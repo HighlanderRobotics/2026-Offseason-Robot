@@ -28,7 +28,7 @@ public class Robot extends LoggedRobot {
   public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
 
   public Robot() {
-    DriverStation.silenceJoystickConnectionWarning(false);
+  DriverStation.silenceJoystickConnectionWarning(false);
     SignalLogger.enableAutoLogging(false);
     RobotController.setBrownoutVoltage(6.0);
 
