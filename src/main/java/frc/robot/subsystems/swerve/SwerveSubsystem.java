@@ -603,7 +603,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // Update maple simulation
     SimulatedArena.getInstance().simulationPeriodic();
     // Log simulated pose
-    // Logger.recordOutput("MapleSim/Pose", swerveSimulation.getSimulatedDriveTrainPose());
+    Logger.recordOutput("MapleSim/Pose", swerveSimulation.getSimulatedDriveTrainPose());
   }
 
   public Command runTurnSysid() {
