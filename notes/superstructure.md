@@ -13,5 +13,5 @@
 ## Transitions
 IDLE goes to INTAKE on an intake request, and INTAKE returns to IDLE when the request ends
 IDLE goes to SPIN_UP_(FEED/SCORE) when a the score/feed request is active, SPIN_UP_(FEED/SCORE) goes to (FEED/SCORE) when the flywheel is at the correct velocity
-FEED and SCORE return to INTAKE when the request ends
+FEED and SCORE return to IDLE when the request ends
 IDLE to flow instead if flow is requested
