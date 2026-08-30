@@ -65,7 +65,7 @@ public class IndexerIOSim extends IndexerIO {
                   physicsSimIndexer.getAngularPosition().in(Rotations) * GEAR_RATIO);
               indexerFxSimState.setRotorVelocity(
                   physicsSimIndexer.getAngularVelocity().in(RotationsPerSecond) * GEAR_RATIO);
-            
+
               kickerFxSimState.setRawRotorPosition(
                   physicsSimKicker.getAngularPosition().in(Rotations) * KICKER_GEAR_RATIO);
               kickerFxSimState.setRotorVelocity(

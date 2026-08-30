@@ -102,7 +102,9 @@ public class IndexerIO {
         kickerStatorCurrent,
         kickerVoltage,
         kickerTemp);
-    indexerMotor.optimizeBusUtilization(); // only update variables that have update frequency set to non-zero value
+    indexerMotor
+        .optimizeBusUtilization(); // only update variables that have update frequency set to
+    // non-zero value
     kickerMotor.optimizeBusUtilization();
   }
 
