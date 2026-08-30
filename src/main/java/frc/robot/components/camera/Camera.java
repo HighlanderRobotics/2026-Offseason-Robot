@@ -172,16 +172,8 @@ public class Camera {
             () -> {
               swerveEstimator.addVisionMeasurement(
                   visionPose.toPose2d(),
-                  inputs.result.metadata.captureTimestampMicros / 1.0e6,
-                  deviations
-                      .times(DriverStation.isAutonomous() ? 2.0 : 1.0)
-                      .times(
-                          getName().equals("Front_Left_Camera")
-                                  || getName().equals("Front_Right_Camera")
-                              // todo add superstructure states
-                              ? 0.75
-                              : 1) // also tune these numbers if you want, you trust the front
-                  // cameras 25% more
+                  inputs.result.metadata.captureTimestampMicros / 1.0e6
+                   
                   ); // cameras less depened on during auto, sem is twice as strict?
               // the sussifier (need to work on that) why would this in be tracer
             });
