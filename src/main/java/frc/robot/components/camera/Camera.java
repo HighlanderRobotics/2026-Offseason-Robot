@@ -172,9 +172,8 @@ public class Camera {
             () -> {
               swerveEstimator.addVisionMeasurement(
                   visionPose.toPose2d(),
-                  inputs.result.metadata.captureTimestampMicros / 1.0e6
-                   
-                  ); // cameras less depened on during auto, sem is twice as strict?
+                  inputs.result.metadata.captureTimestampMicros
+                      / 1.0e6); // cameras less depened on during auto, sem is twice as strict?
               // the sussifier (need to work on that) why would this in be tracer
             });
 
