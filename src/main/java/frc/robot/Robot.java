@@ -107,8 +107,6 @@ public class Robot extends LoggedRobot {
             .withName("Teleop drive"));
 
     indexer.setDefaultCommand(indexer.rest());
-
-    driver.a().whileTrue(indexer.kick());
   }
 
   @Override
