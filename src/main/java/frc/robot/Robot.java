@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
@@ -37,6 +38,7 @@ public class Robot extends LoggedRobot {
   private CANBus canBus = new CANBus("*");
 
   private SwerveSubsystem swerve = new SwerveSubsystem(canBus);
+  private IndexerSubsystem indexer = new IndexerSubsystem(canBus);
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
@@ -103,6 +105,8 @@ public class Robot extends LoggedRobot {
                                 * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
                         .times(-1))
             .withName("Teleop drive"));
+
+    indexer.setDefaultCommand(indexer.rest());
   }
 
   @Override
