@@ -39,7 +39,7 @@ public class IndexerSubsystem extends SubsystemBase {
               null,
               null,
               (state) -> Logger.recordOutput("Kicker/SysID State", state.toString())),
-          new Mechanism((volts) -> indexerIO.setIndexerVoltage(volts.in(Volts)), null, this));
+          new Mechanism((volts) -> indexerIO.setKickerVoltage(volts.in(Volts)), null, this));
 
   public IndexerSubsystem(CANBus canbus) {
     if (Robot.ROBOT_MODE == RobotMode.SIM) {

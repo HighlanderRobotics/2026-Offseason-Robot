@@ -36,6 +36,7 @@ public class IndexerIO {
     public boolean kickerConnected = false;
   }
 
+  // TODO: Set gear ratios
   public static final double GEAR_RATIO = 1.0;
   public static final double KICKER_GEAR_RATIO = 1.0;
 
@@ -64,9 +65,11 @@ public class IndexerIO {
       new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
   public IndexerIO(CANBus canBus) {
+    // TODO: set motor ID for indexer
     indexerMotor = new TalonFX(16, canBus);
     indexerMotor.getConfigurator().apply(IndexerIO.getIndexerConfiguration());
 
+    // TODO: set motor ID for kicker
     kickerMotor = new TalonFX(15, canBus);
     kickerMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
 

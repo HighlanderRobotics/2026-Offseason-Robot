@@ -48,7 +48,7 @@ public class IndexerIOSim extends IndexerIO {
     simNotifier =
         new Notifier(
             () -> {
-              final double currentTime = Timer.getFPGATimestamp();
+              final double currentTime = Timer.getTimestamp();
               final double deltaTime = currentTime - lastSimTime;
               lastSimTime = currentTime;
 
