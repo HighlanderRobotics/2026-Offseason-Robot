@@ -46,7 +46,8 @@ public class Camera {
   // values associated with a pose estimate to reflect how reliable we think an estimate is
   public static final Matrix<N3, N1> visionPointBlankDevs =
       new Matrix<N3, N1>(Nat.N3(), Nat.N1(), new double[] {0.6, 0.6, 0.5});
-  //is 0.6, 0.5 etc used to find the optimal std and if we are out side like the 99% of these values we discard? 
+  // is 0.6, 0.5 etc used to find the optimal std and if we are out side like the 99% of these
+  // values we discard?
 
   // infinite devs are used to show that we really don't trust this estimate
   public static final Matrix<N3, N1> infiniteDevs =
@@ -75,7 +76,8 @@ public class Camera {
 
   public Camera(CameraIO io) {
     this.io = io;
-    // Tells the estimator what the transformation is between the camera and the robot, relative positions betrween camera and center of robot
+    // Tells the estimator what the transformation is between the camera and the robot, relative
+    // positions betrween camera and center of robot
     estimator.setRobotToCameraTransform(io.getCameraConstants().robotToCamera);
     futureVisionData =
         new Alert(getName() + " Vision Data Coming from ✨The Future✨", AlertType.kError);
@@ -87,7 +89,8 @@ public class Camera {
     Tracer.trace("Update inputs", this::updateInputs);
     Tracer.trace("Process april tag inputs", this::processApriltagInputs);
 
-    // TODO potentially later track nt disconnected vs completely disconnected like 6328 does? (maybe smth i could work on)
+    // TODO potentially later track nt disconnected vs completely disconnected like 6328 does?
+    // (maybe smth i could work on)
     disconnectedAlert.set(!inputs.connected);
   }
 
@@ -105,11 +108,12 @@ public class Camera {
     if (result.getTargets().size() < 1) {
       return Optional.empty();
     }
-    //updates this
+    // updates this
     Optional<EstimatedRobotPose> estPose = estimator.update(result);
     return estPose;
   }
-    //sim stuff, takes in an estimation, decides if there is a new result? 
+
+  // sim stuff, takes in an estimation, decides if there is a new result?
   public void setSimPose(Optional<EstimatedRobotPose> simEst, boolean newResult) {
     this.io.setSimPose(simEst, newResult);
   }
@@ -121,26 +125,33 @@ public class Camera {
   public static Matrix<N3, N1> findVisionMeasurementStdDevs(EstimatedRobotPose estimation) {
     double sumDistance = 0;
     for (PhotonTrackedTarget target : estimation.targetsUsed) {
-      Transform3d t3d = target.getBestCameraToTarget(); //is there multiple "best cameras" idont think so
+      Transform3d t3d =
+          target.getBestCameraToTarget(); // is there multiple "best cameras" idont think so
       sumDistance +=
-          Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2)); //for every axis, the it gets sumnationed into 
+          Math.sqrt(
+              Math.pow(t3d.getX(), 2)
+                  + Math.pow(t3d.getY(), 2)
+                  + Math.pow(t3d.getZ(), 2)); // for every axis, the it gets sumnationed into
     }
-    double avgDistance = sumDistance / estimation.targetsUsed.size(); //this is a pretty weird way to write std
+    double avgDistance =
+        sumDistance / estimation.targetsUsed.size(); // this is a pretty weird way to write std
 
     Matrix<N3, N1> deviation =
-        visionPointBlankDevs.times(Math.max(avgDistance, 0.0) * distanceFactor);//more std calcs
-    if (estimation.targetsUsed.size() == 1) {//if we are using one camera, we take all values within 3 std
+        visionPointBlankDevs.times(Math.max(avgDistance, 0.0) * distanceFactor); // more std calcs
+    if (estimation.targetsUsed.size()
+        == 1) { // if we are using one camera, we take all values within 3 std
       deviation = deviation.times(3);
     }
     if (estimation.targetsUsed.size() == 1 && estimation.targetsUsed.get(0).poseAmbiguity > 0.15) {
-      return infiniteDevs; //if we arent certain about the main target, then we reject
+      return infiniteDevs; // if we arent certain about the main target, then we reject
     }
     // Reject if estimated pose is in the air or ground
     if (Math.abs(estimation.estimatedPose.getZ()) > 0.125) {
       return infiniteDevs;
     }
 
-    return deviation; //so deviation is different for every reading we have (for every loop it is different)
+    return deviation; // so deviation is different for every reading we have (for every loop it is
+    // different)
   }
 
   public void updateCamera(SwerveDrivePoseEstimator swerveEstimator) {
@@ -150,7 +161,7 @@ public class Camera {
         Optional<EstimatedRobotPose> estPose =
             Tracer.trace("Update Camera", () -> update(inputs.result));
         Pose3d visionPose = estPose.get().estimatedPose;
-        pose = visionPose; //updates where cameras thinks it is on the field
+        pose = visionPose; // updates where cameras thinks it is on the field
         // Sets the pose on the sim field
         setSimPose(estPose, !inputs.stale);
 
@@ -158,11 +169,14 @@ public class Camera {
 
         Tracer.trace(
             "Add Measurement From " + getName(),
-            () -> { 
+            () -> {
               swerveEstimator.addVisionMeasurement(
                   visionPose.toPose2d(),
                   inputs.result.metadata.captureTimestampMicros / 1.0e6,
-                  deviations.times(DriverStation.isAutonomous() ? 2.0 : 1.0)); //cameras less depened on during auto, sem is twice as strict?
+                  deviations.times(
+                      DriverStation.isAutonomous()
+                          ? 2.0
+                          : 1.0)); // cameras less depened on during auto, sem is twice as strict?
               // the sussifier (need to work on that)
             });
 
@@ -188,7 +202,7 @@ public class Camera {
 
     }
     futureVisionData.set(hasFutureData);
-  }//trouble pinpointing
+  } // trouble pinpointing
 
   public CameraConstants getCameraConstants() {
     return io.getCameraConstants();
