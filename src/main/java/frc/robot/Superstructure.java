@@ -3,10 +3,6 @@ package frc.robot;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix6.Utils;
-
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.utils.CommandXboxControllerSubsystem;
@@ -20,7 +16,8 @@ public class Superstructure {
         SCORE_FLOW,
         FEED_FLOW,
         SPIN_UP_SCORE,
-        SPIN_UP_FEED;
+        SPIN_UP_FEED,
+        DEFENSE;
 
         private final Trigger stateTrigger;
 
@@ -38,14 +35,18 @@ public class Superstructure {
 
     private boolean shouldFeed = false;
     private boolean shouldFlow = false;
+    private boolean defense = false;
     
     private Trigger intakeReq;
     private Trigger scoreReq;
     private Trigger feedReq;
     private Trigger flowReq;
     private Trigger shooterReady;
+    private Trigger defenseReq = new Trigger(() -> defense);
 
     public Superstructure(CommandXboxControllerSubsystem driver, CommandXboxControllerSubsystem operator) {
+
+        // NOTE! MUST BE CALLED IN THIS ORDER!
         addRequests(driver, operator);
         bindTransitions();
         bindCommands();
@@ -65,10 +66,17 @@ public class Superstructure {
     private void addRequests(CommandXboxControllerSubsystem driver, CommandXboxControllerSubsystem operator) {
         intakeReq = driver.leftTrigger();
         scoreReq = driver.rightTrigger().and(() -> !shouldFeed);
-        scoreReq = driver.rightTrigger().and(() -> shouldFeed);
+        feedReq = driver.rightTrigger().and(() -> shouldFeed);
         flowReq = new Trigger(() -> shouldFlow);
 
-        // TODO: SET SHOULD FEED AND FLOW
+        operator.povUp().onTrue(Commands.runOnce(() -> defense = true));
+        operator.povDown().onTrue(Commands.runOnce(() -> defense = false));
+
+        operator.a().onTrue(Commands.runOnce(() -> shouldFlow = true));
+        operator.b().onTrue(Commands.runOnce(() -> shouldFlow = true));
+
+        operator.x().onTrue(Commands.runOnce(() -> shouldFeed = false));
+        operator.y().onTrue(Commands.runOnce(() -> shouldFeed = true));
     }
 
     private void bindTransitions() {
@@ -88,6 +96,10 @@ public class Superstructure {
         bindTransition(SuperState.SPIN_UP_FEED, shooterReady.and(flowReq), SuperState.FEED_FLOW);
         bindTransition(SuperState.FEED, feedReq.negate(), SuperState.IDLE);
         bindTransition(SuperState.FEED_FLOW, feedReq.negate(), SuperState.IDLE);
+
+        // Any to defense
+        defenseReq.onTrue(Commands.runOnce(() -> state = SuperState.DEFENSE));
+        bindTransition(SuperState.DEFENSE, defenseReq.negate(), SuperState.IDLE);
     }
 
     // TODO
