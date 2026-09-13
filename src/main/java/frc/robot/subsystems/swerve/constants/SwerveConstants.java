@@ -12,6 +12,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc.robot.components.camera.Camera.CameraConstants;
 import frc.robot.subsystems.swerve.module.Module.ModuleConstants;
 
 public abstract class SwerveConstants {
@@ -159,4 +160,6 @@ public abstract class SwerveConstants {
   public abstract CANcoderConfiguration getCancoderConfig(Rotation2d cancoderOffset);
 
   public abstract double getHeadingVelocityKP();
+
+  public abstract CameraConstants[] getCameraConstants();
 }
