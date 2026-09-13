@@ -199,17 +199,15 @@ public class SwerveSubsystem extends SubsystemBase {
             new Module(new ModuleIOReal(SWERVE_CONSTANTS.getBackLeftModuleConstants(), canbus)),
             new Module(new ModuleIOReal(SWERVE_CONSTANTS.getBackRightModuleConstants(), canbus))
           };
-      cameras = 
+      cameras =
           Arrays.stream(SWERVE_CONSTANTS.getCameraConstants())
-            .map((constants) -> new Camera(new CameraIOReal(constants)))
-            .toArray(Camera[]::new);
+              .map((constants) -> new Camera(new CameraIOReal(constants)))
+              .toArray(Camera[]::new);
     }
     this.cameraPoses = new Pose3d[cameras.length];
-    for (int i = 0; i< cameras.length; i++){
+    for (int i = 0; i < cameras.length; i++) {
       cameraPoses[i] = Pose3d.kZero;
     }
-    
-    
 
     this.gyroIO =
         Robot.ROBOT_MODE != RobotMode.SIM
@@ -268,11 +266,11 @@ public class SwerveSubsystem extends SubsystemBase {
           for (Module module : modules) {
             Tracer.trace("Update module inputs for " + module.getPrefix(), module::periodic);
           }
-          for (Camera camera : cameras){
-            Tracer.trace("Camera" + camera.getName() + " Periodic ",camera::periodic);
+          for (Camera camera : cameras) {
+            Tracer.trace("Camera" + camera.getName() + " Periodic ", camera::periodic);
           }
           Tracer.trace("Update odometry", this::updateOdometry);
-          
+
           // Logger.recordOutput("Current Hub Pose", FieldUtils.getCurrentHubPose());
         });
   }
@@ -352,22 +350,24 @@ public class SwerveSubsystem extends SubsystemBase {
       estimator.updateWithTime(sample.timestamp(), rawGyroRotation, modulePositions);
     }
   }
-  private void updateVision(){
-  for (int i = 0; i<cameras.length; i++){
-    cameras[i].updateCamera(estimator);
-    cameraPoses[i]= cameras[i].getPose();
 
-  }
-  Pose3d[] arr = new Pose3d[cameras.length];
-  for (int k = 0, k<cameras.length; k++){
-    if (Robot.ROBOT_MODE == RobotMode.SIM){
-      arr[k] = new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()).transformBy(cameras[k].getCameraConstants().robotToCamera());
-      }else{
+  private void updateVision() {
+    for (int i = 0; i < cameras.length; i++) {
+      cameras[i].updateCamera(estimator);
+      cameraPoses[i] = cameras[i].getPose();
+    }
+    Pose3d[] arr = new Pose3d[cameras.length];
+    for (int k = 0; k < cameras.length; k++) {
+      if (Robot.ROBOT_MODE == RobotMode.SIM) {
+        arr[k] =
+            new Pose3d(swerveSimulation.getSimulatedDriveTrainPose())
+                .transformBy(cameras[k].getCameraConstants().robotToCamera());
+      } else {
         arr[k] = getPose3d().transformBy(cameras[k].getCameraConstants().robotToCamera());
       }
     }
   }
-  }
+
   /**
    * Runs the modules to the specified ChassisSpeeds (robot velocity)
    *
