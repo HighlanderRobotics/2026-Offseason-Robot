@@ -18,17 +18,15 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class SlapdownSubsystem extends SubsystemBase {
-  public static final Rotation2d PIVOT_MIN_POSITION =
-      Rotation2d.fromDegrees(0.0); 
-      // TODO:get pivot min position in degrees
-  public static final Rotation2d PIVOT_MAX_POSITION =
-      Rotation2d.fromDegrees(0);
-      // TODO: pivot max position degrees
+  public static final Rotation2d PIVOT_MIN_POSITION = Rotation2d.fromDegrees(0.0);
+  // TODO:get pivot min position in degrees
+  public static final Rotation2d PIVOT_MAX_POSITION = Rotation2d.fromDegrees(0);
+  // TODO: pivot max position degrees
   public static final Rotation2d PIVOT_EXTENDED_POSITION = PIVOT_MIN_POSITION;
   public static final Rotation2d PIVOT_RETRACTED_POSITION = PIVOT_MAX_POSITION;
-  public static final double CURRENT_ZEROING_THRESHOLD = 0.0; 
+  public static final double CURRENT_ZEROING_THRESHOLD = 0.0;
   public static final double ROLLER_GEAR_RATIO = 0.0 / 0.0;
-  public static final double PIVOT_GEAR_RATIO = 0.0; 
+  public static final double PIVOT_GEAR_RATIO = 0.0;
   // TODO: implement true ratios for zeroing threshold, roller gear ratio, and pivvot gear ratio
   private final PivotIO pivotIO;
   private PivotIOInputsAutoLogged pivotIOInputs = new PivotIOInputsAutoLogged();
@@ -45,6 +43,7 @@ public class SlapdownSubsystem extends SubsystemBase {
 
   @AutoLogOutput(key = "Intake/Pivot/Current Filter Value")
   private double currentFilterValue = 0.0;
+
   // TODO: find actual filter value
   public SlapdownSubsystem(PivotIO pivotIO, CANcoderIO cancoderIO, RollerIO rollerIO) {
     this.pivotIO = pivotIO;
@@ -72,7 +71,6 @@ public class SlapdownSubsystem extends SubsystemBase {
     currentFilterValue = currentFilter.calculate(pivotIOInputs.statorCurrentAmps);
   }
 
-
   public Command agitate() {
     return Commands.sequence(
             this.run(
@@ -99,9 +97,7 @@ public class SlapdownSubsystem extends SubsystemBase {
           pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION, 0.0);
           rollerIO.setRollerVelocity(0.0);
           // TODO: find  pivotio feed forward volts, and roller velocity
-        })
-
-    ;
+        });
   }
 
   public Command outtake() {
@@ -113,15 +109,13 @@ public class SlapdownSubsystem extends SubsystemBase {
         });
   }
 
-
   public Command restExtended() {
     return this.run(
         () -> {
           pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION);
           rollerIO.setRollerVoltage(0.0);
           // TODO: set roller voltage
-        })
-    ;
+        });
   }
 
   public Command restRetracted() {
@@ -135,12 +129,11 @@ public class SlapdownSubsystem extends SubsystemBase {
 
   public Command runCurrentZeroing() {
     return Commands.sequence(
-        this.run(() -> pivotIO.setMotorVoltage(0.0)), //TODO: set motor voltage
+        this.run(() -> pivotIO.setMotorVoltage(0.0)), // TODO: set motor voltage
         Commands.waitUntil(() -> currentFilterValue > CURRENT_ZEROING_THRESHOLD),
         this.runOnce(() -> pivotIO.resetEncoder(PIVOT_MIN_POSITION)),
         Commands.print("Intake pivot zeroed"));
   }
-
 
   public Command zeroPivotOffCancoder() {
     return this.runOnce(() -> pivotIO.resetEncoder(cancoderIOInputs.cancoderPositionRotations));
@@ -177,20 +170,21 @@ public class SlapdownSubsystem extends SubsystemBase {
     // TODO: set sensor to mech ratio
 
     config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.0; 
+    config.Slot0.kV = 0.0;
     config.Slot0.kA = 0.0;
     config.Slot0.kG = 0.0;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-    config.Slot0.GravityArmPositionOffset = 0.0; 
+    config.Slot0.GravityArmPositionOffset = 0.0;
     config.Slot0.kP = 0.0;
     config.Slot0.kD = 0.0;
     // TODO: set kS, kV, kS, kG, GravityArmPositionOffset, kP, kD
 
-    config.CurrentLimits.StatorCurrentLimit = 0.0; 
+    config.CurrentLimits.StatorCurrentLimit = 0.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 0.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    // TODO: set stator current limit, stator current lim enable, supply current lim, supply current lim enable
+    // TODO: set stator current limit, stator current lim enable, supply current lim, supply current
+    // lim enable
 
     config.MotionMagic.MotionMagicCruiseVelocity = 0.0;
     config.MotionMagic.MotionMagicAcceleration = 0.0;
@@ -203,14 +197,14 @@ public class SlapdownSubsystem extends SubsystemBase {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; 
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     config.Feedback.SensorToMechanismRatio = ROLLER_GEAR_RATIO;
 
-    config.Slot0.kS = 0.0; 
-    config.Slot0.kV = 0.0; 
-    config.Slot0.kA = 0.0; 
-    config.Slot0.kP = 0.0; 
+    config.Slot0.kS = 0.0;
+    config.Slot0.kV = 0.0;
+    config.Slot0.kA = 0.0;
+    config.Slot0.kP = 0.0;
     config.Slot0.kD = 0.0;
     // TODO: set kS, kV, kA, kP, kD
 
@@ -218,7 +212,8 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 0.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    // TODO: set stator current lim, stator current lim enable, supply current lim, supply current lim enable
+    // TODO: set stator current lim, stator current lim enable, supply current lim, supply current
+    // lim enable
 
     return config;
   }
@@ -234,11 +229,9 @@ public class SlapdownSubsystem extends SubsystemBase {
     return config;
   }
 
-
   public Command restExtend() {
     throw new UnsupportedOperationException("Unimplemented method 'restExtend'");
   }
-
 
   public Command zeroPivotOffCancder() {
     throw new UnsupportedOperationException("Unimplemented method 'zeroPivotOffCancder'");

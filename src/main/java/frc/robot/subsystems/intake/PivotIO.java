@@ -17,35 +17,36 @@ import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
 public class PivotIO {
-    @AutoLog
-    public static class PivotIOInputs{
-        public Rotation2d position = new Rotation2d();
-        public double angularVelocityRotationsPerSec = 0.0;
-        public double statorCurrentAmps = 0.0;
-        public double supplyCurrentAmps = 0.0;
-        public double voltage = 0.0;
-        public double tempC = 0.0;
-        public double positionRotations = 0.0;
-        public boolean connected = false;
-        // TODO:get angular velocity, stator current, supply current, voltage, tempC, position rotations
-    }
-protected final TalonFX motor;
+  @AutoLog
+  public static class PivotIOInputs {
+    public Rotation2d position = new Rotation2d();
+    public double angularVelocityRotationsPerSec = 0.0;
+    public double statorCurrentAmps = 0.0;
+    public double supplyCurrentAmps = 0.0;
+    public double voltage = 0.0;
+    public double tempC = 0.0;
+    public double positionRotations = 0.0;
+    public boolean connected = false;
+    // TODO:get angular velocity, stator current, supply current, voltage, tempC, position rotations
+  }
 
-private final StatusSignal<Angle> position;
-private final BaseStatusSignal angularVelocity;
-private final StatusSignal<Voltage> voltage;
-private final StatusSignal<Current> statorCurrent;
-private final StatusSignal<Current> supplyCurrent;
-private final StatusSignal<Temperature> temp;
+  protected final TalonFX motor;
 
-private VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC(true);
-// TODO: get motor voltage for pivotio
-private MotionMagicVoltage motorMagicVoltage = new MotionMagicVoltage(0.0).withEnableFOC(true);
- // TODO:get target position for pivotio
+  private final StatusSignal<Angle> position;
+  private final BaseStatusSignal angularVelocity;
+  private final StatusSignal<Voltage> voltage;
+  private final StatusSignal<Current> statorCurrent;
+  private final StatusSignal<Current> supplyCurrent;
+  private final StatusSignal<Temperature> temp;
 
-private Rotation2d setpoint = Rotation2d.kZero;
+  private VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC(true);
+  // TODO: get motor voltage for pivotio
+  private MotionMagicVoltage motorMagicVoltage = new MotionMagicVoltage(0.0).withEnableFOC(true);
+  // TODO:get target position for pivotio
 
-public PivotIO(int motorId, TalonFXConfiguration config, CANBus canBus) {
+  private Rotation2d setpoint = Rotation2d.kZero;
+
+  public PivotIO(int motorId, TalonFXConfiguration config, CANBus canBus) {
     motor = new TalonFX(motorId, canBus);
     motor.getConfigurator().apply(config);
 
@@ -58,40 +59,45 @@ public PivotIO(int motorId, TalonFXConfiguration config, CANBus canBus) {
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         0.0, position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
-        // TO_DO: get real frequency for pivotio base status signal
-        motor.optimizeBusUtilization();
-}
+    // TO_DO: get real frequency for pivotio base status signal
+    motor.optimizeBusUtilization();
+  }
 
-    public void updateInputs(PivotIOInputs inputs) {
-        BaseStatusSignal.refreshAll(
-            position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
-    
-    inputs.connected = 
+  public void updateInputs(PivotIOInputs inputs) {
+    BaseStatusSignal.refreshAll(
+        position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
+
+    inputs.connected =
         BaseStatusSignal.isAllGood(
             position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
-        inputs.position = new Rotation2d(position.getValue());
-        inputs.positionRotations = position.getValue().in(Rotation);
-        inputs.angularVelocityRotationsPerSec = angularVelocity.getValueAsDouble();
-        inputs.statorCurrentAmps = supplyCurrent.getValueAsDouble();
-        inputs.tempC = temp.getValueAsDouble();
-    }
-    public void setMotorVoltage(double voltage) {
-        motor.setControl(voltageOut.withOutput(voltage));
-    }
-    public void setMotorPositionSetpoint(Rotation2d setpoint) {
-        this.setpoint = setpoint;
-        motor.setControl(motorMagicVoltage.withPosition(setpoint.getMeasure()).withFeedForward(0.0));
-        //TO_DO: real feed forward for pivotio
-    }
-    public void setMotorPositionSetpoint(Rotation2d setpoint, double ffVolts) {
-        this.setpoint = setpoint;
-        motor.setControl(
-            motorMagicVoltage.withPosition(setpoint.getMeasure()).withFeedForward(ffVolts));
-    }
-    public Rotation2d getSetpoint() {
-        return setpoint;
-    }
-    public void resetEncoder(Rotation2d newPosition){
-        motor.setPosition(newPosition.getMeasure());
-    }
+    inputs.position = new Rotation2d(position.getValue());
+    inputs.positionRotations = position.getValue().in(Rotation);
+    inputs.angularVelocityRotationsPerSec = angularVelocity.getValueAsDouble();
+    inputs.statorCurrentAmps = supplyCurrent.getValueAsDouble();
+    inputs.tempC = temp.getValueAsDouble();
+  }
+
+  public void setMotorVoltage(double voltage) {
+    motor.setControl(voltageOut.withOutput(voltage));
+  }
+
+  public void setMotorPositionSetpoint(Rotation2d setpoint) {
+    this.setpoint = setpoint;
+    motor.setControl(motorMagicVoltage.withPosition(setpoint.getMeasure()).withFeedForward(0.0));
+    // TO_DO: real feed forward for pivotio
+  }
+
+  public void setMotorPositionSetpoint(Rotation2d setpoint, double ffVolts) {
+    this.setpoint = setpoint;
+    motor.setControl(
+        motorMagicVoltage.withPosition(setpoint.getMeasure()).withFeedForward(ffVolts));
+  }
+
+  public Rotation2d getSetpoint() {
+    return setpoint;
+  }
+
+  public void resetEncoder(Rotation2d newPosition) {
+    motor.setPosition(newPosition.getMeasure());
+  }
 }
