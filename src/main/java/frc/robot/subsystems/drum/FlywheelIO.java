@@ -95,4 +95,8 @@ public class FlywheelIO {
         velocitySetpointRotPerSec = velocityRotPerSec;
         leader.setControl(motionMagic.withVelocity(velocityRotPerSec));
     }
+
+    public double getSetpointRotPerSec() {
+        return velocitySetpointRotPerSec;
+    }
 }
