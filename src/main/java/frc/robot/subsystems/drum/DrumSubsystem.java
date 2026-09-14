@@ -16,6 +16,8 @@ public class DrumSubsystem extends SubsystemBase {
   private FollowerIOInputsAutoLogged[] followerIOInputs = new FollowerIOInputsAutoLogged[3];
 
   public DrumSubsystem(CANBus canBus) {
+    flywheelIO = new FlywheelIO(canBus);
+
     // Fill with blank inputs
     Arrays.fill(followerIOInputs, new FollowerIOInputsAutoLogged());
 
