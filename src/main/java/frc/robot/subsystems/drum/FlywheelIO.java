@@ -70,6 +70,14 @@ public class FlywheelIO {
     }
 
     public void updateInputs(FlywheelIOInputs inputs) {
+        BaseStatusSignal.refreshAll(
+            velocity,
+            voltage,
+            statorCurrent,
+            supplyCurrent,
+            temp,
+            flywheelPosition
+        );
         inputs.flywheelPositionRotations = flywheelPosition.getValue().in(Rotation);
         inputs.velocityRotPerSec = velocity.getValue().in(Rotation.per(Second));
         inputs.voltage = voltage.getValueAsDouble();
