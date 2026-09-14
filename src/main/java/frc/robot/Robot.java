@@ -4,10 +4,15 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.components.motor.MotorIO;
+import frc.robot.components.motor.MotorIOSim;
+import frc.robot.subsystems.arm.ArmSubsystem;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -26,6 +31,9 @@ public class Robot extends LoggedRobot {
   }
 
   public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
+
+  ArmSubsystem arm;
+  public static CANBus canivore = new CANBus("*");
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
@@ -75,6 +83,14 @@ public class Robot extends LoggedRobot {
     }
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
+
+    if (Robot.isReal()) {
+      arm = new ArmSubsystem(new MotorIO(10, arm.getConfig(), canivore));
+    } else {
+      arm =
+          new ArmSubsystem(
+              new MotorIOSim(10, arm.getConfig(), arm.getSim(), MotorType.KrakenX60, canivore));
+    }
   }
 
   @Override
