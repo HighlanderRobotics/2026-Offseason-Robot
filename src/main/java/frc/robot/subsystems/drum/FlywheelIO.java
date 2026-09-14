@@ -29,7 +29,7 @@ public class FlywheelIO {
     public double flywheelPositionRotations = 0.0;
   }
 
-  public final TalonFX leader;
+  protected final TalonFX leader;
 
   private StatusSignal<AngularVelocity> velocity;
   private StatusSignal<Voltage> voltage;
@@ -46,7 +46,7 @@ public class FlywheelIO {
 
   public FlywheelIO(CANBus canBus) {
     // TODO: CORRECT ID
-    leader = new TalonFX(0, canBus);
+    leader = new TalonFX(DrumSubsystem.FLYWHEEL_LEADER_ID, canBus);
 
     velocity = leader.getVelocity();
     voltage = leader.getMotorVoltage();
