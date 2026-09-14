@@ -30,6 +30,7 @@ public class DrumSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     flywheelIO.updateInputs(flywheelIOInputs);
+    Logger.processInputs("Drum/Flywheel/Leader", flywheelIOInputs);
 
     // Update follower inputs
     for (int i = 0; i < followerIOs.length; i++) {
