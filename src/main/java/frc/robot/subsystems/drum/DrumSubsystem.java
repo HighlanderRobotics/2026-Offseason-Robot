@@ -7,6 +7,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class DrumSubsystem extends SubsystemBase {
   public static final int FLYWHEEL_LEADER_ID = 0; // TODO: CORRECT ID
+  public static final double FLYWHEEL_GEAR_RATIO = 1.0; // TODO: VALUE FROM CAD
 
   private FlywheelIO flywheelIO;
   private FlywheelIOInputsAutoLogged flywheelIOInputs = new FlywheelIOInputsAutoLogged();
