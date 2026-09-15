@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drum;
+package frc.robot.subsystems.drum.flywheel;
 
 import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Rotation;
@@ -7,20 +7,21 @@ import static edu.wpi.first.units.Units.Second;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.subsystems.drum.DrumSubsystem;
+
 import org.littletonrobotics.junction.AutoLog;
 
-public class FollowerIO {
+public class FlywheelIO {
   @AutoLog
-  public static class FollowerIOInputs {
-    public int motorId = 0;
+  public static class FlywheelIOInputs {
     public double velocityRotPerSec = 0.0;
     public double voltage = 0.0;
     public double statorCurrentAmps = 0.0;
@@ -30,8 +31,7 @@ public class FollowerIO {
     public double flywheelPositionRotations = 0.0;
   }
 
-  protected final TalonFX motor;
-  private final int motorId;
+  protected final TalonFX leader;
 
   private StatusSignal<AngularVelocity> velocity;
   private StatusSignal<Voltage> voltage;
@@ -40,36 +40,51 @@ public class FollowerIO {
   private StatusSignal<Temperature> temp;
   private StatusSignal<Angle> flywheelPosition;
 
-  private Follower followerReq;
+  private VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC(true);
+  private MotionMagicVelocityVoltage motionMagic =
+      new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
 
-  public FollowerIO(int motorID, int leaderID, MotorAlignmentValue alignment, CANBus canBus) {
-    this.motorId = motorID;
-    motor = new TalonFX(motorID, canBus);
+  private double velocitySetpointRotPerSec = 0.0;
 
-    velocity = motor.getVelocity();
-    voltage = motor.getMotorVoltage();
-    statorCurrent = motor.getStatorCurrent();
-    supplyCurrent = motor.getSupplyCurrent();
-    temp = motor.getDeviceTemp();
-    flywheelPosition = motor.getPosition();
+  public FlywheelIO(CANBus canBus) {
+    // TODO: CORRECT ID
+    leader = new TalonFX(DrumSubsystem.FLYWHEEL_LEADER_ID, canBus);
 
+    velocity = leader.getVelocity();
+    voltage = leader.getMotorVoltage();
+    statorCurrent = leader.getStatorCurrent();
+    supplyCurrent = leader.getSupplyCurrent();
+    temp = leader.getDeviceTemp();
+    flywheelPosition = leader.getPosition();
+
+    // TODO: MAYBE INCREASE FREQUENCY FOR VOLTAGE
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPosition);
-    motor.optimizeBusUtilization();
-
-    followerReq = new Follower(leaderID, alignment);
-    motor.setControl(followerReq);
+    leader.optimizeBusUtilization();
   }
 
-  public void updateInputs(FollowerIOInputs inputs) {
+  public void updateInputs(FlywheelIOInputs inputs) {
     BaseStatusSignal.refreshAll(
         velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPosition);
-    inputs.motorId = motorId;
     inputs.flywheelPositionRotations = flywheelPosition.getValue().in(Rotation);
     inputs.velocityRotPerSec = velocity.getValue().in(Rotation.per(Second));
     inputs.voltage = voltage.getValueAsDouble();
     inputs.statorCurrentAmps = statorCurrent.getValueAsDouble();
     inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
     inputs.tempC = temp.getValue().in(Celsius);
+  }
+
+  public void setVoltage(double voltage) {
+    leader.setControl(voltageOut.withOutput(voltage));
+  }
+
+  // TODO: ADD ACCEL CONTROL
+  public void setVelocitySetpoint(double velocityRotPerSec) {
+    velocitySetpointRotPerSec = velocityRotPerSec;
+    leader.setControl(motionMagic.withVelocity(velocityRotPerSec));
+  }
+
+  public double getSetpointRotPerSec() {
+    return velocitySetpointRotPerSec;
   }
 }

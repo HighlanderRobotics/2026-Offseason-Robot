@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drum;
+package frc.robot.subsystems.drum.flywheel;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -11,6 +11,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.subsystems.drum.DrumSubsystem;
 
 public class FlywheelIOSim extends FlywheelIO {
 

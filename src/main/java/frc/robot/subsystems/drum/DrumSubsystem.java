@@ -2,6 +2,9 @@ package frc.robot.subsystems.drum;
 
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.components.follower.FollowerIO;
+import frc.robot.subsystems.drum.flywheel.FlywheelIO;
+
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 
