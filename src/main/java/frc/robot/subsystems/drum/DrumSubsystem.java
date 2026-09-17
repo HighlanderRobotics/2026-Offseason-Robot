@@ -1,11 +1,21 @@
 package frc.robot.subsystems.drum;
 
 import com.ctre.phoenix6.CANBus;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.components.follower.FollowerIO;
+import frc.robot.components.follower.FollowerIOInputsAutoLogged;
 import frc.robot.subsystems.drum.flywheel.FlywheelIO;
+import frc.robot.subsystems.drum.flywheel.FlywheelIOInputsAutoLogged;
+import frc.robot.subsystems.drum.hood.HoodIO;
+import frc.robot.subsystems.drum.hood.HoodIOInputsAutoLogged;
 
 import java.util.Arrays;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.Logger;
 
 public class DrumSubsystem extends SubsystemBase {
@@ -17,8 +27,10 @@ public class DrumSubsystem extends SubsystemBase {
   private FlywheelIOInputsAutoLogged flywheelIOInputs = new FlywheelIOInputsAutoLogged();
 
   private FollowerIO[] followerIOs = new FollowerIO[3];
-
   private FollowerIOInputsAutoLogged[] followerIOInputs = new FollowerIOInputsAutoLogged[3];
+
+  private HoodIO hoodIO;
+  private HoodIOInputsAutoLogged hoodIOInputs = new HoodIOInputsAutoLogged();
 
   public DrumSubsystem(CANBus canBus) {
     flywheelIO = new FlywheelIO(canBus);
@@ -42,5 +54,15 @@ public class DrumSubsystem extends SubsystemBase {
       followerIOs[i].updateInputs(followerIOInputs[i]);
       Logger.processInputs("Drum/Flywheel/Follower " + i, followerIOInputs[i]);
     }
+
+    hoodIO.updateInputs(hoodIOInputs);
+    Logger.processInputs("Drum/Hood", hoodIOInputs);
+  }
+
+  public Command setFlywheelAndHood(DoubleSupplier flywheelVelRotPerSec, Supplier<Rotation2d> hoodAngle) {
+    return this.run(() -> {
+      hoodIO.setPositionSetpoint(hoodAngle.get());
+      flywheelIO.setVelocitySetpoint(flywheelVelRotPerSec.getAsDouble());
+    });
   }
 }
