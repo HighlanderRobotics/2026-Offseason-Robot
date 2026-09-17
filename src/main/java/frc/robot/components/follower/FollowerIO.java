@@ -43,7 +43,12 @@ public class FollowerIO {
 
   private Follower followerReq;
 
-  public FollowerIO(int motorID, int leaderID, MotorAlignmentValue alignment, CANBus canBus, TalonFXConfiguration config) {
+  public FollowerIO(
+      int motorID,
+      int leaderID,
+      MotorAlignmentValue alignment,
+      CANBus canBus,
+      TalonFXConfiguration config) {
     this.motorId = motorID;
     motor = new TalonFX(motorID, canBus);
 
