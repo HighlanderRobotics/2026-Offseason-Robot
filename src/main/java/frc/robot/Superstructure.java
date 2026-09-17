@@ -1,7 +1,9 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -16,7 +18,8 @@ public class Superstructure {
     FEED_FLOW,
     SPIN_UP_SCORE,
     SPIN_UP_FEED,
-    DEFENSE;
+    DEFENSE,
+    SPIT;
 
     private final Trigger stateTrigger;
 
@@ -26,6 +29,10 @@ public class Superstructure {
 
     public Trigger getTrigger() {
       return stateTrigger;
+    }
+
+    public void bindCommands(Command... commands) {
+      stateTrigger.whileTrue(Commands.parallel(commands));
     }
   }
 
@@ -43,8 +50,11 @@ public class Superstructure {
   private Trigger shooterReady;
   private Trigger defenseReq = new Trigger(() -> defense);
 
+  private final IndexerSubsystem indexer;
+
   public Superstructure(
-      CommandXboxControllerSubsystem driver, CommandXboxControllerSubsystem operator) {
+      CommandXboxControllerSubsystem driver, CommandXboxControllerSubsystem operator, IndexerSubsystem indexer) {
+    this.indexer = indexer;
 
     // NOTE! MUST BE CALLED IN THIS ORDER!
     addRequests(driver, operator);
@@ -103,8 +113,48 @@ public class Superstructure {
     bindTransition(SuperState.DEFENSE, defenseReq.negate(), SuperState.IDLE);
   }
 
-  // TODO
-  private void bindCommands() {}
+  // TODO other mechs
+  private void bindCommands() {
+    SuperState.IDLE.bindCommands(
+      indexer.rest()
+    );
+
+    SuperState.INTAKE.bindCommands(
+      indexer.rest() // Should we index?
+    );
+
+    SuperState.SPIN_UP_SCORE.bindCommands(
+      indexer.rest()
+    );
+
+    SuperState.SCORE.bindCommands(
+      indexer.kick()
+    );
+
+    SuperState.SCORE_FLOW.bindCommands(
+      indexer.kick()
+    );
+
+    SuperState.SPIN_UP_FEED.bindCommands(
+      indexer.rest()
+    );
+
+    SuperState.FEED.bindCommands(
+      indexer.kick()
+    );
+
+    SuperState.FEED_FLOW.bindCommands(
+      indexer.kick()
+    );
+
+    SuperState.DEFENSE.bindCommands(
+      indexer.rest()
+    );
+
+    SuperState.SPIT.bindCommands(
+      indexer.reverse()
+    );
+  }
 
   public static SuperState getState() {
     return state;

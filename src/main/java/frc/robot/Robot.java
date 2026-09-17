@@ -43,6 +43,8 @@ public class Robot extends LoggedRobot {
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
 
+  private Superstructure superstructure = new Superstructure(driver, operator, indexer);
+
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
     SignalLogger.enableAutoLogging(false);
@@ -112,6 +114,11 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+  }
+
+  @Override
+  public void simulationPeriodic() {
+      superstructure.simulationPeriodic();
   }
 
   // Use obstacle-free simulation arena
