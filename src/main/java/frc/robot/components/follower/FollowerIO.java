@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Second;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -42,9 +43,11 @@ public class FollowerIO {
 
   private Follower followerReq;
 
-  public FollowerIO(int motorID, int leaderID, MotorAlignmentValue alignment, CANBus canBus) {
+  public FollowerIO(int motorID, int leaderID, MotorAlignmentValue alignment, CANBus canBus, TalonFXConfiguration config) {
     this.motorId = motorID;
     motor = new TalonFX(motorID, canBus);
+
+    motor.getConfigurator().apply(config);
 
     velocity = motor.getVelocity();
     voltage = motor.getMotorVoltage();

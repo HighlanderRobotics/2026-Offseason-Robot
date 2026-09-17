@@ -15,6 +15,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.subsystems.drum.DrumSubsystem;
+
 import org.littletonrobotics.junction.AutoLog;
 
 public class HoodIO {
@@ -47,6 +49,8 @@ public class HoodIO {
 
   public HoodIO(CANBus canBus) {
     motor = new TalonFX(0, canBus); // TODO: REAL ID
+
+    motor.getConfigurator().apply(DrumSubsystem.getHoodConfig());
 
     angularVelocity = motor.getVelocity();
     voltage = motor.getMotorVoltage();

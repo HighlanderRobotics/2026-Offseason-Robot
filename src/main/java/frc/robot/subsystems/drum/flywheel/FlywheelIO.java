@@ -49,6 +49,8 @@ public class FlywheelIO {
     // TODO: CORRECT ID
     leader = new TalonFX(DrumSubsystem.FLYWHEEL_LEADER_ID, canBus);
 
+    leader.getConfigurator().apply(DrumSubsystem.getFlywheelConfig());
+
     velocity = leader.getVelocity();
     voltage = leader.getMotorVoltage();
     statorCurrent = leader.getStatorCurrent();

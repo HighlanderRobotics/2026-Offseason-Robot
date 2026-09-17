@@ -1,6 +1,9 @@
 package frc.robot.subsystems.drum;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -39,9 +42,9 @@ public class DrumSubsystem extends SubsystemBase {
     Arrays.fill(followerIOInputs, new FollowerIOInputsAutoLogged());
 
     // TODO: CORRECT VALUES
-    followerIOs[0] = new FollowerIO(0, FLYWHEEL_LEADER_ID, null, canBus);
-    followerIOs[1] = new FollowerIO(0, FLYWHEEL_LEADER_ID, null, canBus);
-    followerIOs[2] = new FollowerIO(0, FLYWHEEL_LEADER_ID, null, canBus);
+    followerIOs[0] = new FollowerIO(0, FLYWHEEL_LEADER_ID, null, canBus, getFlywheelConfig());
+    followerIOs[1] = new FollowerIO(0, FLYWHEEL_LEADER_ID, null, canBus, getFlywheelConfig());
+    followerIOs[2] = new FollowerIO(0, FLYWHEEL_LEADER_ID, null, canBus, getFlywheelConfig());
   }
 
   @Override
@@ -64,5 +67,66 @@ public class DrumSubsystem extends SubsystemBase {
       hoodIO.setPositionSetpoint(hoodAngle.get());
       flywheelIO.setVelocitySetpoint(flywheelVelRotPerSec.getAsDouble());
     });
+  }
+
+
+  // Configs
+
+  public static TalonFXConfiguration getFlywheelConfig() {
+    TalonFXConfiguration config = new TalonFXConfiguration();
+
+    // TODO: VALUE FROM CAD
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake; // Its possible that we should actually coast on this mech but idk
+
+    // TODO: BUDGET CURRENT
+    config.CurrentLimits.StatorCurrentLimit = 45.0;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = 40.0;
+    config.CurrentLimits.SupplyCurrentLimitEnable = false;
+
+    config.Feedback.SensorToMechanismRatio = DrumSubsystem.FLYWHEEL_GEAR_RATIO;
+
+    config.MotionMagic.MotionMagicAcceleration = 10.0; // TODO: CALCULATE ACTUAL VALUE
+    
+    // Slot 0 is motion magic velocity pidf
+    config.Slot0.kS = 0.0;
+    config.Slot0.kV = 0.0;
+    config.Slot0.kA = 0.0;
+    config.Slot0.kP = 0.0;
+    config.Slot0.kI = 0.0;
+    config.Slot0.kD = 0.0;
+
+    return config;
+  }
+
+  public static TalonFXConfiguration getHoodConfig() {
+    TalonFXConfiguration config = new TalonFXConfiguration();
+
+    // TODO: VALUE FROM CAD
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    // TODO: BUDGET CURRENT
+    config.CurrentLimits.StatorCurrentLimit = 10.0;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = 40.0;
+    config.CurrentLimits.SupplyCurrentLimitEnable = false;
+
+    config.Feedback.SensorToMechanismRatio = DrumSubsystem.HOOD_GEAR_RATIO; // TODO: MAYBE INCLUDE CANCODER
+
+    // TODO: CALCULATE ACTUAL VALUE
+    config.MotionMagic.MotionMagicCruiseVelocity = 1.0;
+    config.MotionMagic.MotionMagicAcceleration = 10.0;
+    
+    // Slot 0 is motion magic position pidf
+    config.Slot0.kS = 0.0;
+    config.Slot0.kV = 0.0;
+    config.Slot0.kA = 0.0;
+    config.Slot0.kP = 0.0;
+    config.Slot0.kI = 0.0;
+    config.Slot0.kD = 0.0;
+
+    return config;
   }
 }

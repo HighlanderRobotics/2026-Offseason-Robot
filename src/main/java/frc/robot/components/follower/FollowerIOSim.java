@@ -1,6 +1,7 @@
 package frc.robot.components.follower;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import java.util.function.DoubleSupplier;
@@ -16,9 +17,10 @@ public class FollowerIOSim extends FollowerIO {
       int leaderID,
       MotorAlignmentValue alignment,
       CANBus canBus,
+      TalonFXConfiguration config,
       DoubleSupplier leaderPositionSupplier,
       DoubleSupplier leaderVelSupplier) {
-    super(motorID, leaderID, alignment, canBus);
+    super(motorID, leaderID, alignment, canBus, config);
 
     // TODO: I'M NOT EVEN SURE THIS WORKS
     this.leaderPositionSupplier = leaderPositionSupplier;
