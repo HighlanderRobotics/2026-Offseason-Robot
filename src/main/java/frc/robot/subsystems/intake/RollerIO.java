@@ -25,8 +25,7 @@ public class RollerIO {
     public double statorCurrentAmps = 0.0;
     public double temperatureCelsius = 0.0;
     public boolean connected = false;
-    // TODO: get true values for velocity, applied votage, position rotations, supply current,
-    // stator current, tempC
+    // TODO: get true values for velocity, applied votage, position rotations, supply current, stator current, tempC
   }
 
   protected final TalonFX motor;

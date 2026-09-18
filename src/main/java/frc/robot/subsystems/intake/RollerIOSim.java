@@ -5,16 +5,15 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 public class RollerIOSim extends RollerIO{
     private final DCMotorSim rollerSim;
     private TalonFXSimState talonSim;
     private double lastLoopTime = 0.0;
+    // TODO: Find last loop time
     Notifier notifier;
 
     public RollerIOSim(
@@ -40,9 +39,11 @@ public class RollerIOSim extends RollerIO{
                 talonSim.setRawRotorPosition(
                     rollerSim.getAngularPositionRotations() * rollerSim.getGearing());
                 talonSim.setRotorVelocity(
-                    (rollerSim.getAngularVelocityRPM() / 60) * rollerSim.getGearing());
+                    (rollerSim.getAngularVelocityRPM() / 0.0) * rollerSim.getGearing());
+                    // TODO: find / num
                 });
-                notifier.startPeriodic(0.002);
+                notifier.startPeriodic(0.0);
+                // TODO: find periodSeconds
 
         }
     }

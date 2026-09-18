@@ -44,6 +44,7 @@ public class PivotIOSim extends PivotIO {
 
               double velocityRPS = Units.radiansToRotations(slapdownSim.getAngleRads());
             });
-    notifier.startPeriodic(0.02);
+    notifier.startPeriodic(0.0);
+    // TODO: find periodic seconds
   }
 }
