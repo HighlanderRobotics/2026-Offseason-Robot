@@ -21,6 +21,7 @@ import org.littletonrobotics.junction.AutoLog;
 public class FlywheelIO {
   @AutoLog
   public static class FlywheelIOInputs {
+    public boolean connected = false;
     public double velocityRotPerSec = 0.0;
     public double voltage = 0.0;
     public double statorCurrentAmps = 0.0;
@@ -67,6 +68,7 @@ public class FlywheelIO {
   public void updateInputs(FlywheelIOInputs inputs) {
     BaseStatusSignal.refreshAll(
         velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPosition);
+    inputs.connected = BaseStatusSignal.isAllGood(velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPosition);
     inputs.flywheelPositionRotations = flywheelPosition.getValue().in(Rotation);
     inputs.velocityRotPerSec = velocity.getValue().in(Rotation.per(Second));
     inputs.voltage = voltage.getValueAsDouble();

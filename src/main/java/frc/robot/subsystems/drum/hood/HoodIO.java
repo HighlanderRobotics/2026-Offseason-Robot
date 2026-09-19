@@ -22,6 +22,7 @@ public class HoodIO {
 
   @AutoLog
   public static class HoodIOInputs {
+    public boolean connected = false;
     public Rotation2d position = new Rotation2d();
     public double angularVelocityRotPerSec = 0.0;
     public double voltage = 0.0;
@@ -67,6 +68,7 @@ public class HoodIO {
     BaseStatusSignal.refreshAll(
         angularVelocity, voltage, statorCurrent, supplyCurrent, temp, position);
 
+    inputs.connected = BaseStatusSignal.isAllGood(angularVelocity, voltage, statorCurrent, supplyCurrent, temp, position);
     inputs.position = new Rotation2d(position.getValue()); // WPIlib handles units here
     inputs.angularVelocityRotPerSec = angularVelocity.getValue().in(RotationsPerSecond);
     inputs.voltage = voltage.getValueAsDouble();

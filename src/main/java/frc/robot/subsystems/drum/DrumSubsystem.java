@@ -5,6 +5,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.components.follower.FollowerIO;
@@ -32,6 +34,11 @@ public class DrumSubsystem extends SubsystemBase {
   private HoodIO hoodIO;
   private HoodIOInputsAutoLogged hoodIOInputs = new HoodIOInputsAutoLogged();
 
+  private Alert hoodDisconnectAlert = new Alert("Hood Motor Disconnected", AlertType.kError);
+  private Alert flywheelLeaderDisconnectAlert = new Alert("Flywheel Leader Disconnected", AlertType.kError);
+  // True if any are disconnected (maybe I should add one for each but seems excessive)
+  private Alert flywheelFollowerDisconnectAlert = new Alert("Flywheel Follower Disconnected", AlertType.kError);
+
   public DrumSubsystem(CANBus canBus) {
     flywheelIO = new FlywheelIO(canBus);
 
@@ -48,15 +55,21 @@ public class DrumSubsystem extends SubsystemBase {
   public void periodic() {
     flywheelIO.updateInputs(flywheelIOInputs);
     Logger.processInputs("Drum/Flywheel/Leader", flywheelIOInputs);
+    flywheelLeaderDisconnectAlert.set(!flywheelIOInputs.connected);
 
     // Update follower inputs
+    boolean anyFollowerDisconnected = false;
     for (int i = 0; i < followerIOs.length; i++) {
       followerIOs[i].updateInputs(followerIOInputs[i]);
       Logger.processInputs("Drum/Flywheel/Follower " + i, followerIOInputs[i]);
+
+      anyFollowerDisconnected |= !followerIOInputs[i].connected;
     }
+    flywheelFollowerDisconnectAlert.set(anyFollowerDisconnected);
 
     hoodIO.updateInputs(hoodIOInputs);
     Logger.processInputs("Drum/Hood", hoodIOInputs);
+    hoodDisconnectAlert.set(!hoodIOInputs.connected);
   }
 
   public Command setFlywheelAndHood(

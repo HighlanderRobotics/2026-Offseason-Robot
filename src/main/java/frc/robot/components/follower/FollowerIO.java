@@ -22,13 +22,14 @@ public class FollowerIO {
   @AutoLog
   public static class FollowerIOInputs {
     public int motorId = 0;
+    public boolean connected = false;
     public double velocityRotPerSec = 0.0;
     public double voltage = 0.0;
     public double statorCurrentAmps = 0.0;
     public double supplyCurrentAmps = 0.0;
     public double tempC = 0.0;
     // For sysid
-    public double flywheelPositionRotations = 0.0;
+    public double positionRotations = 0.0;
   }
 
   protected final TalonFX motor;
@@ -39,7 +40,7 @@ public class FollowerIO {
   private StatusSignal<Current> statorCurrent;
   private StatusSignal<Current> supplyCurrent;
   private StatusSignal<Temperature> temp;
-  private StatusSignal<Angle> flywheelPosition;
+  private StatusSignal<Angle> position;
 
   private Follower followerReq;
 
@@ -59,10 +60,10 @@ public class FollowerIO {
     statorCurrent = motor.getStatorCurrent();
     supplyCurrent = motor.getSupplyCurrent();
     temp = motor.getDeviceTemp();
-    flywheelPosition = motor.getPosition();
+    position = motor.getPosition();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPosition);
+        50.0, velocity, voltage, statorCurrent, supplyCurrent, temp, position);
     motor.optimizeBusUtilization();
 
     followerReq = new Follower(leaderID, alignment);
@@ -71,9 +72,11 @@ public class FollowerIO {
 
   public void updateInputs(FollowerIOInputs inputs) {
     BaseStatusSignal.refreshAll(
-        velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPosition);
+        velocity, voltage, statorCurrent, supplyCurrent, temp, position);
+
+    inputs.connected = BaseStatusSignal.isAllGood(velocity, voltage, statorCurrent, supplyCurrent, temp, position);
     inputs.motorId = motorId;
-    inputs.flywheelPositionRotations = flywheelPosition.getValue().in(Rotation);
+    inputs.positionRotations = position.getValue().in(Rotation);
     inputs.velocityRotPerSec = velocity.getValue().in(Rotation.per(Second));
     inputs.voltage = voltage.getValueAsDouble();
     inputs.statorCurrentAmps = statorCurrent.getValueAsDouble();
