@@ -82,6 +82,7 @@ public class DrumSubsystem extends SubsystemBase {
           flywheelIO.setVelocitySetpoint(flywheelVelRotPerSec.getAsDouble());
         });
   }
+  // TODO: MORE COMMANDS WHEN SUPERSTRUCTURE IS INTEGRATED
 
   // Configs
 
