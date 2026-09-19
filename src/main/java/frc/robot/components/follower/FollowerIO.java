@@ -71,10 +71,10 @@ public class FollowerIO {
   }
 
   public void updateInputs(FollowerIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        velocity, voltage, statorCurrent, supplyCurrent, temp, position);
+    BaseStatusSignal.refreshAll(velocity, voltage, statorCurrent, supplyCurrent, temp, position);
 
-    inputs.connected = BaseStatusSignal.isAllGood(velocity, voltage, statorCurrent, supplyCurrent, temp, position);
+    inputs.connected =
+        BaseStatusSignal.isAllGood(velocity, voltage, statorCurrent, supplyCurrent, temp, position);
     inputs.motorId = motorId;
     inputs.positionRotations = position.getValue().in(Rotation);
     inputs.velocityRotPerSec = velocity.getValue().in(Rotation.per(Second));

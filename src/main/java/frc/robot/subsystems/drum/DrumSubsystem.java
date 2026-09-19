@@ -35,9 +35,11 @@ public class DrumSubsystem extends SubsystemBase {
   private HoodIOInputsAutoLogged hoodIOInputs = new HoodIOInputsAutoLogged();
 
   private Alert hoodDisconnectAlert = new Alert("Hood Motor Disconnected", AlertType.kError);
-  private Alert flywheelLeaderDisconnectAlert = new Alert("Flywheel Leader Disconnected", AlertType.kError);
+  private Alert flywheelLeaderDisconnectAlert =
+      new Alert("Flywheel Leader Disconnected", AlertType.kError);
   // True if any are disconnected (maybe I should add one for each but seems excessive)
-  private Alert flywheelFollowerDisconnectAlert = new Alert("Flywheel Follower Disconnected", AlertType.kError);
+  private Alert flywheelFollowerDisconnectAlert =
+      new Alert("Flywheel Follower Disconnected", AlertType.kError);
 
   public DrumSubsystem(CANBus canBus) {
     flywheelIO = new FlywheelIO(canBus);
