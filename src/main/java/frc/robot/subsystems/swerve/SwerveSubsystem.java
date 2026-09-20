@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.CANBus;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -19,6 +20,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -48,6 +50,7 @@ import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread.Samples;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread.SignalID;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread.SignalType;
 import frc.robot.utils.Tracer;
+import frc.robot.utils.autoaim.AutoAlign;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -145,6 +148,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   private final SwerveDriveSimulation swerveSimulation =
       new SwerveDriveSimulation(driveTrainSimConfig, new Pose2d(3, 3, Rotation2d.kZero));
+
+  private AutoAlign autoAlign = new AutoAlign();
 
   public SwerveSubsystem(CANBus canbus) {
     if (Robot.ROBOT_MODE == RobotMode.SIM) {
@@ -399,7 +404,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Drive closed-loop at field relative speeds (i.e. for autoaim)
+   * Drive open-loop at robot relative speeds (i.e. for autoaim)
    *
    * @param speeds
    * @return a Command driving to the target speeds
@@ -446,6 +451,104 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public Command stopForTime(DoubleSupplier seconds) {
     return stop().repeatedly().withTimeout(seconds.getAsDouble());
+  }
+
+  /**
+   * Autoaligns to a target pose given constraints
+   *
+   * @param target the target pose
+   * @param speedsModifier field relative speeds that get added to PID calculated speeds e.g. driver
+   *     requested speeds to drive along a line
+   * @return Command driving to the target
+   */
+  public Command translateToPose(
+      Supplier<Pose2d> target,
+      Supplier<ChassisSpeeds> speedsModifier,
+      Constraints translationConstraints,
+      Constraints headingConstraints) {
+    return Commands.runOnce(
+            () -> autoAlign.resetPIDControllers(getPose(), getVelocityFieldRelative()))
+        .andThen(
+            driveClosedLoopFieldRelative(
+                    () -> {
+                      return autoAlign
+                          .calculateSpeeds(
+                              getPose(),
+                              target.get(),
+                              translationConstraints,
+                              translationConstraints,
+                              headingConstraints)
+                          .plus(speedsModifier.get());
+                    })
+                .alongWith(
+                    Commands.run(
+                        () -> {
+                          Logger.recordOutput("AutoAlign/Target Pose", target.get());
+                          Logger.recordOutput("AutoAlign/Speeds Modifier", speedsModifier.get());
+                        })));
+  }
+
+  /**
+   * Autoaligns to a target pose given a speed modifier
+   *
+   * @param target the target pose
+   * @param speedsModifier field relative speeds that get added to PID calculated speeds e.g. driver
+   *     requested speeds to drive along a line
+   * @return Command driving to the target
+   */
+  public Command translateToPose(Supplier<Pose2d> target, Supplier<ChassisSpeeds> speedsModifier) {
+    return Commands.runOnce(
+            () -> autoAlign.resetPIDControllers(getPose(), getVelocityFieldRelative()))
+        .andThen(
+            driveClosedLoopFieldRelative(
+                    () -> {
+                      return autoAlign
+                          .calculateSpeeds(getPose(), target.get())
+                          .plus(speedsModifier.get());
+                    })
+                .alongWith(
+                    Commands.run(
+                        () -> {
+                          Logger.recordOutput("AutoAlign/Target Pose", target.get());
+                          Logger.recordOutput("AutoAlign/Speeds Modifier", speedsModifier.get());
+                        })));
+  }
+
+  /**
+   * Autoaligns to a target pose
+   *
+   * @param target the target pose
+   * @param speedsModifier field relative speeds that get added to PID calculated speeds e.g. driver
+   *     requested speeds to drive along a line
+   * @return Command driving to the target
+   */
+  private Command translateToPose(Supplier<Pose2d> target) {
+    return translateToPose(target, () -> new ChassisSpeeds());
+  }
+
+  /**
+   * Autoaligns to a target pose, stopping once it reaches a tolerance
+   *
+   * @param target the target pose
+   * @param xToleranceMeters tolerance in x direction (meters)
+   * @param yToleranceMeters tolerance in y direction (meters)
+   * @param headingToleranceRadians tolerance of heading (radians)
+   * @return Command driving to the target
+   */
+  public Command translateToPoseWithTolerance(
+      Supplier<Pose2d> target,
+      double xToleranceMeters,
+      double yToleranceMeters,
+      double headingToleranceRadians) {
+    return translateToPose(target)
+        .until(
+            () ->
+                MathUtil.isNear(target.get().getX(), getPose().getX(), xToleranceMeters)
+                    && MathUtil.isNear(target.get().getY(), getPose().getY(), yToleranceMeters)
+                    && MathUtil.isNear(
+                        target.get().getRotation().getRadians(),
+                        getPose().getRotation().getRadians(),
+                        headingToleranceRadians));
   }
 
   //   @AutoLogOutput(key = "Swerve/Near Trench")
