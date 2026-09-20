@@ -40,7 +40,7 @@ public class IndexerIOSim extends IndexerIO {
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.0136, GEAR_RATIO),
             DCMotor.getKrakenX60Foc(1));
-    kickerFxSimState = kickerMotor.getSimState();
+    kickerFxSimState = kickerLeaderMotor.getSimState();
     kickerFxSimState.setMotorType(MotorType.KrakenX60);
     kickerFxSimState.Orientation = ChassisReference.CounterClockwise_Positive;
 

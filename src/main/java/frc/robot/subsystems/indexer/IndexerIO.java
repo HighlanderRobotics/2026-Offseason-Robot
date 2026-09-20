@@ -4,10 +4,12 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -27,21 +29,30 @@ public class IndexerIO {
     public double indexerTempC = 0.0;
     public boolean indexerConnected = false;
 
-    public double kickerVelocityRotationsPerSec = 0.0;
-    public double kickerPositionRots = 0.0;
-    public double kickerStatorCurrentAmp = 0.0;
-    public double kickerSupplyCurrentAmp = 0.0;
-    public double kickerVoltage = 0.0;
-    public double kickerTempC = 0.0;
-    public boolean kickerConnected = false;
+    public double kickerLeaderVelocityRotationsPerSec = 0.0;
+    public double kickerLeaderPositionRots = 0.0;
+    public double kickerLeaderStatorCurrentAmp = 0.0;
+    public double kickerLeaderSupplyCurrentAmp = 0.0;
+    public double kickerLeaderVoltage = 0.0;
+    public double kickerLeaderTempC = 0.0;
+    public boolean kickerLeaderConnected = false;
+
+    public double kickerFollowerVelocityRotationsPerSec = 0.0;
+    public double kickerFollowerPositionRots = 0.0;
+    public double kickerFollowerStatorCurrentAmp = 0.0;
+    public double kickerFollowerSupplyCurrentAmp = 0.0;
+    public double kickerFollowerVoltage = 0.0;
+    public double kickerFollowerTempC = 0.0;
+    public boolean kickerFollowerConnected = false;
   }
 
-  // TODO: Set gear ratios
-  public static final double GEAR_RATIO = 1.0;
-  public static final double KICKER_GEAR_RATIO = 1.0;
+  // Set gear ratios
+  public static final double GEAR_RATIO = 50/12;
+  public static final double KICKER_GEAR_RATIO = 30/12;
 
   protected final TalonFX indexerMotor;
-  protected final TalonFX kickerMotor;
+  protected final TalonFX kickerLeaderMotor;
+  protected final TalonFX kickerFollowerMotor;
 
   // StatusSignal - used to get information about each motor
   private final StatusSignal<AngularVelocity> indexerAngularVelocityRotsPerSec;
@@ -51,12 +62,19 @@ public class IndexerIO {
   private final StatusSignal<Voltage> indexerVoltage;
   private final StatusSignal<Temperature> indexerTemp;
 
-  private final StatusSignal<AngularVelocity> kickerAngularVelocityRotsPerSec;
-  private final StatusSignal<Angle> kickerPosition;
-  private final StatusSignal<Current> kickerStatorCurrent;
-  private final StatusSignal<Current> kickerSupplyCurrent;
-  private final StatusSignal<Voltage> kickerVoltage;
-  private final StatusSignal<Temperature> kickerTemp;
+  private final StatusSignal<AngularVelocity> kickerLeaderAngularVelocityRotsPerSec;
+  private final StatusSignal<Angle> kickerLeaderPosition;
+  private final StatusSignal<Current> kickerLeaderStatorCurrent;
+  private final StatusSignal<Current> kickerLeaderSupplyCurrent;
+  private final StatusSignal<Voltage> kickerLeaderVoltage;
+  private final StatusSignal<Temperature> kickerLeaderTemp;
+
+  private final StatusSignal<AngularVelocity> kickerFollowerAngularVelocityRotsPerSec;
+  private final StatusSignal<Angle> kickerFollowerPosition;
+  private final StatusSignal<Current> kickerFollowerStatorCurrent;
+  private final StatusSignal<Current> kickerFollowerSupplyCurrent;
+  private final StatusSignal<Voltage> kickerFollowerVoltage;
+  private final StatusSignal<Temperature> kickerFollowerTemp;
 
   // Voltage and velocity controllers
   private VoltageOut voltageOut =
@@ -69,9 +87,16 @@ public class IndexerIO {
     indexerMotor = new TalonFX(16, canBus);
     indexerMotor.getConfigurator().apply(IndexerIO.getIndexerConfiguration());
 
-    // TODO: set motor ID for kicker
-    kickerMotor = new TalonFX(15, canBus);
-    kickerMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
+    // TODO: set motor ID for kicker leader
+    kickerLeaderMotor = new TalonFX(15, canBus);
+    kickerLeaderMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
+
+    // TODO: set motor ID for kicker follower
+    kickerFollowerMotor = new TalonFX(14, canBus);
+    kickerFollowerMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
+
+    // Set kicker follower to follow leader
+    kickerFollowerMotor.setControl(new Follower(kickerLeaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
     // Set the data for each motor
     indexerAngularVelocityRotsPerSec = indexerMotor.getVelocity();
@@ -81,12 +106,19 @@ public class IndexerIO {
     indexerVoltage = indexerMotor.getMotorVoltage();
     indexerTemp = indexerMotor.getDeviceTemp();
 
-    kickerAngularVelocityRotsPerSec = kickerMotor.getVelocity();
-    kickerPosition = kickerMotor.getPosition();
-    kickerStatorCurrent = kickerMotor.getStatorCurrent();
-    kickerSupplyCurrent = kickerMotor.getSupplyCurrent();
-    kickerVoltage = kickerMotor.getMotorVoltage();
-    kickerTemp = kickerMotor.getDeviceTemp();
+    kickerLeaderAngularVelocityRotsPerSec = kickerLeaderMotor.getVelocity();
+    kickerLeaderPosition = kickerLeaderMotor.getPosition();
+    kickerLeaderStatorCurrent = kickerLeaderMotor.getStatorCurrent();
+    kickerLeaderSupplyCurrent = kickerLeaderMotor.getSupplyCurrent();
+    kickerLeaderVoltage = kickerLeaderMotor.getMotorVoltage();
+    kickerLeaderTemp = kickerLeaderMotor.getDeviceTemp();
+
+    kickerFollowerAngularVelocityRotsPerSec = kickerFollowerMotor.getVelocity();
+    kickerFollowerPosition = kickerFollowerMotor.getPosition();
+    kickerFollowerStatorCurrent = kickerFollowerMotor.getStatorCurrent();
+    kickerFollowerSupplyCurrent = kickerFollowerMotor.getSupplyCurrent();
+    kickerFollowerVoltage = kickerFollowerMotor.getMotorVoltage();
+    kickerFollowerTemp = kickerFollowerMotor.getDeviceTemp();
 
     // Use setUpdateFrequencyForAll to only update motor data every time the robot updates
     BaseStatusSignal.setUpdateFrequencyForAll(
@@ -98,17 +130,24 @@ public class IndexerIO {
         indexerStatorCurrent,
         indexerVoltage,
         indexerTemp,
-        kickerAngularVelocityRotsPerSec,
-        kickerPosition,
-        kickerStatorCurrent,
-        kickerSupplyCurrent,
-        kickerStatorCurrent,
-        kickerVoltage,
-        kickerTemp);
+        kickerLeaderAngularVelocityRotsPerSec,
+        kickerLeaderPosition,
+        kickerLeaderStatorCurrent,
+        kickerLeaderSupplyCurrent,
+        kickerLeaderStatorCurrent,
+        kickerLeaderVoltage,
+        kickerLeaderTemp,
+        kickerFollowerAngularVelocityRotsPerSec,
+        kickerFollowerPosition,
+        kickerFollowerStatorCurrent,
+        kickerFollowerSupplyCurrent,
+        kickerFollowerStatorCurrent,
+        kickerFollowerVoltage,
+        kickerFollowerTemp);
     indexerMotor
-        .optimizeBusUtilization(); // only update variables that have update frequency set to
-    // non-zero value
-    kickerMotor.optimizeBusUtilization();
+        .optimizeBusUtilization(); // only update variables that have update frequency set to non-zero value
+    kickerLeaderMotor.optimizeBusUtilization();
+    kickerFollowerMotor.optimizeBusUtilization();
   }
 
   public static TalonFXConfiguration getIndexerConfiguration() {
@@ -164,7 +203,7 @@ public class IndexerIO {
   }
 
   public void setKickerVoltage(double voltage) {
-    kickerMotor.setControl(voltageOut.withOutput(voltage));
+    kickerLeaderMotor.setControl(voltageOut.withOutput(voltage));
   }
 
   public void updateInputs(IndexerIOInputs inputs) {
@@ -176,12 +215,18 @@ public class IndexerIO {
         indexerSupplyCurrent,
         indexerVoltage,
         indexerTemp,
-        kickerAngularVelocityRotsPerSec,
-        kickerPosition,
-        kickerStatorCurrent,
-        kickerSupplyCurrent,
-        kickerVoltage,
-        kickerTemp);
+        kickerLeaderAngularVelocityRotsPerSec,
+        kickerLeaderPosition,
+        kickerLeaderStatorCurrent,
+        kickerLeaderSupplyCurrent,
+        kickerLeaderVoltage,
+        kickerLeaderTemp,
+        kickerFollowerAngularVelocityRotsPerSec,
+        kickerFollowerPosition,
+        kickerFollowerStatorCurrent,
+        kickerFollowerSupplyCurrent,
+        kickerFollowerVoltage,
+        kickerFollowerTemp);
 
     // Set variables to the motor data for indexer
     inputs.indexerConnected =
@@ -199,20 +244,36 @@ public class IndexerIO {
     inputs.indexerVoltage = indexerVoltage.getValueAsDouble();
     inputs.indexerTempC = indexerTemp.getValueAsDouble();
 
-    // Set variables to the motor data for kicker
-    inputs.kickerConnected =
+    // Set variables to the motor data for kicker leader
+    inputs.kickerLeaderConnected =
         BaseStatusSignal.isAllGood(
-            kickerAngularVelocityRotsPerSec,
-            kickerPosition,
-            kickerStatorCurrent,
-            kickerSupplyCurrent,
-            kickerVoltage,
-            kickerTemp);
-    inputs.kickerVelocityRotationsPerSec = kickerAngularVelocityRotsPerSec.getValueAsDouble();
-    inputs.kickerPositionRots = kickerPosition.getValueAsDouble();
-    inputs.kickerStatorCurrentAmp = kickerStatorCurrent.getValueAsDouble();
-    inputs.kickerSupplyCurrentAmp = kickerSupplyCurrent.getValueAsDouble();
-    inputs.kickerVoltage = kickerVoltage.getValueAsDouble();
-    inputs.kickerTempC = kickerTemp.getValueAsDouble();
+            kickerLeaderAngularVelocityRotsPerSec,
+            kickerLeaderPosition,
+            kickerLeaderStatorCurrent,
+            kickerLeaderSupplyCurrent,
+            kickerLeaderVoltage,
+            kickerLeaderTemp);
+    inputs.kickerLeaderVelocityRotationsPerSec = kickerLeaderAngularVelocityRotsPerSec.getValueAsDouble();
+    inputs.kickerLeaderPositionRots = kickerLeaderPosition.getValueAsDouble();
+    inputs.kickerLeaderStatorCurrentAmp = kickerLeaderStatorCurrent.getValueAsDouble();
+    inputs.kickerLeaderSupplyCurrentAmp = kickerLeaderSupplyCurrent.getValueAsDouble();
+    inputs.kickerLeaderVoltage = kickerLeaderVoltage.getValueAsDouble();
+    inputs.kickerLeaderTempC = kickerLeaderTemp.getValueAsDouble();
+
+    // Set variables to the motor data for kicker follower
+    inputs.kickerFollowerConnected =
+        BaseStatusSignal.isAllGood(
+            kickerFollowerAngularVelocityRotsPerSec,
+            kickerFollowerPosition,
+            kickerFollowerStatorCurrent,
+            kickerFollowerSupplyCurrent,
+            kickerFollowerVoltage,
+            kickerFollowerTemp);
+    inputs.kickerFollowerVelocityRotationsPerSec = kickerFollowerAngularVelocityRotsPerSec.getValueAsDouble();
+    inputs.kickerFollowerPositionRots = kickerFollowerPosition.getValueAsDouble();
+    inputs.kickerFollowerStatorCurrentAmp = kickerFollowerStatorCurrent.getValueAsDouble();
+    inputs.kickerFollowerSupplyCurrentAmp = kickerFollowerSupplyCurrent.getValueAsDouble();
+    inputs.kickerFollowerVoltage = kickerFollowerVoltage.getValueAsDouble();
+    inputs.kickerFollowerTempC = kickerFollowerTemp.getValueAsDouble();
   }
 }
