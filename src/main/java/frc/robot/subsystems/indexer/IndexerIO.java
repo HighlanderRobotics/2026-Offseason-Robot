@@ -47,8 +47,8 @@ public class IndexerIO {
   }
 
   // Set gear ratios
-  public static final double GEAR_RATIO = 50/12;
-  public static final double KICKER_GEAR_RATIO = 30/12;
+  public static final double GEAR_RATIO = 50 / 12;
+  public static final double KICKER_GEAR_RATIO = 30 / 12;
 
   protected final TalonFX indexerMotor;
   protected final TalonFX kickerLeaderMotor;
@@ -96,7 +96,8 @@ public class IndexerIO {
     kickerFollowerMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
 
     // Set kicker follower to follow leader
-    kickerFollowerMotor.setControl(new Follower(kickerLeaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+    kickerFollowerMotor.setControl(
+        new Follower(kickerLeaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
     // Set the data for each motor
     indexerAngularVelocityRotsPerSec = indexerMotor.getVelocity();
@@ -145,7 +146,8 @@ public class IndexerIO {
         kickerFollowerVoltage,
         kickerFollowerTemp);
     indexerMotor
-        .optimizeBusUtilization(); // only update variables that have update frequency set to non-zero value
+        .optimizeBusUtilization(); // only update variables that have update frequency set to
+    // non-zero value
     kickerLeaderMotor.optimizeBusUtilization();
     kickerFollowerMotor.optimizeBusUtilization();
   }
@@ -253,7 +255,8 @@ public class IndexerIO {
             kickerLeaderSupplyCurrent,
             kickerLeaderVoltage,
             kickerLeaderTemp);
-    inputs.kickerLeaderVelocityRotationsPerSec = kickerLeaderAngularVelocityRotsPerSec.getValueAsDouble();
+    inputs.kickerLeaderVelocityRotationsPerSec =
+        kickerLeaderAngularVelocityRotsPerSec.getValueAsDouble();
     inputs.kickerLeaderPositionRots = kickerLeaderPosition.getValueAsDouble();
     inputs.kickerLeaderStatorCurrentAmp = kickerLeaderStatorCurrent.getValueAsDouble();
     inputs.kickerLeaderSupplyCurrentAmp = kickerLeaderSupplyCurrent.getValueAsDouble();
@@ -269,7 +272,8 @@ public class IndexerIO {
             kickerFollowerSupplyCurrent,
             kickerFollowerVoltage,
             kickerFollowerTemp);
-    inputs.kickerFollowerVelocityRotationsPerSec = kickerFollowerAngularVelocityRotsPerSec.getValueAsDouble();
+    inputs.kickerFollowerVelocityRotationsPerSec =
+        kickerFollowerAngularVelocityRotsPerSec.getValueAsDouble();
     inputs.kickerFollowerPositionRots = kickerFollowerPosition.getValueAsDouble();
     inputs.kickerFollowerStatorCurrentAmp = kickerFollowerStatorCurrent.getValueAsDouble();
     inputs.kickerFollowerSupplyCurrentAmp = kickerFollowerSupplyCurrent.getValueAsDouble();
