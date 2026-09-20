@@ -2,6 +2,7 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -27,7 +28,10 @@ public class SlapdownSubsystem extends SubsystemBase {
   public static final double CURRENT_ZEROING_THRESHOLD = 0.0;
   public static final double ROLLER_GEAR_RATIO = 0.0 / 0.0;
   public static final double PIVOT_GEAR_RATIO = 0.0;
-  // TODO: implement true ratios for zeroing threshold, roller gear ratio, and pivvot gear ratio
+  public static final double PIVOT_TO_CANCODER = 0.0;
+  public static final double CANCODER_TO_PIVOT = 0.0;
+  // TODO: implement true ratios for roller gear ratio, and pivot gear ratio, pivot to cancoder and cancoder to pivot
+  // find zeroing threshold
   private final PivotIO pivotIO;
   private PivotIOInputsAutoLogged pivotIOInputs = new PivotIOInputsAutoLogged();
 
@@ -116,7 +120,6 @@ public class SlapdownSubsystem extends SubsystemBase {
         () -> {
           pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION);
           rollerIO.setRollerVoltage(0.0);
-          // TODO: set roller voltage
         });
   }
 
@@ -141,9 +144,7 @@ public class SlapdownSubsystem extends SubsystemBase {
     return this.runOnce(() -> pivotIO.resetEncoder(cancoderIOInputs.cancoderPositionRotations));
   }
 
-  public boolean beambreak() {
-    return false;
-  }
+
 
   public Rotation2d getPosition() {
     return pivotIOInputs.position;
@@ -154,7 +155,7 @@ public class SlapdownSubsystem extends SubsystemBase {
   }
 
   public boolean atExtension() {
-    return MathUtil.isNear(getPositionSetpoint().getDegrees(), getPosition().getDegrees(), 0.0);
+    return MathUtil.isNear(getPositionSetpoint().getDegrees(), getPosition().getDegrees(), 10.0);
     // TODO: set .isNear tolerance
   }
 
@@ -163,10 +164,11 @@ public class SlapdownSubsystem extends SubsystemBase {
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
     config.Feedback.FeedbackRemoteSensorID = 0;
     // TODO: set feedback remote sensorID
-    config.Feedback.RotorToSensorRatio = PIVOT_GEAR_RATIO;
+    config.Feedback.RotorToSensorRatio = PIVOT_TO_CANCODER;
 
     config.Feedback.SensorToMechanismRatio = 0;
     // TODO: set sensor to mech ratio
@@ -181,9 +183,10 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.Slot0.kD = 0.0;
     // TODO: set kS, kV, kS, kG, GravityArmPositionOffset, kP, kD
 
-    config.CurrentLimits.StatorCurrentLimit = 0.0;
+    config.CurrentLimits.StatorCurrentLimit = 30.0;
+
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 0.0;
+    config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     // TODO: set stator current limit, stator current lim enable, supply current lim, supply current
     // lim enable
@@ -200,6 +203,7 @@ public class SlapdownSubsystem extends SubsystemBase {
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    // TODO: clockwise postitive
 
     config.Feedback.SensorToMechanismRatio = ROLLER_GEAR_RATIO;
 
@@ -210,7 +214,7 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.Slot0.kD = 0.0;
     // TODO: set kS, kV, kA, kP, kD
 
-    config.CurrentLimits.StatorCurrentLimit = 0.0;
+    config.CurrentLimits.StatorCurrentLimit = 20.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 0.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -233,9 +237,5 @@ public class SlapdownSubsystem extends SubsystemBase {
 
   public Command restExtend() {
     throw new UnsupportedOperationException("Unimplemented method 'restExtend'");
-  }
-
-  public Command zeroPivotOffCancder() {
-    throw new UnsupportedOperationException("Unimplemented method 'zeroPivotOffCancder'");
   }
 }

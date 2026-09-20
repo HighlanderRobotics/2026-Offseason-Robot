@@ -39,11 +39,9 @@ public class RollerIOSim extends RollerIO{
                 talonSim.setRawRotorPosition(
                     rollerSim.getAngularPositionRotations() * rollerSim.getGearing());
                 talonSim.setRotorVelocity(
-                    (rollerSim.getAngularVelocityRPM() / 0.0) * rollerSim.getGearing());
-                    // TODO: find / num
+                    (rollerSim.getAngularVelocityRPM() * 60) * rollerSim.getGearing());
                 });
-                notifier.startPeriodic(0.0);
-                // TODO: find periodSeconds
+                notifier.startPeriodic(0.002);
 
         }
     }

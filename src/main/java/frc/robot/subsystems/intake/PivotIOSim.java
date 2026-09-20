@@ -39,12 +39,12 @@ public class PivotIOSim extends PivotIO {
               slapdownSim.setInputVoltage(talonSim.getMotorVoltage());
               slapdownSim.update(deltaTime);
 
-              double positionRotations = Units.radiansToDegrees(slapdownSim.getAngleRads());
+              double positionRotations = Units.radiansToRotations(slapdownSim.getAngleRads() * SlapdownSubsystem.PIVOT_GEAR_RATIO);
               talonSim.setRawRotorPosition(positionRotations);
 
-              double velocityRPS = Units.radiansToRotations(slapdownSim.getAngleRads());
+              double velocityRPS = Units.radiansToRotations(slapdownSim.getAngleRads() * SlapdownSubsystem.PIVOT_GEAR_RATIO);
+              talonSim.setRotorVelocity(velocityRPS);
             });
-    notifier.startPeriodic(0.0);
-    // TODO: find periodic seconds
+    notifier.startPeriodic(0.002);
   }
 }

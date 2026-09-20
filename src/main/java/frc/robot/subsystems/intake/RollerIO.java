@@ -37,7 +37,7 @@ public class RollerIO {
   private final StatusSignal<Temperature> temperatureCelsius;
   private final StatusSignal<Angle> positionRotations;
 
-  private double setpoint;
+  private double setpointvelocity;
 
   private final VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC(true);
   private final VelocityVoltage velocityVoltage =
@@ -54,8 +54,7 @@ public class RollerIO {
     temperatureCelsius = motor.getDeviceTemp();
     positionRotations = motor.getPosition();
     BaseStatusSignal.setUpdateFrequencyForAll(
-        0.0,
-        // TODO: get real frequency for base status signal
+        50.0,
         angularVelocityRotsPerSec,
         supplyCurrentAmps,
         statorCurrentAmps,
@@ -95,11 +94,11 @@ public class RollerIO {
   }
 
   public void setRollerVelocity(double velocityRPS) {
-    setpoint = velocityRPS;
+    setpointvelocity = velocityRPS;
     motor.setControl(velocityVoltage.withVelocity(velocityRPS));
   }
 
   public double getVelocitySetpoint() {
-    return setpoint;
+    return setpointvelocity;
   }
 }

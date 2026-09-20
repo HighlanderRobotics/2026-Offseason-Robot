@@ -25,8 +25,7 @@ public class CANcoderIO {
   public CANcoderIO(int cancoderID, CANcoderConfiguration config, CANBus canbus) {
     cancoder = new CANcoder(cancoderID, canbus);
     cancoderAbsolutePositionRotations = cancoder.getAbsolutePosition();
-    BaseStatusSignal.setUpdateFrequencyForAll(0.0, cancoderAbsolutePositionRotations);
-    // TODO: get frequency for base status signal
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0, cancoderAbsolutePositionRotations);
     cancoder.getConfigurator().apply(config);
     cancoder.optimizeBusUtilization();
   }

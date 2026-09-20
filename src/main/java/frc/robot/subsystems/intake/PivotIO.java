@@ -23,6 +23,7 @@ public class PivotIO {
     public double angularVelocityRotationsPerSec = 0.0;
     public double statorCurrentAmps = 0.0;
     public double supplyCurrentAmps = 0.0;
+    public double supplyCurrent = 0.0;
     public double voltage = 0.0;
     public double tempC = 0.0;
     public double positionRotations = 0.0;
@@ -56,6 +57,7 @@ public class PivotIO {
     statorCurrent = motor.getStatorCurrent();
     supplyCurrent = motor.getSupplyCurrent();
     temp = motor.getDeviceTemp();
+    
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         0.0, position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
@@ -74,6 +76,7 @@ public class PivotIO {
     inputs.positionRotations = position.getValue().in(Rotation);
     inputs.angularVelocityRotationsPerSec = angularVelocity.getValueAsDouble();
     inputs.statorCurrentAmps = supplyCurrent.getValueAsDouble();
+
     inputs.tempC = temp.getValueAsDouble();
   }
 
@@ -84,7 +87,7 @@ public class PivotIO {
   public void setMotorPositionSetpoint(Rotation2d setpoint) {
     this.setpoint = setpoint;
     motor.setControl(motorMagicVoltage.withPosition(setpoint.getMeasure()).withFeedForward(0.0));
-    // TO_DO: real feed forward for pivotio
+  
   }
 
   public void setMotorPositionSetpoint(Rotation2d setpoint, double ffVolts) {
