@@ -9,39 +9,38 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-public class RollerIOSim extends RollerIO{
-    private final DCMotorSim rollerSim;
-    private TalonFXSimState talonSim;
-    private double lastLoopTime = 0.0;
-    // TODO: Find last loop time
-    Notifier notifier;
+public class RollerIOSim extends RollerIO {
+  private final DCMotorSim rollerSim;
+  private TalonFXSimState talonSim;
+  private double lastLoopTime = 0.0;
+  // TODO: Find last loop time
+  Notifier notifier;
 
-    public RollerIOSim(
-        int motorID,
-        TalonFXConfiguration config,
-        DCMotorSim motorSim,
-        MotorType motorType,
-        CANBus canbus) {
+  public RollerIOSim(
+      int motorID,
+      TalonFXConfiguration config,
+      DCMotorSim motorSim,
+      MotorType motorType,
+      CANBus canbus) {
 
-        super(motorID, config, canbus);
-        rollerSim = motorSim;
-        talonSim = motor.getSimState();
-        talonSim.setMotorType(motorType);
+    super(motorID, config, canbus);
+    rollerSim = motorSim;
+    talonSim = motor.getSimState();
+    talonSim.setMotorType(motorType);
 
-        notifier=
+    notifier =
         new Notifier(
-            ()->{
-                double deltaTime = (Utils.getCurrentTimeSeconds() - lastLoopTime);
-                lastLoopTime = Utils.getCurrentTimeSeconds();
-                talonSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-                rollerSim.setInputVoltage(talonSim.getMotorVoltage());
-                rollerSim.update(deltaTime);
-                talonSim.setRawRotorPosition(
-                    rollerSim.getAngularPositionRotations() * rollerSim.getGearing());
-                talonSim.setRotorVelocity(
-                    (rollerSim.getAngularVelocityRPM() * 60) * rollerSim.getGearing());
-                });
-                notifier.startPeriodic(0.002);
-
-        }
-    }
+            () -> {
+              double deltaTime = (Utils.getCurrentTimeSeconds() - lastLoopTime);
+              lastLoopTime = Utils.getCurrentTimeSeconds();
+              talonSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+              rollerSim.setInputVoltage(talonSim.getMotorVoltage());
+              rollerSim.update(deltaTime);
+              talonSim.setRawRotorPosition(
+                  rollerSim.getAngularPositionRotations() * rollerSim.getGearing());
+              talonSim.setRotorVelocity(
+                  (rollerSim.getAngularVelocityRPM() * 60) * rollerSim.getGearing());
+            });
+    notifier.startPeriodic(0.002);
+  }
+}

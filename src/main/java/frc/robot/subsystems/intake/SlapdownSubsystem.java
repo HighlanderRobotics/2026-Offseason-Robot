@@ -2,7 +2,6 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -30,7 +29,8 @@ public class SlapdownSubsystem extends SubsystemBase {
   public static final double PIVOT_GEAR_RATIO = 0.0;
   public static final double PIVOT_TO_CANCODER = 0.0;
   public static final double CANCODER_TO_PIVOT = 0.0;
-  // TODO: implement true ratios for roller gear ratio, and pivot gear ratio, pivot to cancoder and cancoder to pivot
+  // TODO: implement true ratios for roller gear ratio, and pivot gear ratio, pivot to cancoder and
+  // cancoder to pivot
   // find zeroing threshold
   private final PivotIO pivotIO;
   private PivotIOInputsAutoLogged pivotIOInputs = new PivotIOInputsAutoLogged();
@@ -144,8 +144,6 @@ public class SlapdownSubsystem extends SubsystemBase {
     return this.runOnce(() -> pivotIO.resetEncoder(cancoderIOInputs.cancoderPositionRotations));
   }
 
-
-
   public Rotation2d getPosition() {
     return pivotIOInputs.position;
   }
@@ -164,7 +162,7 @@ public class SlapdownSubsystem extends SubsystemBase {
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    
+
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
     config.Feedback.FeedbackRemoteSensorID = 0;
     // TODO: set feedback remote sensorID
