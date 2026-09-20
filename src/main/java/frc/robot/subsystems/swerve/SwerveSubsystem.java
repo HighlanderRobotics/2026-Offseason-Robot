@@ -189,6 +189,16 @@ public class SwerveSubsystem extends SubsystemBase {
                     SWERVE_CONSTANTS.getCameraConstants()[1],
                     () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()),
                     SWERVE_CONSTANTS.getFieldTagLayout())),
+            new Camera(
+                new CameraIOSim(
+                    SWERVE_CONSTANTS.getCameraConstants()[2],
+                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()),
+                    SWERVE_CONSTANTS.getFieldTagLayout())),
+            new Camera(
+                new CameraIOSim(
+                    SWERVE_CONSTANTS.getCameraConstants()[3],
+                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()),
+                    SWERVE_CONSTANTS.getFieldTagLayout()))
           };
     } else {
       // Add real modules
@@ -204,6 +214,7 @@ public class SwerveSubsystem extends SubsystemBase {
               .map((constants) -> new Camera(new CameraIOReal(constants)))
               .toArray(Camera[]::new);
     }
+
     this.cameraPoses = new Pose3d[cameras.length];
     for (int i = 0; i < cameras.length; i++) {
       cameraPoses[i] = Pose3d.kZero;
@@ -270,6 +281,7 @@ public class SwerveSubsystem extends SubsystemBase {
             Tracer.trace("Camera" + camera.getName() + " Periodic ", camera::periodic);
           }
           Tracer.trace("Update odometry", this::updateOdometry);
+          Tracer.trace("Update vision", this::updateVision);
 
           // Logger.recordOutput("Current Hub Pose", FieldUtils.getCurrentHubPose());
         });
@@ -366,6 +378,7 @@ public class SwerveSubsystem extends SubsystemBase {
         arr[k] = getPose3d().transformBy(cameras[k].getCameraConstants().robotToCamera());
       }
     }
+    Logger.recordOutput("Vision/Camera Poses on Robot", arr);
   }
 
   /**

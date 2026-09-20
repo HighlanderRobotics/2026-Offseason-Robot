@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.Robot;
+import frc.robot.Robot.RobotMode;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.Tracer;
 import java.util.NoSuchElementException;
@@ -156,6 +158,7 @@ public class Camera {
 
   public void updateCamera(SwerveDrivePoseEstimator swerveEstimator) {
     boolean hasFutureData = false;
+
     try {
       if (!inputs.stale) {
         Optional<EstimatedRobotPose> estPose =
@@ -165,15 +168,29 @@ public class Camera {
         // Sets the pose on the sim field
         setSimPose(estPose, !inputs.stale);
 
+        if (Robot.ROBOT_MODE != RobotMode.REAL)
+          Logger.recordOutput("Vision/" + getName() + "/Pose3d", visionPose);
+        if (Robot.ROBOT_MODE != RobotMode.REAL)
+          Logger.recordOutput("Vision/" + getName() + "/Pose2d", visionPose.toPose2d());
+        // if (Robot.ROBOT_MODE != RobotMode.REAL){
+        //   List<Pose3d> targetPoses = estPose.get().targetsUsed.stream().map((target) -> {
+
+        //   }).collect(List::new);
+        //   Logger.recordOutput("Vision/" + getName() + "/Target Pose", estPose.get().targetsUsed);
+        // }
         final Matrix<N3, N1> deviations = findVisionMeasurementStdDevs(estPose.get());
+        if (Robot.ROBOT_MODE != RobotMode.REAL)
+          Logger.recordOutput("Vision/" + getName() + "/Deviations", deviations.getData());
 
         Tracer.trace(
             "Add Measurement From " + getName(),
             () -> {
               swerveEstimator.addVisionMeasurement(
                   visionPose.toPose2d(),
-                  inputs.result.metadata.captureTimestampMicros
-                      / 1.0e6); // cameras less depened on during auto, sem is twice as strict?
+                  inputs.result.metadata.captureTimestampMicros / 1.0e6,
+                  sussifier(
+                      deviations,
+                      estPose)); // cameras less depened on during auto, sem is twice as strict?
               // the sussifier (need to work on that) why would this in be tracer
             });
 
@@ -190,10 +207,12 @@ public class Camera {
                         .getTagPose(inputs.result.targets.get(j).getFiducialId())
                         .get();
               }
+              if (Robot.ROBOT_MODE != RobotMode.REAL)
+                Logger.recordOutput("Vision/" + getName() + "/Target Poses", targetPose3ds);
             });
 
       } else {
-
+        ;
       }
     } catch (NoSuchElementException e) {
 

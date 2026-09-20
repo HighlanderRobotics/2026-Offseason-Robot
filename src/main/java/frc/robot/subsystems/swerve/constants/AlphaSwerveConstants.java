@@ -14,6 +14,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -197,6 +199,11 @@ public class AlphaSwerveConstants extends SwerveConstants {
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
     return turnConfig;
+  }
+
+  @Override
+  public AprilTagFieldLayout getFieldTagLayout() {
+    return AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
   }
 
   @Override

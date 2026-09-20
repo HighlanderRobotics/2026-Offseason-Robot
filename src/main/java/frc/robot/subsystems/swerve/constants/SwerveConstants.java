@@ -12,26 +12,28 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.components.camera.Camera.CameraConstants;
 import frc.robot.subsystems.swerve.module.Module.ModuleConstants;
+import java.io.File;
 
 public abstract class SwerveConstants {
 
   protected static final Alert multipleInstancesAlert =
       new Alert("Multiple Swerve Constants Files", AlertType.kError);
-  private static final Alert tagLoadFailureAlert =
+  protected static final Alert tagLoadFailureAlert =
       new Alert("Failed to load custom tag map", AlertType.kWarning);
   protected AprilTagFieldLayout fieldTags;
 
   public SwerveConstants() {
     try {
       fieldTags =
-          // new AprilTagFieldLayout(
-          //     Filesystem.getDeployDirectory()
-          //         .toPath()
-          //         // .resolve("tagmaps" + File.separator + "field_map_mar_13_18_10_19.json"));
-          //         .resolve("tagmaps" + File.separator + "field_map_mar_27_18_47_20.json"));
-          AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+          new AprilTagFieldLayout(
+              Filesystem.getDeployDirectory()
+                  .toPath()
+                  // .resolve("tagmaps" + File.separator + "field_map_mar_13_18_10_19.json"));
+                  .resolve("tagmaps" + File.separator + "2026-rebuilt-andymark.json"));
+      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
       System.out.println("Successfully loaded tag map");
     } catch (Exception e) {
       System.err.println("Failed to load custom tag map");
