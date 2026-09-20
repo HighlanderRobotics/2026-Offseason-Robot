@@ -25,6 +25,8 @@ public class FollowerIOSim extends FollowerIO {
     // TODO: I'M NOT EVEN SURE THIS WORKS
     this.leaderPositionSupplier = leaderPositionSupplier;
     this.leaderVelSupplier = leaderVelSupplier;
+
+    simState = motor.getSimState();
   }
 
   @Override

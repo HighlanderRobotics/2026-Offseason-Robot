@@ -3,25 +3,31 @@ package frc.robot.subsystems.drum;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
+import frc.robot.Robot.RobotMode;
 import frc.robot.components.follower.FollowerIO;
 import frc.robot.components.follower.FollowerIOInputsAutoLogged;
+import frc.robot.components.follower.FollowerIOSim;
 import frc.robot.subsystems.drum.flywheel.FlywheelIO;
 import frc.robot.subsystems.drum.flywheel.FlywheelIOInputsAutoLogged;
+import frc.robot.subsystems.drum.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.drum.hood.HoodIO;
 import frc.robot.subsystems.drum.hood.HoodIOInputsAutoLogged;
+import frc.robot.subsystems.drum.hood.HoodIOSim;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class DrumSubsystem extends SubsystemBase {
-  public static final int FLYWHEEL_LEADER_ID = 0; // TODO: CORRECT ID
+  public static final int FLYWHEEL_LEADER_ID = 9; // TODO: CORRECT ID
   public static final double FLYWHEEL_GEAR_RATIO = 1.0; // TODO: VALUE FROM CAD
   public static final double HOOD_GEAR_RATIO = 1.0; // TODO: VALUE FROM CAD
 
@@ -42,15 +48,57 @@ public class DrumSubsystem extends SubsystemBase {
       new Alert("Flywheel Follower Disconnected", AlertType.kError);
 
   public DrumSubsystem(CANBus canBus) {
-    flywheelIO = new FlywheelIO(canBus);
+    if (Robot.ROBOT_MODE != RobotMode.SIM) {
+      flywheelIO = new FlywheelIO(canBus);
+
+      hoodIO = new HoodIO(canBus);
+
+      // TODO: CORRECT VALUES
+      followerIOs[0] =
+          new FollowerIO(
+              0, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Aligned, canBus, getFlywheelConfig());
+      followerIOs[1] =
+          new FollowerIO(
+              0, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
+      followerIOs[2] =
+          new FollowerIO(
+              0, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
+    } else {
+      flywheelIO = new FlywheelIOSim(canBus);
+      hoodIO = new HoodIOSim(canBus);
+
+      // TODO: CORRECT VALUES
+      followerIOs[0] =
+          new FollowerIOSim(
+              10,
+              FLYWHEEL_LEADER_ID,
+              MotorAlignmentValue.Aligned,
+              canBus,
+              getFlywheelConfig(),
+              () -> flywheelIOInputs.flywheelPositionRotations,
+              () -> flywheelIOInputs.velocityRotPerSec);
+      followerIOs[1] =
+          new FollowerIOSim(
+              11,
+              FLYWHEEL_LEADER_ID,
+              MotorAlignmentValue.Opposed,
+              canBus,
+              getFlywheelConfig(),
+              () -> flywheelIOInputs.flywheelPositionRotations,
+              () -> flywheelIOInputs.velocityRotPerSec);
+      followerIOs[2] =
+          new FollowerIOSim(
+              12,
+              FLYWHEEL_LEADER_ID,
+              MotorAlignmentValue.Opposed,
+              canBus,
+              getFlywheelConfig(),
+              () -> flywheelIOInputs.flywheelPositionRotations,
+              () -> flywheelIOInputs.velocityRotPerSec);
+    }
 
     // Fill with blank inputs
     Arrays.fill(followerIOInputs, new FollowerIOInputsAutoLogged());
-
-    // TODO: CORRECT VALUES
-    followerIOs[0] = new FollowerIO(0, FLYWHEEL_LEADER_ID, null, canBus, getFlywheelConfig());
-    followerIOs[1] = new FollowerIO(0, FLYWHEEL_LEADER_ID, null, canBus, getFlywheelConfig());
-    followerIOs[2] = new FollowerIO(0, FLYWHEEL_LEADER_ID, null, canBus, getFlywheelConfig());
   }
 
   @Override
@@ -80,6 +128,14 @@ public class DrumSubsystem extends SubsystemBase {
         () -> {
           hoodIO.setPositionSetpoint(hoodAngle.get());
           flywheelIO.setVelocitySetpoint(flywheelVelRotPerSec.getAsDouble());
+        });
+  }
+
+  public Command setFlywheelAndHoodVoltage(DoubleSupplier flywheel, DoubleSupplier hood) {
+    return this.run(
+        () -> {
+          hoodIO.setVoltage(hood.getAsDouble());
+          flywheelIO.setVoltage(flywheel.getAsDouble());
         });
   }
 
