@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
@@ -12,11 +14,13 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 public class IndexerIOSim extends IndexerIO {
   TalonFXSimState indexerFxSimState;
   TalonFXSimState kickerFxSimState;
+  TalonFXSimState kickerFxSimStateFollower;
   DCMotorSim physicsSimIndexer;
   DCMotorSim physicsSimKicker;
 
@@ -38,11 +42,15 @@ public class IndexerIOSim extends IndexerIO {
 
     physicsSimKicker =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.0136, GEAR_RATIO),
-            DCMotor.getKrakenX60Foc(1));
+            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(2), 0.0136, GEAR_RATIO),
+            DCMotor.getKrakenX60Foc(2));
     kickerFxSimState = kickerLeaderMotor.getSimState();
     kickerFxSimState.setMotorType(MotorType.KrakenX60);
     kickerFxSimState.Orientation = ChassisReference.CounterClockwise_Positive;
+
+    kickerFxSimStateFollower = kickerFollowerMotor.getSimState();
+    kickerFxSimStateFollower.setMotorType(MotorType.KrakenX60);
+    kickerFxSimStateFollower.Orientation = ChassisReference.CounterClockwise_Positive;
 
     // Set voltages and calculate position and velocity in sim for both motors
     simNotifier =
@@ -69,6 +77,11 @@ public class IndexerIOSim extends IndexerIO {
               kickerFxSimState.setRawRotorPosition(
                   physicsSimKicker.getAngularPosition().in(Rotations) * KICKER_GEAR_RATIO);
               kickerFxSimState.setRotorVelocity(
+                  physicsSimKicker.getAngularVelocity().in(RotationsPerSecond) * KICKER_GEAR_RATIO);
+
+              kickerFxSimStateFollower.setRawRotorPosition(
+                  physicsSimKicker.getAngularPosition().in(Rotations) * KICKER_GEAR_RATIO);
+              kickerFxSimStateFollower.setRotorVelocity(
                   physicsSimKicker.getAngularVelocity().in(RotationsPerSecond) * KICKER_GEAR_RATIO);
             });
 
