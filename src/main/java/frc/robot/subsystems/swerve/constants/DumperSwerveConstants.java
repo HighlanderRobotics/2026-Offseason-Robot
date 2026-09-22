@@ -53,9 +53,8 @@ public class DumperSwerveConstants extends SwerveConstants {
 
   @Override
   public double getMaxLinearAcceleration() {
-    // copied from kelpie
-    // TODO: RECALCULATE WITH CHOREO
-    return 14.0;
+    // Calc'd with choreo
+    return 9.339;
   }
 
   @Override
