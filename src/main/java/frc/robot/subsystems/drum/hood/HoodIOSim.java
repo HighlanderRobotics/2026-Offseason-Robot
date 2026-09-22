@@ -29,12 +29,12 @@ public class HoodIOSim extends HoodIO {
         new SingleJointedArmSim(
             DCMotor.getKrakenX60Foc(1), // TODO: IS IT X44?
             DrumSubsystem.HOOD_GEAR_RATIO,
-            0.01,
-            0.25,
-            0.0,
-            Units.degreesToRadians(40),
+            0.111666,
+            Units.inchesToMeters(8.800269),
+            Units.degreesToRadians(10),
+            Units.degreesToRadians(45),
             true,
-            0.0);
+            Units.degreesToRadians(10));
 
     notifier =
         new Notifier(

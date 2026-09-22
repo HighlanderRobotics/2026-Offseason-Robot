@@ -29,7 +29,7 @@ public class FlywheelIOSim extends FlywheelIO {
     physicsSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX60Foc(4), 0.01, DrumSubsystem.FLYWHEEL_GEAR_RATIO),
+                DCMotor.getKrakenX60Foc(4), 0.002407, DrumSubsystem.FLYWHEEL_GEAR_RATIO),
             DCMotor.getKrakenX60Foc(4));
 
     simNotifier =
