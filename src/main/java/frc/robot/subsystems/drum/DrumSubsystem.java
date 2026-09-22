@@ -28,8 +28,10 @@ import org.littletonrobotics.junction.Logger;
 
 public class DrumSubsystem extends SubsystemBase {
   public static final int FLYWHEEL_LEADER_ID = 9; // TODO: CORRECT ID
-  public static final double FLYWHEEL_GEAR_RATIO = 1.0; // TODO: VALUE FROM CAD
-  public static final double HOOD_GEAR_RATIO = 1.0; // TODO: VALUE FROM CAD
+  // Ratio to main drum
+  public static final double FLYWHEEL_GEAR_RATIO = 18 / 24;
+  // May have to adjust 10/20 to account for the hood not moving a whole rotation
+  public static final double HOOD_GEAR_RATIO = (12 / 30) * (10 / 20);
 
   private FlywheelIO flywheelIO;
   private FlywheelIOInputsAutoLogged flywheelIOInputs = new FlywheelIOInputsAutoLogged();
