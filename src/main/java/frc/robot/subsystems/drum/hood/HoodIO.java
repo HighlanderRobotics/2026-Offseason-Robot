@@ -75,7 +75,7 @@ public class HoodIO {
     inputs.angularVelocityRotPerSec = angularVelocity.getValue().in(RotationsPerSecond);
     inputs.voltage = voltage.getValueAsDouble();
     inputs.statorCurrentAmps = statorCurrent.getValueAsDouble();
-    inputs.supplyCurrentAmps = statorCurrent.getValueAsDouble();
+    inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
     inputs.tempC = temp.getValueAsDouble();
     inputs.positionRotations = position.getValue().in(Rotation);
   }
