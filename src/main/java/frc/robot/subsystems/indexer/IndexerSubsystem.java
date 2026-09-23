@@ -19,9 +19,11 @@ public class IndexerSubsystem extends SubsystemBase {
   private IndexerIOInputsAutoLogged indexerInputs = new IndexerIOInputsAutoLogged();
 
   private final Alert indexerDisconnectedAlert =
-      new Alert("Disconnected flywheel leader!", AlertType.kError);
-  private final Alert kickerDisconnectedAlert =
-      new Alert("Disconnected flywheel follower!", AlertType.kError);
+      new Alert("Disconnected indexer!", AlertType.kError);
+  private final Alert kickerLeaderDisconnectedAlert =
+      new Alert("Disconnected kicker leader!", AlertType.kError);
+  private final Alert kickerFollowerDisconnectedAlert =
+      new Alert("Disconnected kicker follower!", AlertType.kError);
 
   private SysIdRoutine indexerSysid =
       new SysIdRoutine(
@@ -106,6 +108,7 @@ public class IndexerSubsystem extends SubsystemBase {
     Logger.processInputs("Indexer", indexerInputs);
 
     indexerDisconnectedAlert.set(!indexerInputs.indexerConnected);
-    kickerDisconnectedAlert.set(!indexerInputs.kickerConnected);
+    kickerLeaderDisconnectedAlert.set(!indexerInputs.kickerLeaderConnected);
+    kickerFollowerDisconnectedAlert.set(!indexerInputs.kickerFollowerConnected);
   }
 }
