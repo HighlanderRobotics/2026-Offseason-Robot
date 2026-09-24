@@ -74,7 +74,8 @@ public class PivotIO {
     inputs.position = new Rotation2d(position.getValue());
     inputs.positionRotations = position.getValue().in(Rotation);
     inputs.angularVelocityRotationsPerSec = angularVelocity.getValueAsDouble();
-    inputs.statorCurrentAmps = supplyCurrent.getValueAsDouble();
+    inputs.statorCurrentAmps = statorCurrent.getValueAsDouble();
+    inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
 
     inputs.tempC = temp.getValueAsDouble();
   }
