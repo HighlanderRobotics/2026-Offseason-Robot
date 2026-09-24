@@ -9,7 +9,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Robot;
 import frc.robot.Robot.RobotMode;
 import frc.robot.components.follower.FollowerIO;
@@ -21,6 +26,9 @@ import frc.robot.subsystems.drum.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.drum.hood.HoodIO;
 import frc.robot.subsystems.drum.hood.HoodIOInputsAutoLogged;
 import frc.robot.subsystems.drum.hood.HoodIOSim;
+
+import static edu.wpi.first.units.Units.Volts;
+
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -32,6 +40,8 @@ public class DrumSubsystem extends SubsystemBase {
   public static final double FLYWHEEL_GEAR_RATIO = 18.0 / 24.0;
   // May have to adjust 10/20 to account for the hood not moving a whole rotation
   public static final double HOOD_GEAR_RATIO = (12.0 / 30.0) * (10.0 / 20.0);
+  public static final Rotation2d HOOD_MIN_ANGLE = Rotation2d.fromDegrees(10);
+  public static final Rotation2d HOOD_MAX_ANGLE = Rotation2d.fromDegrees(45);
 
   private FlywheelIO flywheelIO;
   private FlywheelIOInputsAutoLogged flywheelIOInputs = new FlywheelIOInputsAutoLogged();
@@ -48,6 +58,15 @@ public class DrumSubsystem extends SubsystemBase {
   // True if any are disconnected (maybe I should add one for each but seems excessive)
   private Alert flywheelFollowerDisconnectAlert =
       new Alert("Flywheel Follower Disconnected", AlertType.kError);
+
+  private SysIdRoutine flywheelSysid = new SysIdRoutine(
+    new Config(null, null, null, (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state)),
+    new Mechanism((voltage) -> flywheelIO.setVoltage(voltage.in(Volts)), null, this));
+
+  // TODO: PROBABLY NEED TO REDUCE RAMP RATE ETC TO MAKE WORK
+  private SysIdRoutine hoodSysid = new SysIdRoutine(
+    new Config(null, null, null, (state) -> Logger.recordOutput("Drum/Hood/SysID State", state)),
+    new Mechanism((voltage) -> hoodIO.setVoltage(voltage.in(Volts)), null, this));
 
   public DrumSubsystem(CANBus canBus) {
     if (Robot.ROBOT_MODE != RobotMode.SIM) {
@@ -142,6 +161,25 @@ public class DrumSubsystem extends SubsystemBase {
   }
 
   // TODO: MORE COMMANDS WHEN SUPERSTRUCTURE IS INTEGRATED
+
+  // Sysids
+  public Command runFlywheelSysid() {
+    return Commands.sequence(
+      flywheelSysid.quasistatic(Direction.kForward),
+      flywheelSysid.quasistatic(Direction.kReverse),
+      flywheelSysid.dynamic(Direction.kForward),
+      flywheelSysid.dynamic(Direction.kReverse)
+    );
+  }
+
+  public Command runHoodSysid() {
+    return Commands.sequence(
+      hoodSysid.quasistatic(Direction.kForward).until(() -> hoodIOInputs.position.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
+      hoodSysid.quasistatic(Direction.kReverse).until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)),
+      hoodSysid.dynamic(Direction.kForward).until(() -> hoodIOInputs.position.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
+      hoodSysid.dynamic(Direction.kReverse).until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5))
+    );
+  }
 
   // Configs
 

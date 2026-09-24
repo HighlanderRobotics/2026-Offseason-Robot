@@ -27,14 +27,14 @@ public class HoodIOSim extends HoodIO {
     // TODO: VALUES FROM CAD
     physicsSim =
         new SingleJointedArmSim(
-            DCMotor.getKrakenX60Foc(1), // TODO: IS IT X44?
+            DCMotor.getKrakenX60Foc(1),
             DrumSubsystem.HOOD_GEAR_RATIO,
             0.111666,
             Units.inchesToMeters(8.800269),
-            Units.degreesToRadians(10),
-            Units.degreesToRadians(45),
+            DrumSubsystem.HOOD_MIN_ANGLE.getRadians(),
+            DrumSubsystem.HOOD_MAX_ANGLE.getRadians(),
             true,
-            Units.degreesToRadians(10));
+            DrumSubsystem.HOOD_MIN_ANGLE.getRadians());
 
     notifier =
         new Notifier(
