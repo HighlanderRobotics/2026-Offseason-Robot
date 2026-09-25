@@ -1,5 +1,7 @@
 package frc.robot.subsystems.drum;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -26,9 +28,6 @@ import frc.robot.subsystems.drum.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.drum.hood.HoodIO;
 import frc.robot.subsystems.drum.hood.HoodIOInputsAutoLogged;
 import frc.robot.subsystems.drum.hood.HoodIOSim;
-
-import static edu.wpi.first.units.Units.Volts;
-
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -59,14 +58,18 @@ public class DrumSubsystem extends SubsystemBase {
   private Alert flywheelFollowerDisconnectAlert =
       new Alert("Flywheel Follower Disconnected", AlertType.kError);
 
-  private SysIdRoutine flywheelSysid = new SysIdRoutine(
-    new Config(null, null, null, (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state)),
-    new Mechanism((voltage) -> flywheelIO.setVoltage(voltage.in(Volts)), null, this));
+  private SysIdRoutine flywheelSysid =
+      new SysIdRoutine(
+          new Config(
+              null, null, null, (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state)),
+          new Mechanism((voltage) -> flywheelIO.setVoltage(voltage.in(Volts)), null, this));
 
   // TODO: PROBABLY NEED TO REDUCE RAMP RATE ETC TO MAKE WORK
-  private SysIdRoutine hoodSysid = new SysIdRoutine(
-    new Config(null, null, null, (state) -> Logger.recordOutput("Drum/Hood/SysID State", state)),
-    new Mechanism((voltage) -> hoodIO.setVoltage(voltage.in(Volts)), null, this));
+  private SysIdRoutine hoodSysid =
+      new SysIdRoutine(
+          new Config(
+              null, null, null, (state) -> Logger.recordOutput("Drum/Hood/SysID State", state)),
+          new Mechanism((voltage) -> hoodIO.setVoltage(voltage.in(Volts)), null, this));
 
   public DrumSubsystem(CANBus canBus) {
     if (Robot.ROBOT_MODE != RobotMode.SIM) {
@@ -165,20 +168,26 @@ public class DrumSubsystem extends SubsystemBase {
   // Sysids
   public Command runFlywheelSysid() {
     return Commands.sequence(
-      flywheelSysid.quasistatic(Direction.kForward),
-      flywheelSysid.quasistatic(Direction.kReverse),
-      flywheelSysid.dynamic(Direction.kForward),
-      flywheelSysid.dynamic(Direction.kReverse)
-    );
+        flywheelSysid.quasistatic(Direction.kForward),
+        flywheelSysid.quasistatic(Direction.kReverse),
+        flywheelSysid.dynamic(Direction.kForward),
+        flywheelSysid.dynamic(Direction.kReverse));
   }
 
   public Command runHoodSysid() {
     return Commands.sequence(
-      hoodSysid.quasistatic(Direction.kForward).until(() -> hoodIOInputs.position.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
-      hoodSysid.quasistatic(Direction.kReverse).until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)),
-      hoodSysid.dynamic(Direction.kForward).until(() -> hoodIOInputs.position.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
-      hoodSysid.dynamic(Direction.kReverse).until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5))
-    );
+        hoodSysid
+            .quasistatic(Direction.kForward)
+            .until(() -> hoodIOInputs.position.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
+        hoodSysid
+            .quasistatic(Direction.kReverse)
+            .until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)),
+        hoodSysid
+            .dynamic(Direction.kForward)
+            .until(() -> hoodIOInputs.position.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
+        hoodSysid
+            .dynamic(Direction.kReverse)
+            .until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)));
   }
 
   // Configs
