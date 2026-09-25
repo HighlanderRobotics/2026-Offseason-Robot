@@ -80,21 +80,21 @@ public class SlapdownSubsystem extends SubsystemBase {
 
   public Command agitate() {
     return Commands.sequence(
-        this.run(
-            () -> {
-              pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION);
-              rollerIO.setRollerVelocity(0.0);
-              // TODO: find roller velocity
-            })
-            .until(atExtensionTrigger),
-        this.run(
-            () -> {
-              pivotIO.setMotorPositionSetpoint(
-                  PIVOT_EXTENDED_POSITION.plus(Rotation2d.fromDegrees(0.0)));
-              rollerIO.setRollerVelocity(0.0);
-              // TODO: find pivot offset and roller velocity
-            })
-            .until(atExtensionTrigger))
+            this.run(
+                    () -> {
+                      pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION);
+                      rollerIO.setRollerVelocity(0.0);
+                      // TODO: find roller velocity
+                    })
+                .until(atExtensionTrigger),
+            this.run(
+                    () -> {
+                      pivotIO.setMotorPositionSetpoint(
+                          PIVOT_EXTENDED_POSITION.plus(Rotation2d.fromDegrees(0.0)));
+                      rollerIO.setRollerVelocity(0.0);
+                      // TODO: find pivot offset and roller velocity
+                    })
+                .until(atExtensionTrigger))
         .repeatedly();
   }
 

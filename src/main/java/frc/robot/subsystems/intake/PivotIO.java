@@ -69,8 +69,9 @@ public class PivotIO {
     BaseStatusSignal.refreshAll(
         position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
 
-    inputs.connected = BaseStatusSignal.isAllGood(
-        position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
+    inputs.connected =
+        BaseStatusSignal.isAllGood(
+            position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
     inputs.position = new Rotation2d(position.getValue());
     inputs.positionRotations = position.getValue().in(Rotation);
     inputs.angularVelocityRotationsPerSec = angularVelocity.getValueAsDouble();
