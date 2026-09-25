@@ -25,10 +25,10 @@ public class SlapdownSubsystem extends SubsystemBase {
   public static final Rotation2d PIVOT_EXTENDED_POSITION = PIVOT_MIN_POSITION;
   public static final Rotation2d PIVOT_RETRACTED_POSITION = PIVOT_MAX_POSITION;
   public static final double CURRENT_ZEROING_THRESHOLD = 0.0;
-  public static final double ROLLER_GEAR_RATIO = 0.0 / 0.0;
-  public static final double PIVOT_GEAR_RATIO = 0.0;
-  public static final double PIVOT_TO_CANCODER = 0.0;
-  public static final double CANCODER_TO_PIVOT = 0.0;
+  public static final double ROLLER_GEAR_RATIO = 3/1;
+  public static final double PIVOT_GEAR_RATIO = 1.77777778/1;
+  public static final double PIVOT_TO_CANCODER = 1/1.77777778;
+  public static final double CANCODER_TO_PIVOT = 1.77777778/1;
   // TODO: implement true ratios for roller gear ratio, and pivot gear ratio, pivot to cancoder and
   // cancoder to pivot
   // find zeroing threshold
@@ -166,7 +166,7 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
     config.Feedback.FeedbackRemoteSensorID = 0;
     // TODO: set feedback remote sensorID
-    config.Feedback.RotorToSensorRatio = PIVOT_TO_CANCODER;
+    config.Feedback.RotorToSensorRatio = CANCODER_TO_PIVOT;
 
     config.Feedback.SensorToMechanismRatio = 0;
     // TODO: set sensor to mech ratio
@@ -231,9 +231,5 @@ public class SlapdownSubsystem extends SubsystemBase {
     // TODO: set magnet offset, abs sensor discontinuity point
 
     return config;
-  }
-
-  public Command restExtend() {
-    throw new UnsupportedOperationException("Unimplemented method 'restExtend'");
   }
 }
