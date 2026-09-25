@@ -25,12 +25,13 @@ public class SlapdownSubsystem extends SubsystemBase {
   public static final Rotation2d PIVOT_EXTENDED_POSITION = PIVOT_MIN_POSITION;
   public static final Rotation2d PIVOT_RETRACTED_POSITION = PIVOT_MAX_POSITION;
   public static final double CURRENT_ZEROING_THRESHOLD = 0.0;
-  public static final double ROLLER_GEAR_RATIO = 3/1;
-  public static final double PIVOT_GEAR_RATIO = 1.77777778/1;
-  public static final double PIVOT_TO_CANCODER = 1/1.77777778;
-  public static final double CANCODER_TO_PIVOT = 1.77777778/1;
-  // TODO: implement true ratios for roller gear ratio, and pivot gear ratio, pivot to cancoder and
-  // cancoder to pivot
+  public static final double ROLLER_GEAR_RATIO = 3 / 1;
+  public static final double PIVOT_GEAR_RATIO = 1.77777778 / 1;
+  public static final double PIVOT_TO_CANCODER = 1 / 1.77777778;
+  public static final double CANCODER_TO_PIVOT = 1.77777778 / 1;
+  // TODO: implement true ratios for roller gear ratio, and pivot gear ratio,
+  // pivot to cancoder and
+  // cancoder to pivots
   // find zeroing threshold
   private final PivotIO pivotIO;
   private PivotIOInputsAutoLogged pivotIOInputs = new PivotIOInputsAutoLogged();
@@ -79,21 +80,21 @@ public class SlapdownSubsystem extends SubsystemBase {
 
   public Command agitate() {
     return Commands.sequence(
-            this.run(
-                    () -> {
-                      pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION);
-                      rollerIO.setRollerVelocity(0.0);
-                      // TODO: find roller velocity
-                    })
-                .until(atExtensionTrigger),
-            this.run(
-                    () -> {
-                      pivotIO.setMotorPositionSetpoint(
-                          PIVOT_EXTENDED_POSITION.plus(Rotation2d.fromDegrees(0.0)));
-                      rollerIO.setRollerVelocity(0.0);
-                      // TODO: find pivot offset and roller velocity
-                    })
-                .until(atExtensionTrigger))
+        this.run(
+            () -> {
+              pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION);
+              rollerIO.setRollerVelocity(0.0);
+              // TODO: find roller velocity
+            })
+            .until(atExtensionTrigger),
+        this.run(
+            () -> {
+              pivotIO.setMotorPositionSetpoint(
+                  PIVOT_EXTENDED_POSITION.plus(Rotation2d.fromDegrees(0.0)));
+              rollerIO.setRollerVelocity(0.0);
+              // TODO: find pivot offset and roller velocity
+            })
+            .until(atExtensionTrigger))
         .repeatedly();
   }
 
@@ -102,7 +103,7 @@ public class SlapdownSubsystem extends SubsystemBase {
         () -> {
           pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION, 0.0);
           rollerIO.setRollerVelocity(0.0);
-          // TODO: find  pivotio feed forward volts, and roller velocity
+          // TODO: find pivotio feed forward volts, and roller velocity
         });
   }
 
@@ -186,7 +187,8 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    // TODO: set stator current limit, stator current lim enable, supply current lim, supply current
+    // TODO: set stator current limit, stator current lim enable, supply current
+    // lim, supply current
     // lim enable
 
     config.MotionMagic.MotionMagicCruiseVelocity = 0.0;
@@ -216,7 +218,8 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 0.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    // TODO: set stator current lim, stator current lim enable, supply current lim, supply current
+    // TODO: set stator current lim, stator current lim enable, supply current lim,
+    // supply current
     // lim enable
 
     return config;

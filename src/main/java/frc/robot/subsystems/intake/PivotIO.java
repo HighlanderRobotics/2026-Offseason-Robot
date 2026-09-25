@@ -28,7 +28,8 @@ public class PivotIO {
     public double tempC = 0.0;
     public double positionRotations = 0.0;
     public boolean connected = false;
-    // TODO:get angular velocity, stator current, supply current, voltage, tempC, position rotations
+    // TODO:get angular velocity, stator current, supply current, voltage, tempC,
+    // position rotations
   }
 
   protected final TalonFX motor;
@@ -68,9 +69,8 @@ public class PivotIO {
     BaseStatusSignal.refreshAll(
         position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
 
-    inputs.connected =
-        BaseStatusSignal.isAllGood(
-            position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
+    inputs.connected = BaseStatusSignal.isAllGood(
+        position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
     inputs.position = new Rotation2d(position.getValue());
     inputs.positionRotations = position.getValue().in(Rotation);
     inputs.angularVelocityRotationsPerSec = angularVelocity.getValueAsDouble();
