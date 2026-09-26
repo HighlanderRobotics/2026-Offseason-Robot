@@ -1,0 +1,155 @@
+{
+ "name":"choreo",
+ "version":2,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{
+   "LDip":{
+    "x":{
+     "exp":"7.783250331878662 m",
+     "val":7.783250331878662
+    },
+    "y":{
+     "exp":"6.899630069732666 m",
+     "val":6.899630069732666
+    },
+    "heading":{
+     "exp":"270 deg",
+     "val":4.71238898038469
+    }
+   },
+   "LDipEnd":{
+    "x":{
+     "exp":"7.822230339050293 m",
+     "val":7.822230339050293
+    },
+    "y":{
+     "exp":"4.4243998527526855 m",
+     "val":4.4243998527526855
+    },
+    "heading":{
+     "exp":"-2.1910477964861816 rad",
+     "val":-2.1910477964861816
+    }
+   },
+   "LShoot":{
+    "x":{
+     "exp":"2.462479591369629 m",
+     "val":2.462479591369629
+    },
+    "y":{
+     "exp":"5.80819034576416 m",
+     "val":5.80819034576416
+    },
+    "heading":{
+     "exp":"2.356194490192345 rad",
+     "val":2.356194490192345
+    }
+   },
+   "LTStartBlue":{
+    "x":{
+     "exp":"4.40537166595459 m",
+     "val":4.40537166595459
+    },
+    "y":{
+     "exp":"7.350574970245361 m",
+     "val":7.350574970245361
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "RTStart":{
+    "x":{
+     "exp":"4.40537166595459 m",
+     "val":4.40537166595459
+    },
+    "y":{
+     "exp":"0.64942502975 m",
+     "val":0.64942502975
+    },
+    "heading":{
+     "exp":"90 deg",
+     "val":1.5707963267948966
+    }
+   }
+  }
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"11 in",
+    "val":0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-11 in",
+    "val":-0.2794
+   },
+   "y":{
+    "exp":"11 in",
+    "val":0.2794
+   }
+  },
+  "mass":{
+   "exp":"150 lbs",
+   "val":68.0388555
+  },
+  "inertia":{
+   "exp":"6 kg m ^ 2",
+   "val":6.0
+  },
+  "gearing":{
+   "exp":"6.5",
+   "val":6.5
+  },
+  "radius":{
+   "exp":"2 in",
+   "val":0.0508
+  },
+  "vmax":{
+   "exp":"6000 RPM",
+   "val":628.3185307179587
+  },
+  "tmax":{
+   "exp":"1.2 N * m",
+   "val":1.2
+  },
+  "cof":{
+   "exp":"1.5",
+   "val":1.5
+  },
+  "bumper":{
+   "front":{
+    "exp":"16 in",
+    "val":0.4064
+   },
+   "side":{
+    "exp":"16 in",
+    "val":0.4064
+   },
+   "back":{
+    "exp":"16 in",
+    "val":0.4064
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[],
+ "codegen":{
+  "root":"../C:/Users/jtysz/.vscode/2026-Offseason-Robot",
+  "genVars":true,
+  "genTrajData":true,
+  "useChoreoLib":true
+ }
+}
