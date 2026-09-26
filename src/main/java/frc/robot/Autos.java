@@ -28,7 +28,11 @@ public class Autos {
 
   // testing please organize later :)
   public enum Path {
-    LStartToFirstDip("StartToFirstDip", Action.NOTHING);
+    // testing
+    LStartToFirstDip("LTStartToFirstDip", Action.NOTHING),
+    LDipToFirstShoot("LTDipToFirstShootBump", Action.NOTHING),
+    LSecondDip("LTSecondDip", Action.NOTHING);
+
     private final String name;
     private final Action action;
 
@@ -80,40 +84,34 @@ public class Autos {
 
   public Command emptyPath(Path path, AutoRoutine routine) {
     return Commands.sequence(
-        setAllReqsFalse(),
+        // setAllReqsFalse(),
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()));
   }
 
-  public Command startIntaking() {
-    return Commands.runOnce(() -> autoIntake = true);
-  }
-
-  public Command stopIntaking() {
-    return Commands.runOnce(() -> autoIntake = false);
-  }
-
   public Command setAllReqsFalse() {
-    return Commands.sequence(stopIntaking());
+    return null;
   }
 
-  public void setAllReqsFalsenotcmd() {
-    autoIntake = false;
-  }
-
-  public Command createAuto(
-      String name, Path[] paths, Command setClimbSideCmd, Command... startingCommands) {
+  public Command createAuto(String name, Path[] paths, Command... startingCommands) {
     final AutoRoutine routine = factory.newRoutine(name);
 
-    Command autoCommand =
-        paths[0]
-            .getTrajectory(routine)
-            .resetOdometry()
-            .alongWith(setClimbSideCmd)
-            .andThen(startingCommands);
+    Command autoCommand = paths[0].getTrajectory(routine).resetOdometry().andThen(startingCommands);
     for (Path p : paths) {
       autoCommand = autoCommand.andThen(runPath(p, routine));
     }
     routine.active().onTrue(autoCommand);
     return routine.cmd();
+  }
+
+  public Command getTesting() {
+    return createAuto("Single dip auto", new Path[] {Path.LStartToFirstDip, Path.LDipToFirstShoot});
+  }
+
+  public Command getTestDoubleDipAuto() {
+    return createAuto(
+        "Single dip auto",
+        new Path[] {
+          Path.LStartToFirstDip, Path.LDipToFirstShoot, Path.LSecondDip, Path.LDipToFirstShoot
+        });
   }
 }
