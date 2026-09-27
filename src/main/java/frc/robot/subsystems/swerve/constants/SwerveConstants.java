@@ -31,7 +31,6 @@ public abstract class SwerveConstants {
           new AprilTagFieldLayout(
               Filesystem.getDeployDirectory()
                   .toPath()
-                  // .resolve("tagmaps" + File.separator + "field_map_mar_13_18_10_19.json"));
                   .resolve("tagmaps" + File.separator + "2026-rebuilt-andymark.json"));
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
       System.out.println("Successfully loaded tag map");

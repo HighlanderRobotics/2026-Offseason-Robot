@@ -26,7 +26,6 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -64,11 +63,7 @@ public class Camera {
 
   private final CameraIO io;
   private final CameraIOInputsAutoLogged inputs = new CameraIOInputsAutoLogged();
-  private final PhotonPoseEstimator estimator =
-      new PhotonPoseEstimator(
-          SwerveSubsystem.SWERVE_CONSTANTS.getFieldTagLayout(),
-          PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-          null);
+  private final PhotonPoseEstimator estimator;
   // uses photon vision in order to estimate where we are on the field
 
   // set up error alerts
@@ -81,7 +76,10 @@ public class Camera {
     this.io = io;
     // Tells the estimator what the transformation is between the camera and the robot, relative
     // positions betrween camera and center of robot
-    estimator.setRobotToCameraTransform(io.getCameraConstants().robotToCamera);
+    estimator =
+        new PhotonPoseEstimator(
+            SwerveSubsystem.SWERVE_CONSTANTS.getFieldTagLayout(),
+            io.getCameraConstants().robotToCamera);
     futureVisionData =
         new Alert(getName() + " Vision Data Coming from ✨The Future✨", AlertType.kError);
     disconnectedAlert = new Alert(getName() + " Camera Disconnected!", AlertType.kError);
@@ -112,7 +110,7 @@ public class Camera {
       return Optional.empty();
     }
     // updates this
-    Optional<EstimatedRobotPose> estPose = estimator.update(result);
+    Optional<EstimatedRobotPose> estPose = estimator.estimateCoprocMultiTagPose(result);
     return estPose;
   }
 
@@ -170,8 +168,7 @@ public class Camera {
 
         if (Robot.ROBOT_MODE != RobotMode.REAL)
           Logger.recordOutput("Vision/" + getName() + "/Pose3d", visionPose);
-        if (Robot.ROBOT_MODE != RobotMode.REAL)
-          Logger.recordOutput("Vision/" + getName() + "/Pose2d", visionPose.toPose2d());
+        Logger.recordOutput("Vision/" + getName() + "/Pose2d", visionPose.toPose2d());
         // if (Robot.ROBOT_MODE != RobotMode.REAL){
         //   List<Pose3d> targetPoses = estPose.get().targetsUsed.stream().map((target) -> {
 
@@ -190,8 +187,8 @@ public class Camera {
                   inputs.result.metadata.captureTimestampMicros / 1.0e6,
                   sussifier(
                       deviations,
-                      estPose)); // cameras less depened on during auto, sem is twice as strict?
-              // the sussifier (need to work on that) why would this in be tracer
+                      estPose)); // cameras less depened on during auto, also trust hub tags more
+              // the sussifier
             });
 
         hasFutureData |= inputs.result.metadata.captureTimestampMicros > RobotController.getTime();
@@ -228,6 +225,7 @@ public class Camera {
     return pose;
   }
 
+  // trust the hub tags more than the other tags on the field
   public Matrix<N3, N1> sussifier(Matrix<N3, N1> deviations, Optional<EstimatedRobotPose> estPose) {
     if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
       deviations.times(
@@ -257,14 +255,8 @@ public class Camera {
               ? 0.5
               : 1);
     }
-    deviations
-        .times(DriverStation.isAutonomous() ? 2.0 : 1.0)
-        .times(
-            getName().equals("Front_Left_Camera") || getName().equals("Front_Right_Camera")
-                // todo add superstructure states
-                ? 0.75
-                : 1); // also tune these numbers if you want
-    // you trust the front cameras 25% more
+    deviations.times(DriverStation.isAutonomous() ? 2.0 : 1.0);
+    // TODO add states
 
     return deviations;
   }

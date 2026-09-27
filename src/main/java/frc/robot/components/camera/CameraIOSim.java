@@ -1,6 +1,5 @@
 package frc.robot.components.camera;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.components.camera.Camera.CameraConstants;
@@ -20,8 +19,7 @@ public class CameraIOSim implements CameraIO {
   private final PhotonCameraSim simCamera;
   public final Supplier<Pose3d> poseSupplier;
 
-  public CameraIOSim(
-      CameraConstants constants, Supplier<Pose3d> poseSupplier, AprilTagFieldLayout fieldTags) {
+  public CameraIOSim(CameraConstants constants, Supplier<Pose3d> poseSupplier) {
     this.sim = new VisionSystemSim(constants.name());
     var cameraProp = new SimCameraProperties();
     cameraProp.setCalibration(1080, 960, constants.intrinsicsMatrix(), constants.distCoeffs());
@@ -30,7 +28,9 @@ public class CameraIOSim implements CameraIO {
     cameraProp.setAvgLatencyMs(30.0);
     cameraProp.setLatencyStdDevMs(5.0); // constants and other things to mimic real world conditions
     this.camera = new PhotonCamera(constants.name());
-    this.simCamera = new PhotonCameraSim(camera, cameraProp, fieldTags);
+    this.simCamera =
+        new PhotonCameraSim(
+            camera, cameraProp, SwerveSubsystem.SWERVE_CONSTANTS.getFieldTagLayout());
     simCamera.enableDrawWireframe(true);
     simCamera.setMaxSightRange(7);
     this.constants = constants;
