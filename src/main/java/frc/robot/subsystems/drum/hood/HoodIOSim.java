@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.subsystems.drum.DrumSubsystem;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.littletonrobotics.junction.Logger;
 
 public class HoodIOSim extends HoodIO {
@@ -20,7 +20,8 @@ public class HoodIOSim extends HoodIO {
   private double lastLoopTime = 0.0;
   private final double simLoopPeriod = 0.02;
 
-  private AtomicInteger notifierTracker = new AtomicInteger(0);
+  private AtomicBoolean firstRunThrough =
+      new AtomicBoolean(true); // Idt this has to be atomic but might as well
 
   private Notifier notifier;
 
@@ -50,6 +51,12 @@ public class HoodIOSim extends HoodIO {
               double deltaTime = currentTime - lastLoopTime;
               lastLoopTime = currentTime;
 
+              // This is actually stupid af
+              if (firstRunThrough.get()) {
+                deltaTime = 1.0;
+                firstRunThrough.set(false);
+              }
+
               simState.setSupplyVoltage(RobotController.getBatteryVoltage());
 
               physicsSim.setInputVoltage(simState.getMotorVoltage());
@@ -65,7 +72,7 @@ public class HoodIOSim extends HoodIO {
 
     notifier.setName("Hood");
 
-    // notifier.startPeriodic(simLoopPeriod);
+    notifier.startPeriodic(simLoopPeriod);
   }
 
   @Override
