@@ -2,6 +2,7 @@ package frc.robot.subsystems.drum.hood;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -31,6 +32,7 @@ public class HoodIOSim extends HoodIO {
     // motor.setPosition(DrumSubsystem.HOOD_MIN_ANGLE.getMeasure());
 
     simState = motor.getSimState();
+    simState.Orientation = ChassisReference.Clockwise_Positive;
 
     // TODO: VALUES FROM CAD
     physicsSim =
