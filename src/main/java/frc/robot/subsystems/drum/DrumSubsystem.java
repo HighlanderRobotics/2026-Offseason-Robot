@@ -229,13 +229,12 @@ public class DrumSubsystem extends SubsystemBase {
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     // TODO: BUDGET CURRENT
-    config.CurrentLimits.StatorCurrentLimit = 10.0;
-    config.CurrentLimits.StatorCurrentLimitEnable = false;
+    config.CurrentLimits.StatorCurrentLimit = 30.0;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = false;
 
-    config.Feedback.SensorToMechanismRatio =
-        DrumSubsystem.HOOD_GEAR_RATIO; // TODO: MAYBE INCLUDE CANCODER
+    config.Feedback.SensorToMechanismRatio = DrumSubsystem.HOOD_GEAR_RATIO;
 
     // TODO: CALCULATE ACTUAL VALUE
     config.MotionMagic.MotionMagicCruiseVelocity = 1.0;
