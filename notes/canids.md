@@ -22,4 +22,8 @@
 | 17     | Drum Follower 2        | X60             | TODO         |
 | 18     | Drum Follower 3        | X60             | TODO         |
 | 0      | Gyro                   | Pigeon 2.0      | TODO         |
-| 0      | Intake CANcoder        | WCP Throughbore | TODO         |
+| 0      | Front Left CANcoder    | CANcoder        | TODO         |
+| 1      | Front Right CANcoder   | CANcoder        | TODO         |
+| 2      | Back Left CANcoder     | CANcoder        | TODO         |
+| 3      | Back Right CANcoder    | CANcoder        | TODO         |
+| 4      | Intake CANcoder        | WCP Throughbore | TODO         |
