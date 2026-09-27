@@ -54,6 +54,7 @@ public class HoodIO {
 
     angularVelocity = motor.getVelocity();
     voltage = motor.getMotorVoltage();
+
     statorCurrent = motor.getStatorCurrent();
     supplyCurrent = motor.getSupplyCurrent();
     temp = motor.getDeviceTemp();
@@ -78,6 +79,8 @@ public class HoodIO {
     inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
     inputs.tempC = temp.getValueAsDouble();
     inputs.positionRotations = position.getValue().in(Rotation);
+
+    System.out.println(motor.getAppliedControl().getControlInfo());
   }
 
   public void setVoltage(double volts) {
