@@ -15,7 +15,10 @@ import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.Robot;
+import frc.robot.Robot.RobotMode;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.Tracer;
 import java.util.NoSuchElementException;
@@ -102,7 +105,7 @@ public class Camera {
     Logger.processInputs("Apriltag Vision" + io.getName(), inputs);
   }
 
-  public Optional<EstimatedRobotPose> update(PhotonPipelineResult result) {
+  public Optional<EstimatedRobotPose> updateEstimator(PhotonPipelineResult result) {
 
     // if we don't see any tags, don't return anything
     if (result.getTargets().size() < 1) {
@@ -125,8 +128,7 @@ public class Camera {
   public static Matrix<N3, N1> findVisionMeasurementStdDevs(EstimatedRobotPose estimation) {
     double sumDistance = 0;
     for (PhotonTrackedTarget target : estimation.targetsUsed) {
-      Transform3d t3d =
-          target.getBestCameraToTarget(); // is there multiple "best cameras" idont think so
+      Transform3d t3d = target.getBestCameraToTarget(); //
       sumDistance +=
           Math.sqrt(
               Math.pow(t3d.getX(), 2)
@@ -134,7 +136,7 @@ public class Camera {
                   + Math.pow(t3d.getZ(), 2)); // for every axis, the it gets sumnationed into
     }
     double avgDistance =
-        sumDistance / estimation.targetsUsed.size(); // this is a pretty weird way to write std
+        sumDistance / estimation.targetsUsed.size(); // avg distance to all the tags read
 
     Matrix<N3, N1> deviation =
         visionPointBlankDevs.times(Math.max(avgDistance, 0.0) * distanceFactor); // more std calcs
@@ -156,16 +158,29 @@ public class Camera {
 
   public void updateCamera(SwerveDrivePoseEstimator swerveEstimator) {
     boolean hasFutureData = false;
+
     try {
       if (!inputs.stale) {
         Optional<EstimatedRobotPose> estPose =
-            Tracer.trace("Update Camera", () -> update(inputs.result));
+            Tracer.trace("Update Camera", () -> updateEstimator(inputs.result));
         Pose3d visionPose = estPose.get().estimatedPose;
         pose = visionPose; // updates where cameras thinks it is on the field
         // Sets the pose on the sim field
         setSimPose(estPose, !inputs.stale);
 
+        if (Robot.ROBOT_MODE != RobotMode.REAL)
+          Logger.recordOutput("Vision/" + getName() + "/Pose3d", visionPose);
+        if (Robot.ROBOT_MODE != RobotMode.REAL)
+          Logger.recordOutput("Vision/" + getName() + "/Pose2d", visionPose.toPose2d());
+        // if (Robot.ROBOT_MODE != RobotMode.REAL){
+        //   List<Pose3d> targetPoses = estPose.get().targetsUsed.stream().map((target) -> {
+
+        //   }).collect(List::new);
+        //   Logger.recordOutput("Vision/" + getName() + "/Target Pose", estPose.get().targetsUsed);
+        // }
         final Matrix<N3, N1> deviations = findVisionMeasurementStdDevs(estPose.get());
+        if (Robot.ROBOT_MODE != RobotMode.REAL)
+          Logger.recordOutput("Vision/" + getName() + "/Deviations", deviations.getData());
 
         Tracer.trace(
             "Add Measurement From " + getName(),
@@ -173,11 +188,10 @@ public class Camera {
               swerveEstimator.addVisionMeasurement(
                   visionPose.toPose2d(),
                   inputs.result.metadata.captureTimestampMicros / 1.0e6,
-                  deviations.times(
-                      DriverStation.isAutonomous()
-                          ? 2.0
-                          : 1.0)); // cameras less depened on during auto, sem is twice as strict?
-              // the sussifier (need to work on that)
+                  sussifier(
+                      deviations,
+                      estPose)); // cameras less depened on during auto, sem is twice as strict?
+              // the sussifier (need to work on that) why would this in be tracer
             });
 
         hasFutureData |= inputs.result.metadata.captureTimestampMicros > RobotController.getTime();
@@ -193,10 +207,12 @@ public class Camera {
                         .getTagPose(inputs.result.targets.get(j).getFiducialId())
                         .get();
               }
+              if (Robot.ROBOT_MODE != RobotMode.REAL)
+                Logger.recordOutput("Vision/" + getName() + "/Target Poses", targetPose3ds);
             });
 
       } else {
-
+        ;
       }
     } catch (NoSuchElementException e) {
 
@@ -210,5 +226,46 @@ public class Camera {
 
   public Pose3d getPose() {
     return pose;
+  }
+
+  public Matrix<N3, N1> sussifier(Matrix<N3, N1> deviations, Optional<EstimatedRobotPose> estPose) {
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
+      deviations.times(
+          estPose.get().targetsUsed.stream()
+                  .anyMatch(
+                      t ->
+                          t.getFiducialId() == 25
+                              || t.getFiducialId() == 26
+                              || t.getFiducialId() == 18
+                              || t.getFiducialId() == 27
+                              || t.getFiducialId() == 21
+                              || t.getFiducialId() == 24)
+              ? 0.5
+              : 1);
+
+    } else {
+      deviations.times(
+          estPose.get().targetsUsed.stream()
+                  .anyMatch(
+                      t ->
+                          t.getFiducialId() == 5
+                              || t.getFiducialId() == 8
+                              || t.getFiducialId() == 9
+                              || t.getFiducialId() == 10
+                              || t.getFiducialId() == 11
+                              || t.getFiducialId() == 2)
+              ? 0.5
+              : 1);
+    }
+    deviations
+        .times(DriverStation.isAutonomous() ? 2.0 : 1.0)
+        .times(
+            getName().equals("Front_Left_Camera") || getName().equals("Front_Right_Camera")
+                // todo add superstructure states
+                ? 0.75
+                : 1); // also tune these numbers if you want
+    // you trust the front cameras 25% more
+
+    return deviations;
   }
 }
