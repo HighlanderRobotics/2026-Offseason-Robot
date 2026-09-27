@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class DrumSubsystem extends SubsystemBase {
-  public static final int FLYWHEEL_LEADER_ID = 9; // TODO: CORRECT ID
+  public static final int FLYWHEEL_LEADER_ID = 15;
   // Ratio to main drum
   public static final double FLYWHEEL_GEAR_RATIO = 24.0 / 18.0;
   // May have to adjust 10/20 to account for the hood not moving a whole rotation
@@ -98,10 +98,9 @@ public class DrumSubsystem extends SubsystemBase {
       flywheelIO = new FlywheelIOSim(canBus);
       hoodIO = new HoodIOSim(canBus);
 
-      // TODO: CORRECT VALUES
       followerIOs[0] =
           new FollowerIOSim(
-              10,
+              16,
               FLYWHEEL_LEADER_ID,
               MotorAlignmentValue.Aligned,
               canBus,
@@ -110,7 +109,7 @@ public class DrumSubsystem extends SubsystemBase {
               () -> flywheelIOInputs.velocityRotPerSec);
       followerIOs[1] =
           new FollowerIOSim(
-              11,
+              17,
               FLYWHEEL_LEADER_ID,
               MotorAlignmentValue.Opposed,
               canBus,
@@ -119,7 +118,7 @@ public class DrumSubsystem extends SubsystemBase {
               () -> flywheelIOInputs.velocityRotPerSec);
       followerIOs[2] =
           new FollowerIOSim(
-              12,
+              18,
               FLYWHEEL_LEADER_ID,
               MotorAlignmentValue.Opposed,
               canBus,

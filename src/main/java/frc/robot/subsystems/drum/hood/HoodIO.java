@@ -48,7 +48,7 @@ public class HoodIO {
   private Rotation2d angleSetpoint = new Rotation2d();
 
   public HoodIO(CANBus canBus) {
-    motor = new TalonFX(13, canBus); // TODO: REAL ID
+    motor = new TalonFX(14, canBus);
 
     motor.getConfigurator().apply(DrumSubsystem.getHoodConfig());
 
