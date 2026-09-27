@@ -82,6 +82,7 @@ public class IndexerIOSim extends IndexerIO {
                   physicsSimKicker.getAngularVelocity().in(RotationsPerSecond) * KICKER_GEAR_RATIO);
             });
 
+    simNotifier.setName("Indexer");
     simNotifier.startPeriodic(simLoopPeriod);
   }
 }
