@@ -51,6 +51,6 @@ public class FlywheelIOSim extends FlywheelIO {
             });
 
     simNotifier.setName("Flywheel");
-    // simNotifier.startPeriodic(simLoopPeriod);
+    simNotifier.startPeriodic(simLoopPeriod);
   }
 }

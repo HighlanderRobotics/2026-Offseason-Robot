@@ -83,6 +83,6 @@ public class IndexerIOSim extends IndexerIO {
             });
 
     simNotifier.setName("Indexer");
-    // simNotifier.startPeriodic(simLoopPeriod);
+    simNotifier.startPeriodic(simLoopPeriod);
   }
 }
