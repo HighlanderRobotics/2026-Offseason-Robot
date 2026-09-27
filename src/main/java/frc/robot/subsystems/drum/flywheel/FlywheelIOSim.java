@@ -50,6 +50,7 @@ public class FlywheelIOSim extends FlywheelIO {
                   physicsSim.getAngularVelocity().in(RotationsPerSecond) * physicsSim.getGearing());
             });
 
-    simNotifier.startPeriodic(simLoopPeriod);
+    simNotifier.setName("Flywheel");
+    // simNotifier.startPeriodic(simLoopPeriod);
   }
 }

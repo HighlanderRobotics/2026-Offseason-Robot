@@ -65,7 +65,7 @@ public class HoodIOSim extends HoodIO {
 
     notifier.setName("Hood");
 
-    notifier.startPeriodic(simLoopPeriod);
+    // notifier.startPeriodic(simLoopPeriod);
   }
 
   @Override
