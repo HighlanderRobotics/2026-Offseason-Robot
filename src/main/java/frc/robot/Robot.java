@@ -14,9 +14,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
@@ -47,6 +44,8 @@ public class Robot extends LoggedRobot {
   private CANBus canBus = new CANBus("*");
 
   private SwerveSubsystem swerve = new SwerveSubsystem(canBus);
+  private IndexerSubsystem indexer = new IndexerSubsystem(canBus);
+  private DrumSubsystem drum = new DrumSubsystem(canBus);
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
@@ -119,42 +118,6 @@ public class Robot extends LoggedRobot {
                                 * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
                         .times(-1))
             .withName("Teleop drive"));
-    // Auto things
-    autos = new Autos(swerve);
-    autoChooser.addDefaultOption("None", Commands.none());
-
-    // Run auto when auto starts. Matches Choreolib's defer impl
-    RobotModeTriggers.autonomous()
-        .whileTrue(Commands.defer(() -> autoChooser.get().asProxy(), Set.of()));
-
-    // Add autos on alliance change
-    new Trigger(
-            () -> {
-              var allianceChanged = !DriverStation.getAlliance().equals(lastAlliance);
-              lastAlliance = DriverStation.getAlliance();
-              return allianceChanged && DriverStation.getAlliance().isPresent();
-            })
-        .onTrue(Commands.runOnce(() -> addAutos()));
-    // Add autos when first connecting to DS
-    new Trigger(
-            () ->
-                DriverStation.isDSAttached()
-                    && DriverStation.getAlliance().isPresent()
-                    && !haveAutosGenerated)
-        .onTrue(Commands.print("connected"))
-        .onTrue(Commands.runOnce(() -> addAutos()).ignoringDisable(true));
-
-    SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
-
-    // log when commands get interrupted
-    CommandScheduler.getInstance()
-        .onCommandInterrupt(
-            (interrupted, interrupting) -> {
-              System.out.println("Interrupted: " + interrupted);
-              System.out.println(
-                  "Interrputing: "
-                      + (interrupting.isPresent() ? interrupting.get().getName() : "none"));
-            });
   }
 
   @Override
