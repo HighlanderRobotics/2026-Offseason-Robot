@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
@@ -42,6 +43,8 @@ public class DrumSubsystem extends SubsystemBase {
   public static final Rotation2d HOOD_MIN_ANGLE = Rotation2d.fromDegrees(10);
   public static final Rotation2d HOOD_MAX_ANGLE = Rotation2d.fromDegrees(45);
 
+  public static final double HOOD_CURRENT_ZEROING_THRESHOLD_AMPS = 30.0; // TODO: Tune
+
   private FlywheelIO flywheelIO;
   private FlywheelIOInputsAutoLogged flywheelIOInputs = new FlywheelIOInputsAutoLogged();
 
@@ -70,6 +73,10 @@ public class DrumSubsystem extends SubsystemBase {
           new Config(
               null, null, null, (state) -> Logger.recordOutput("Drum/Hood/SysID State", state)),
           new Mechanism((voltage) -> hoodIO.setVoltage(voltage.in(Volts)), null, this));
+
+  // For current zeroing
+  private LinearFilter currentFilter = LinearFilter.movingAverage(10);
+  private double currentFilterValue = 0.0;
 
   public DrumSubsystem(CANBus canBus) {
     if (Robot.ROBOT_MODE != RobotMode.SIM) {
@@ -144,6 +151,10 @@ public class DrumSubsystem extends SubsystemBase {
     hoodIO.updateInputs(hoodIOInputs);
     Logger.processInputs("Drum/Hood", hoodIOInputs);
     hoodDisconnectAlert.set(!hoodIOInputs.connected);
+    currentFilterValue = currentFilter.calculate(hoodIOInputs.statorCurrentAmps);
+
+    if (Robot.isSimulation())
+      Logger.recordOutput("Drum/Hood/Current Filter Value", currentFilterValue);
   }
 
   public Command setFlywheelAndHood(
@@ -164,6 +175,15 @@ public class DrumSubsystem extends SubsystemBase {
   }
 
   // TODO: MORE COMMANDS WHEN SUPERSTRUCTURE IS INTEGRATED
+
+  // Current zeroing
+  public Command runCurrentZeroing() {
+    // TODO: May need to tune voltages etc.
+    return this.run(() -> hoodIO.setVoltage(-3.0))
+        .until(() -> currentFilterValue > HOOD_CURRENT_ZEROING_THRESHOLD_AMPS)
+        .andThen(
+            this.runOnce(hoodIO::rezeroMotorToBottom).alongWith(Commands.print("Rezeroed hood")));
+  }
 
   // Sysids
   public Command runFlywheelSysid() {

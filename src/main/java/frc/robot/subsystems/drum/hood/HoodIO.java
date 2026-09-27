@@ -91,6 +91,14 @@ public class HoodIO {
         motionMagicVoltage.withPosition(setpoint.getMeasure())); // WPILib handles units
   }
 
+  public void rezeroMotor(Rotation2d position) {
+    motor.setPosition(position.getMeasure());
+  }
+
+  public void rezeroMotorToBottom() {
+    rezeroMotor(DrumSubsystem.HOOD_MIN_ANGLE);
+  }
+
   public Rotation2d getAngleSetpoint() {
     return angleSetpoint;
   }
