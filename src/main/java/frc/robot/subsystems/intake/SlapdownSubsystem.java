@@ -26,7 +26,7 @@ public class SlapdownSubsystem extends SubsystemBase {
   public static final Rotation2d PIVOT_RETRACTED_POSITION = PIVOT_MAX_POSITION;
   public static final double CURRENT_ZEROING_THRESHOLD = 0.0;
   public static final double ROLLER_GEAR_RATIO = 3 / 1;
-  public static final double PIVOT_GEAR_RATIO = 1.77777778 / 1;
+  public static final double PIVOT_GEAR_RATIO = 0.0;// TODO:?
   public static final double PIVOT_TO_CANCODER = 1 / 1.77777778;
   public static final double CANCODER_TO_PIVOT = 1.77777778 / 1;
   // TODO: implement true ratios for roller gear ratio, and pivot gear ratio,

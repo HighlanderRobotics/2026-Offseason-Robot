@@ -23,7 +23,6 @@ public class PivotIO {
     public double angularVelocityRotationsPerSec = 0.0;
     public double statorCurrentAmps = 0.0;
     public double supplyCurrentAmps = 0.0;
-    public double supplyCurrent = 0.0;
     public double voltage = 0.0;
     public double tempC = 0.0;
     public double positionRotations = 0.0;
