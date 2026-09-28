@@ -13,6 +13,10 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
+import frc.robot.subsystems.intake.CANcoderIO;
+import frc.robot.subsystems.intake.PivotIO;
+import frc.robot.subsystems.intake.RollerIO;
+import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
@@ -41,11 +45,12 @@ public class Robot extends LoggedRobot {
   private SwerveSubsystem swerve = new SwerveSubsystem(canBus);
   private IndexerSubsystem indexer = new IndexerSubsystem(canBus);
   private DrumSubsystem drum = new DrumSubsystem(canBus);
+  private SlapdownSubsystem intake = new SlapdownSubsystem(new PivotIO(0, SlapdownSubsystem.getPivotConfig(), canBus), new CANcoderIO(0, SlapdownSubsystem.getCancoderConfig(), canBus), new RollerIO(0, SlapdownSubsystem.getRollerConfig(), canBus));
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
 
-  private Superstructure superstructure = new Superstructure(driver, operator, indexer);
+  private Superstructure superstructure = new Superstructure(driver, operator, indexer, drum, intake);
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);

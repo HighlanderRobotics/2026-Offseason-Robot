@@ -3,7 +3,9 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
+import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -51,10 +53,14 @@ public class Superstructure {
   private Trigger defenseReq = new Trigger(() -> defense);
 
   private final IndexerSubsystem indexer;
+  private final DrumSubsystem drum;
+  private final SlapdownSubsystem intake;
 
   public Superstructure(
-      CommandXboxControllerSubsystem driver, CommandXboxControllerSubsystem operator, IndexerSubsystem indexer) {
+      CommandXboxControllerSubsystem driver, CommandXboxControllerSubsystem operator, IndexerSubsystem indexer, DrumSubsystem drum, SlapdownSubsystem intake) {
     this.indexer = indexer;
+    this.drum = drum;
+    this.intake = intake;
 
     // NOTE! MUST BE CALLED IN THIS ORDER!
     addRequests(driver, operator);
@@ -79,6 +85,7 @@ public class Superstructure {
     scoreReq = driver.rightTrigger().and(() -> !shouldFeed);
     feedReq = driver.rightTrigger().and(() -> shouldFeed);
     flowReq = new Trigger(() -> shouldFlow);
+    shooterReady = new Trigger(drum::readyToShoot).debounce(0.25);
 
     operator.povUp().onTrue(Commands.runOnce(() -> defense = true));
     operator.povDown().onTrue(Commands.runOnce(() -> defense = false));
@@ -116,43 +123,53 @@ public class Superstructure {
   // TODO other mechs
   private void bindCommands() {
     SuperState.IDLE.bindCommands(
-      indexer.rest()
+      indexer.rest(),
+      intake.restExtended()
     );
 
     SuperState.INTAKE.bindCommands(
-      indexer.rest() // Should we index?
+      indexer.rest(), // Should we index?
+      intake.intake()
     );
 
     SuperState.SPIN_UP_SCORE.bindCommands(
-      indexer.rest()
+      indexer.rest(),
+      intake.restExtended()
     );
 
     SuperState.SCORE.bindCommands(
-      indexer.kick()
+      indexer.kick(),
+      intake.restExtended()
     );
 
     SuperState.SCORE_FLOW.bindCommands(
-      indexer.kick()
+      indexer.kick(),
+      intake.intake()
     );
 
     SuperState.SPIN_UP_FEED.bindCommands(
-      indexer.rest()
+      indexer.rest(),
+      intake.restExtended()
     );
 
     SuperState.FEED.bindCommands(
-      indexer.kick()
+      indexer.kick(),
+      intake.restExtended()
     );
 
     SuperState.FEED_FLOW.bindCommands(
-      indexer.kick()
+      indexer.kick(),
+      intake.intake()
     );
 
     SuperState.DEFENSE.bindCommands(
-      indexer.rest()
+      indexer.rest(),
+      intake.restRetracted()
     );
 
     SuperState.SPIT.bindCommands(
-      indexer.reverse()
+      indexer.reverse(),
+      intake.outtake()
     );
   }
 

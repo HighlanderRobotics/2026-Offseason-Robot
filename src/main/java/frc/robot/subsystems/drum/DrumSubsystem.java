@@ -7,6 +7,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
@@ -207,6 +209,13 @@ public class DrumSubsystem extends SubsystemBase {
         hoodSysid
             .dynamic(Direction.kReverse)
             .until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)));
+  }
+
+  public boolean readyToShoot() {
+    // TODO: TUNE tolerances
+    return 
+      MathUtil.isNear(flywheelIO.getSetpointRotPerSec(), flywheelIOInputs.velocityRotPerSec, 5.0)
+      && MathUtil.isNear(hoodIO.getAngleSetpoint().getDegrees(), hoodIOInputs.position.getDegrees(), 2.0);
   }
 
   // Configs
