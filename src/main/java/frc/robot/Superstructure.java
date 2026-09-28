@@ -57,7 +57,11 @@ public class Superstructure {
   private final SlapdownSubsystem intake;
 
   public Superstructure(
-      CommandXboxControllerSubsystem driver, CommandXboxControllerSubsystem operator, IndexerSubsystem indexer, DrumSubsystem drum, SlapdownSubsystem intake) {
+      CommandXboxControllerSubsystem driver,
+      CommandXboxControllerSubsystem operator,
+      IndexerSubsystem indexer,
+      DrumSubsystem drum,
+      SlapdownSubsystem intake) {
     this.indexer = indexer;
     this.drum = drum;
     this.intake = intake;
@@ -122,55 +126,27 @@ public class Superstructure {
 
   // TODO other mechs
   private void bindCommands() {
-    SuperState.IDLE.bindCommands(
-      indexer.rest(),
-      intake.restExtended()
-    );
+    SuperState.IDLE.bindCommands(indexer.rest(), intake.restExtended(), drum.rest());
 
     SuperState.INTAKE.bindCommands(
-      indexer.rest(), // Should we index?
-      intake.intake()
-    );
+        indexer.rest(), // Should we index?
+        intake.intake(), drum.rest());
 
-    SuperState.SPIN_UP_SCORE.bindCommands(
-      indexer.rest(),
-      intake.restExtended()
-    );
+    SuperState.SPIN_UP_SCORE.bindCommands(indexer.rest(), intake.restExtended());
 
-    SuperState.SCORE.bindCommands(
-      indexer.kick(),
-      intake.restExtended()
-    );
+    SuperState.SCORE.bindCommands(indexer.kick(), intake.restExtended());
 
-    SuperState.SCORE_FLOW.bindCommands(
-      indexer.kick(),
-      intake.intake()
-    );
+    SuperState.SCORE_FLOW.bindCommands(indexer.kick(), intake.intake());
 
-    SuperState.SPIN_UP_FEED.bindCommands(
-      indexer.rest(),
-      intake.restExtended()
-    );
+    SuperState.SPIN_UP_FEED.bindCommands(indexer.rest(), intake.restExtended());
 
-    SuperState.FEED.bindCommands(
-      indexer.kick(),
-      intake.restExtended()
-    );
+    SuperState.FEED.bindCommands(indexer.kick(), intake.restExtended());
 
-    SuperState.FEED_FLOW.bindCommands(
-      indexer.kick(),
-      intake.intake()
-    );
+    SuperState.FEED_FLOW.bindCommands(indexer.kick(), intake.intake());
 
-    SuperState.DEFENSE.bindCommands(
-      indexer.rest(),
-      intake.restRetracted()
-    );
+    SuperState.DEFENSE.bindCommands(indexer.rest(), intake.restRetracted(), drum.rest());
 
-    SuperState.SPIT.bindCommands(
-      indexer.reverse(),
-      intake.outtake()
-    );
+    SuperState.SPIT.bindCommands(indexer.reverse(), intake.outtake(), drum.spit());
   }
 
   public static SuperState getState() {

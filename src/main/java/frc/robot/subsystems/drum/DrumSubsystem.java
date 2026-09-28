@@ -7,7 +7,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -175,6 +174,16 @@ public class DrumSubsystem extends SubsystemBase {
         });
   }
 
+  public Command rest() {
+    // Maybe should keep spinning somewhat
+    return setFlywheelAndHood(() -> 0.0, () -> HOOD_MIN_ANGLE);
+  }
+
+  public Command spit() {
+    // Might need to tune this...
+    return setFlywheelAndHood(() -> 30.0, () -> HOOD_MIN_ANGLE);
+  }
+
   // TODO: MORE COMMANDS WHEN SUPERSTRUCTURE IS INTEGRATED
 
   // Current zeroing
@@ -213,9 +222,10 @@ public class DrumSubsystem extends SubsystemBase {
 
   public boolean readyToShoot() {
     // TODO: TUNE tolerances
-    return 
-      MathUtil.isNear(flywheelIO.getSetpointRotPerSec(), flywheelIOInputs.velocityRotPerSec, 5.0)
-      && MathUtil.isNear(hoodIO.getAngleSetpoint().getDegrees(), hoodIOInputs.position.getDegrees(), 2.0);
+    return MathUtil.isNear(
+            flywheelIO.getSetpointRotPerSec(), flywheelIOInputs.velocityRotPerSec, 5.0)
+        && MathUtil.isNear(
+            hoodIO.getAngleSetpoint().getDegrees(), hoodIOInputs.position.getDegrees(), 2.0);
   }
 
   // Configs

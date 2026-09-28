@@ -45,12 +45,17 @@ public class Robot extends LoggedRobot {
   private SwerveSubsystem swerve = new SwerveSubsystem(canBus);
   private IndexerSubsystem indexer = new IndexerSubsystem(canBus);
   private DrumSubsystem drum = new DrumSubsystem(canBus);
-  private SlapdownSubsystem intake = new SlapdownSubsystem(new PivotIO(0, SlapdownSubsystem.getPivotConfig(), canBus), new CANcoderIO(0, SlapdownSubsystem.getCancoderConfig(), canBus), new RollerIO(0, SlapdownSubsystem.getRollerConfig(), canBus));
+  private SlapdownSubsystem intake =
+      new SlapdownSubsystem(
+          new PivotIO(0, SlapdownSubsystem.getPivotConfig(), canBus),
+          new CANcoderIO(0, SlapdownSubsystem.getCancoderConfig(), canBus),
+          new RollerIO(0, SlapdownSubsystem.getRollerConfig(), canBus));
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
 
-  private Superstructure superstructure = new Superstructure(driver, operator, indexer, drum, intake);
+  private Superstructure superstructure =
+      new Superstructure(driver, operator, indexer, drum, intake);
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
@@ -116,6 +121,8 @@ public class Robot extends LoggedRobot {
             .withName("Teleop drive"));
 
     indexer.setDefaultCommand(indexer.rest());
+    intake.setDefaultCommand(intake.restExtended());
+    // drum.setDefaultCommand();
 
     drum.setDefaultCommand(drum.setFlywheelAndHoodVoltage(() -> 0.0, () -> 0.0));
 
@@ -130,7 +137,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void simulationPeriodic() {
-      superstructure.simulationPeriodic();
+    superstructure.simulationPeriodic();
   }
 
   // Use obstacle-free simulation arena
