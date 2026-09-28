@@ -59,7 +59,7 @@ public class PivotIO {
     temp = motor.getDeviceTemp();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        0.0, position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
+        50.0, position, angularVelocity, voltage, statorCurrent, supplyCurrent, temp);
     // TO_DO: get real frequency for pivotio base status signal
     motor.optimizeBusUtilization();
   }

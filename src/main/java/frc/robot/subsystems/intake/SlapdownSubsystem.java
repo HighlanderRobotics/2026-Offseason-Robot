@@ -167,9 +167,9 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
     config.Feedback.FeedbackRemoteSensorID = 0;
     // TODO: set feedback remote sensorID
-    config.Feedback.RotorToSensorRatio = CANCODER_TO_PIVOT;
+    config.Feedback.RotorToSensorRatio = PIVOT_GEAR_RATIO;
 
-    config.Feedback.SensorToMechanismRatio = 0;
+    config.Feedback.SensorToMechanismRatio = CANCODER_TO_PIVOT;
     // TODO: set sensor to mech ratio
 
     config.Slot0.kS = 0.0;
