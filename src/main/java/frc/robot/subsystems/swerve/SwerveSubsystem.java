@@ -182,23 +182,19 @@ public class SwerveSubsystem extends SubsystemBase {
             new Camera(
                 new CameraIOSim(
                     SWERVE_CONSTANTS.getCameraConstants()[0],
-                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()),
-                    SWERVE_CONSTANTS.getFieldTagLayout())),
+                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()))),
             new Camera(
                 new CameraIOSim(
                     SWERVE_CONSTANTS.getCameraConstants()[1],
-                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()),
-                    SWERVE_CONSTANTS.getFieldTagLayout())),
+                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()))),
             new Camera(
                 new CameraIOSim(
                     SWERVE_CONSTANTS.getCameraConstants()[2],
-                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()),
-                    SWERVE_CONSTANTS.getFieldTagLayout())),
+                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()))),
             new Camera(
                 new CameraIOSim(
                     SWERVE_CONSTANTS.getCameraConstants()[3],
-                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()),
-                    SWERVE_CONSTANTS.getFieldTagLayout()))
+                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose())))
           };
     } else {
       // Add real modules
@@ -378,7 +374,9 @@ public class SwerveSubsystem extends SubsystemBase {
         arr[k] = getPose3d().transformBy(cameras[k].getCameraConstants().robotToCamera());
       }
     }
-    Logger.recordOutput("Vision/Camera Poses on Robot", arr);
+    if (RobotMode.SIM != null) {
+      Logger.recordOutput("Vision/Camera Poses on Robot", arr);
+    }
   }
 
   /**
