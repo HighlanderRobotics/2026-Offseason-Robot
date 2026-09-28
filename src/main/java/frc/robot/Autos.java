@@ -17,13 +17,16 @@ public class Autos {
   private final SwerveSubsystem swerve;
   private final AutoFactory factory;
   private static boolean autoIntake;
+  private static boolean autoScore;
 
   @AutoLogOutput(key = "Superstructure/Auto Intake Request")
   public static Trigger autoIntakeReq =
       new Trigger(() -> autoIntake).and(DriverStation::isAutonomous);
 
   public enum Action {
-    NOTHING
+    NOTHING,
+    DELAYED_SCORE,
+    INTAKE
   }
 
   // testing please organize later :)
@@ -75,6 +78,10 @@ public class Autos {
   public Command runPath(Path path, AutoRoutine routine) {
     Action action = path.action;
     switch (action) {
+      case DELAYED_SCORE:
+        return delayedScorePath(path, routine);
+      case INTAKE:
+        return intakeScorePath(path, routine);
       case NOTHING:
         return emptyPath(path, routine);
       default:
@@ -84,12 +91,52 @@ public class Autos {
 
   public Command emptyPath(Path path, AutoRoutine routine) {
     return Commands.sequence(
-        // setAllReqsFalse(),
+        setAllReqsFalse(),
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()));
   }
 
+  public Command delayedScorePath(Path path, AutoRoutine routine) {
+    return Commands.sequence(
+        path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()),
+        stopIntaking(),
+        startScoring(),
+        Commands.waitSeconds(3));
+  }
+
+  public Command intakeScorePath(Path path, AutoRoutine routine) {
+    return Commands.sequence(
+        stopScoring(),
+        startIntaking(),
+        path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()));
+  }
+
+  public Command shootPreload() {
+    return Commands.sequence(startScoring(), swerve.stop().repeatedly().withTimeout(3));
+  }
+
+  public Command startIntaking() {
+    return Commands.runOnce(() -> autoIntake = true);
+  }
+
+  public Command stopIntaking() {
+    return Commands.runOnce(() -> autoIntake = false);
+  }
+
+  public Command startScoring() {
+    return Commands.runOnce(() -> autoScore = true);
+  }
+
+  public Command stopScoring() {
+    return Commands.runOnce(() -> autoScore = false);
+  }
+
   public Command setAllReqsFalse() {
-    return null;
+    return Commands.sequence(stopIntaking(), stopScoring());
+  }
+
+  public void setAllReqsFalsenotcmd() {
+    autoIntake = false;
+    autoScore = false;
   }
 
   public Command createAuto(String name, Path[] paths, Command... startingCommands) {
