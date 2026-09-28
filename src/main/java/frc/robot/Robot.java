@@ -122,7 +122,7 @@ public class Robot extends LoggedRobot {
 
     indexer.setDefaultCommand(indexer.rest());
     intake.setDefaultCommand(intake.restExtended());
-    // drum.setDefaultCommand();
+    drum.setDefaultCommand(drum.rest());
 
     drum.setDefaultCommand(drum.setFlywheelAndHoodVoltage(() -> 0.0, () -> 0.0));
 
