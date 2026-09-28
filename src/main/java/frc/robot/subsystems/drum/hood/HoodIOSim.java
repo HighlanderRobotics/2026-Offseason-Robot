@@ -1,0 +1,85 @@
+package frc.robot.subsystems.drum.hood;
+
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.sim.ChassisReference;
+import com.ctre.phoenix6.sim.TalonFXSimState;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.subsystems.drum.DrumSubsystem;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.littletonrobotics.junction.Logger;
+
+public class HoodIOSim extends HoodIO {
+  private TalonFXSimState simState;
+  private SingleJointedArmSim physicsSim;
+
+  private double lastLoopTime = 0.0;
+  private final double simLoopPeriod = 0.02;
+
+  private AtomicBoolean firstRunThrough =
+      new AtomicBoolean(true); // Idt this has to be atomic but might as well
+
+  private Notifier notifier;
+
+  public HoodIOSim(CANBus canBus) {
+    super(canBus);
+
+    // motor.setPosition(DrumSubsystem.HOOD_MIN_ANGLE.getMeasure());
+
+    simState = motor.getSimState();
+    simState.Orientation = ChassisReference.Clockwise_Positive;
+
+    // TODO: VALUES FROM CAD
+    physicsSim =
+        new SingleJointedArmSim(
+            DCMotor.getKrakenX44Foc(1),
+            DrumSubsystem.HOOD_GEAR_RATIO,
+            0.0943611538,
+            Units.inchesToMeters(8.75),
+            DrumSubsystem.HOOD_MIN_ANGLE.getRadians(),
+            DrumSubsystem.HOOD_MAX_ANGLE.getRadians(),
+            true,
+            DrumSubsystem.HOOD_MIN_ANGLE.getRadians());
+
+    notifier =
+        new Notifier(
+            () -> {
+              double currentTime = Utils.getCurrentTimeSeconds();
+              double deltaTime = currentTime - lastLoopTime;
+              lastLoopTime = currentTime;
+
+              // This is actually stupid af
+              if (firstRunThrough.get()) {
+                deltaTime = 1.0;
+                firstRunThrough.set(false);
+              }
+
+              simState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
+              physicsSim.setInputVoltage(simState.getMotorVoltage());
+              physicsSim.update(deltaTime);
+
+              simState.setRawRotorPosition(
+                  Units.radiansToRotations(
+                      physicsSim.getAngleRads() * DrumSubsystem.HOOD_GEAR_RATIO));
+              simState.setRotorVelocity(
+                  Units.radiansToRotations(
+                      physicsSim.getVelocityRadPerSec() * DrumSubsystem.HOOD_GEAR_RATIO));
+            });
+
+    notifier.setName("Hood");
+
+    notifier.startPeriodic(simLoopPeriod);
+  }
+
+  @Override
+  public void updateInputs(HoodIOInputs inputs) {
+    super.updateInputs(inputs);
+    Logger.recordOutput("Hood sim position", new Rotation2d(physicsSim.getAngleRads()));
+  }
+}

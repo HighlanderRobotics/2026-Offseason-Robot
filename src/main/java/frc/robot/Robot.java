@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
@@ -39,6 +40,7 @@ public class Robot extends LoggedRobot {
 
   private SwerveSubsystem swerve = new SwerveSubsystem(canBus);
   private IndexerSubsystem indexer = new IndexerSubsystem(canBus);
+  private DrumSubsystem drum = new DrumSubsystem(canBus);
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
@@ -109,6 +111,11 @@ public class Robot extends LoggedRobot {
             .withName("Teleop drive"));
 
     indexer.setDefaultCommand(indexer.rest());
+
+    drum.setDefaultCommand(drum.setFlywheelAndHoodVoltage(() -> 0.0, () -> 0.0));
+
+    driver.a().whileTrue(drum.setFlywheelAndHoodVoltage(() -> 10.0, () -> 10.0));
+    driver.b().whileTrue(drum.runCurrentZeroing());
   }
 
   @Override
