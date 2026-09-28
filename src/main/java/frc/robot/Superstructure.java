@@ -106,7 +106,7 @@ public class Superstructure {
     bindTransition(SuperState.INTAKE, intakeReq.negate(), SuperState.IDLE);
 
     bindTransition(SuperState.IDLE, scoreReq, SuperState.SPIN_UP_SCORE);
-    bindTransition(SuperState.IDLE, scoreReq.negate(), SuperState.IDLE);
+    bindTransition(SuperState.SPIN_UP_SCORE, scoreReq.negate(), SuperState.IDLE);
     bindTransition(SuperState.SPIN_UP_SCORE, shooterReady.and(flowReq.negate()), SuperState.SCORE);
     bindTransition(SuperState.SPIN_UP_SCORE, shooterReady.and(flowReq), SuperState.SCORE_FLOW);
     bindTransition(SuperState.SCORE, scoreReq.negate(), SuperState.IDLE);
@@ -130,7 +130,8 @@ public class Superstructure {
 
     SuperState.INTAKE.bindCommands(
         indexer.rest(), // Should we index?
-        intake.intake(), drum.rest());
+        intake.intake(),
+        drum.rest());
 
     SuperState.SPIN_UP_SCORE.bindCommands(indexer.rest(), intake.restExtended());
 
