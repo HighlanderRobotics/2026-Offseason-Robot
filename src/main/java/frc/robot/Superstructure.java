@@ -51,6 +51,7 @@ public class Superstructure {
   private Trigger flowReq;
   private Trigger shooterReady;
   private Trigger defenseReq = new Trigger(() -> defense);
+  private Trigger spitReq;
 
   private final IndexerSubsystem indexer;
   private final DrumSubsystem drum;
@@ -80,6 +81,8 @@ public class Superstructure {
     Logger.recordOutput("Superstructure/Requests/Feed", feedReq);
     Logger.recordOutput("Superstructure/Requests/Flow", flowReq);
     Logger.recordOutput("Superstructure/Should Feed", shouldFeed);
+    Logger.recordOutput("Superstructure/Should Flow", shouldFlow);
+    Logger.recordOutput("Superstructure/Defense", defenseReq);
     Logger.recordOutput("Superstructure/Shooter Ready", shooterReady);
   }
 
@@ -90,12 +93,13 @@ public class Superstructure {
     feedReq = driver.rightTrigger().and(() -> shouldFeed);
     flowReq = new Trigger(() -> shouldFlow);
     shooterReady = new Trigger(drum::readyToShoot).debounce(0.25);
+    spitReq = driver.povDown();
 
     operator.povUp().onTrue(Commands.runOnce(() -> defense = true));
     operator.povDown().onTrue(Commands.runOnce(() -> defense = false));
 
     operator.a().onTrue(Commands.runOnce(() -> shouldFlow = true));
-    operator.b().onTrue(Commands.runOnce(() -> shouldFlow = true));
+    operator.b().onTrue(Commands.runOnce(() -> shouldFlow = false));
 
     operator.x().onTrue(Commands.runOnce(() -> shouldFeed = false));
     operator.y().onTrue(Commands.runOnce(() -> shouldFeed = true));
@@ -122,6 +126,9 @@ public class Superstructure {
     // Any to defense
     defenseReq.onTrue(Commands.runOnce(() -> state = SuperState.DEFENSE));
     bindTransition(SuperState.DEFENSE, defenseReq.negate(), SuperState.IDLE);
+
+    spitReq.onTrue(Commands.runOnce(() -> state = SuperState.SPIT));
+    bindTransition(SuperState.SPIT, spitReq.negate(), SuperState.IDLE);
   }
 
   // TODO other mechs
