@@ -7,7 +7,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -32,7 +31,6 @@ import frc.robot.subsystems.drum.hood.HoodIO;
 import frc.robot.subsystems.drum.hood.HoodIOInputsAutoLogged;
 import frc.robot.subsystems.drum.hood.HoodIOSim;
 import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
-
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -183,7 +181,9 @@ public class DrumSubsystem extends SubsystemBase {
   }
 
   public Command shoot(Supplier<ShotData> shotDataSupplier) {
-    return setFlywheelAndHood(() -> shotDataSupplier.get().flywheelVelocityRotPerSec(), () -> shotDataSupplier.get().hoodAngle());
+    return setFlywheelAndHood(
+        () -> shotDataSupplier.get().flywheelVelocityRotPerSec(),
+        () -> shotDataSupplier.get().hoodAngle());
   }
 
   public Command spit() {

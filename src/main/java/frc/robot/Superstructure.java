@@ -10,11 +10,9 @@ import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.FieldUtils;
-import frc.robot.utils.autoaim.ShotTrees;
 import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
-
+import frc.robot.utils.autoaim.ShotTrees;
 import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -161,17 +159,23 @@ public class Superstructure {
         intake.intake(),
         drum.rest());
 
-    SuperState.SPIN_UP_SCORE.bindCommands(indexer.rest(), intake.restExtended(), drum.shoot(this::getHubShotData));
+    SuperState.SPIN_UP_SCORE.bindCommands(
+        indexer.rest(), intake.restExtended(), drum.shoot(this::getHubShotData));
 
-    SuperState.SCORE.bindCommands(indexer.kick(), intake.restExtended(), drum.shoot(this::getHubShotData));
+    SuperState.SCORE.bindCommands(
+        indexer.kick(), intake.restExtended(), drum.shoot(this::getHubShotData));
 
-    SuperState.SCORE_FLOW.bindCommands(indexer.kick(), intake.intake(), drum.shoot(this::getHubShotData));
+    SuperState.SCORE_FLOW.bindCommands(
+        indexer.kick(), intake.intake(), drum.shoot(this::getHubShotData));
 
-    SuperState.SPIN_UP_FEED.bindCommands(indexer.rest(), intake.restExtended(), drum.shoot(this::getFeedShotData));
+    SuperState.SPIN_UP_FEED.bindCommands(
+        indexer.rest(), intake.restExtended(), drum.shoot(this::getFeedShotData));
 
-    SuperState.FEED.bindCommands(indexer.kick(), intake.restExtended(), drum.shoot(this::getFeedShotData));
+    SuperState.FEED.bindCommands(
+        indexer.kick(), intake.restExtended(), drum.shoot(this::getFeedShotData));
 
-    SuperState.FEED_FLOW.bindCommands(indexer.kick(), intake.intake(), drum.shoot(this::getFeedShotData));
+    SuperState.FEED_FLOW.bindCommands(
+        indexer.kick(), intake.intake(), drum.shoot(this::getFeedShotData));
 
     SuperState.DEFENSE.bindCommands(indexer.rest(), intake.restRetracted(), drum.rest());
 
