@@ -55,7 +55,7 @@ public class Robot extends LoggedRobot {
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
 
   private Superstructure superstructure =
-      new Superstructure(driver, operator, indexer, drum, intake);
+      new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
