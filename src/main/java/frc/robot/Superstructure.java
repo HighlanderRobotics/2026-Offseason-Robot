@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -7,6 +9,12 @@ import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
+import frc.robot.utils.FieldUtils;
+import frc.robot.utils.autoaim.ShotTrees;
+import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
+
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -50,6 +58,8 @@ public class Superstructure {
   private boolean shouldFlow = false;
   private boolean defense = false;
 
+  private FeedTarget feedTarget = FeedTarget.LEFT;
+
   private Trigger intakeReq;
   private Trigger scoreReq;
   private Trigger feedReq;
@@ -62,15 +72,20 @@ public class Superstructure {
   private final DrumSubsystem drum;
   private final SlapdownSubsystem intake;
 
+  private final Supplier<Pose2d> robotPoseSupplier;
+
   public Superstructure(
       CommandXboxControllerSubsystem driver,
       CommandXboxControllerSubsystem operator,
       IndexerSubsystem indexer,
       DrumSubsystem drum,
-      SlapdownSubsystem intake) {
+      SlapdownSubsystem intake,
+      Supplier<Pose2d> robotPoseSupplier) {
     this.indexer = indexer;
     this.drum = drum;
     this.intake = intake;
+
+    this.robotPoseSupplier = robotPoseSupplier;
 
     // NOTE! MUST BE CALLED IN THIS ORDER!
     addRequests(driver, operator);
@@ -89,6 +104,7 @@ public class Superstructure {
     Logger.recordOutput("Superstructure/Should Flow", shouldFlow);
     Logger.recordOutput("Superstructure/Defense", defenseReq);
     Logger.recordOutput("Superstructure/Shooter Ready", shooterReady);
+    Logger.recordOutput("Superstructure/Feed Target", feedTarget);
   }
 
   private void addRequests(
@@ -145,17 +161,17 @@ public class Superstructure {
         intake.intake(),
         drum.rest());
 
-    SuperState.SPIN_UP_SCORE.bindCommands(indexer.rest(), intake.restExtended());
+    SuperState.SPIN_UP_SCORE.bindCommands(indexer.rest(), intake.restExtended(), drum.shoot(this::getHubShotData));
 
-    SuperState.SCORE.bindCommands(indexer.kick(), intake.restExtended());
+    SuperState.SCORE.bindCommands(indexer.kick(), intake.restExtended(), drum.shoot(this::getHubShotData));
 
-    SuperState.SCORE_FLOW.bindCommands(indexer.kick(), intake.intake());
+    SuperState.SCORE_FLOW.bindCommands(indexer.kick(), intake.intake(), drum.shoot(this::getHubShotData));
 
-    SuperState.SPIN_UP_FEED.bindCommands(indexer.rest(), intake.restExtended());
+    SuperState.SPIN_UP_FEED.bindCommands(indexer.rest(), intake.restExtended(), drum.shoot(this::getFeedShotData));
 
-    SuperState.FEED.bindCommands(indexer.kick(), intake.restExtended());
+    SuperState.FEED.bindCommands(indexer.kick(), intake.restExtended(), drum.shoot(this::getFeedShotData));
 
-    SuperState.FEED_FLOW.bindCommands(indexer.kick(), intake.intake());
+    SuperState.FEED_FLOW.bindCommands(indexer.kick(), intake.intake(), drum.shoot(this::getFeedShotData));
 
     SuperState.DEFENSE.bindCommands(indexer.rest(), intake.restRetracted(), drum.rest());
 
@@ -168,5 +184,14 @@ public class Superstructure {
 
   private void bindTransition(SuperState start, Trigger transitionTrigger, SuperState end) {
     start.getTrigger().and(transitionTrigger).onTrue(Commands.runOnce(() -> state = end));
+  }
+
+  private ShotData getHubShotData() {
+    return ShotTrees.HUB_SHOT_TREE.calculateShot(robotPoseSupplier.get());
+  }
+
+  private ShotData getFeedShotData() {
+    Translation2d feedTargetPos = FieldUtils.FeedTargets.getFeedTarget(feedTarget).getTranslation();
+    return ShotTrees.FEED_SHOT_TREE.calculateShot(robotPoseSupplier.get(), feedTargetPos);
   }
 }

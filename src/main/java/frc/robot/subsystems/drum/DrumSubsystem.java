@@ -31,6 +31,8 @@ import frc.robot.subsystems.drum.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.drum.hood.HoodIO;
 import frc.robot.subsystems.drum.hood.HoodIOInputsAutoLogged;
 import frc.robot.subsystems.drum.hood.HoodIOSim;
+import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
+
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -178,6 +180,10 @@ public class DrumSubsystem extends SubsystemBase {
   public Command rest() {
     // Maybe should keep spinning somewhat
     return setFlywheelAndHood(() -> 0.0, () -> HOOD_MIN_ANGLE);
+  }
+
+  public Command shoot(Supplier<ShotData> shotDataSupplier) {
+    return setFlywheelAndHood(() -> shotDataSupplier.get().flywheelVelocityRotPerSec(), () -> shotDataSupplier.get().hoodAngle());
   }
 
   public Command spit() {
