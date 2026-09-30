@@ -114,6 +114,7 @@ public class Superstructure {
     shooterReady = new Trigger(drum::readyToShoot).debounce(0.25);
     spitReq = driver.povDown();
 
+    // TODO: MAKE SINGULAR CONTROLLER MODE
     operator.povUp().onTrue(Commands.runOnce(() -> defense = true));
     operator.povDown().onTrue(Commands.runOnce(() -> defense = false));
 
@@ -122,6 +123,9 @@ public class Superstructure {
 
     operator.x().onTrue(Commands.runOnce(() -> shouldFeed = false));
     operator.y().onTrue(Commands.runOnce(() -> shouldFeed = true));
+
+    operator.leftBumper().onTrue(Commands.runOnce(() -> feedTarget = FeedTarget.LEFT));
+    operator.rightBumper().onTrue(Commands.runOnce(() -> feedTarget = FeedTarget.RIGHT));
   }
 
   private void bindTransitions() {
