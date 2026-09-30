@@ -38,6 +38,11 @@ public class Superstructure {
     }
   }
 
+  public enum FeedTarget {
+    LEFT,
+    RIGHT
+  }
+
   @AutoLogOutput(key = "Superstructure/State")
   private static SuperState state = SuperState.IDLE;
 
