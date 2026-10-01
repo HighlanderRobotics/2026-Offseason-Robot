@@ -86,16 +86,15 @@ public class DrumSubsystem extends SubsystemBase {
 
       hoodIO = new HoodIO(canBus);
 
-      // TODO: CORRECT VALUES
       followerIOs[0] =
           new FollowerIO(
-              0, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Aligned, canBus, getFlywheelConfig());
+              16, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Aligned, canBus, getFlywheelConfig());
       followerIOs[1] =
           new FollowerIO(
-              0, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
+              17, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
       followerIOs[2] =
           new FollowerIO(
-              0, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
+              18, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
     } else {
       flywheelIO = new FlywheelIOSim(canBus);
       hoodIO = new HoodIOSim(canBus);
