@@ -10,7 +10,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -24,32 +23,23 @@ public class DumperSwerveConstants extends SwerveConstants {
 
   @Override
   public CameraConstants[] getCameraConstants() {
-    final CameraConstants backLeftCameraConstants = 
-      new CameraConstants(
-        "Back_Left", 
-        // TODO: FROM CAD
-        new Transform3d(
-          new Translation3d(-0.342612, -0.255814, 0.480683),
-          new Rotation3d(0.0, 0.0, 0.0)
-        ), 
-        null, 
-        null
-      );
-    final CameraConstants backRightCameraConstants = 
-      new CameraConstants(
-        "Back_Right", 
-        // TODO: FROM CAD
-        new Transform3d(
-          new Translation3d(-0.342502, 0.256376, 0.480406),
-          new Rotation3d(0.0, 0.0, 0.0)
-        ), 
-        null, 
-        null
-      );
-    return new CameraConstants[] {
-      backLeftCameraConstants,
-      backRightCameraConstants
-    };
+    final CameraConstants backLeftCameraConstants =
+        new CameraConstants(
+            "Back_Left",
+            // TODO: FROM CAD
+            new Transform3d(
+                new Translation3d(-0.342612, -0.255814, 0.480683), new Rotation3d(0.0, 0.0, 0.0)),
+            null,
+            null);
+    final CameraConstants backRightCameraConstants =
+        new CameraConstants(
+            "Back_Right",
+            // TODO: FROM CAD
+            new Transform3d(
+                new Translation3d(-0.342502, 0.256376, 0.480406), new Rotation3d(0.0, 0.0, 0.0)),
+            null,
+            null);
+    return new CameraConstants[] {backLeftCameraConstants, backRightCameraConstants};
   }
 
   @Override
@@ -92,7 +82,8 @@ public class DumperSwerveConstants extends SwerveConstants {
 
   @Override
   public double getDriveGearRatio() {
-    // Taken from https://www.swervedrivespecialties.com/collections/kits/products/mk5n-swerve-module, R2
+    // Taken from
+    // https://www.swervedrivespecialties.com/collections/kits/products/mk5n-swerve-module, R2
     // configuration
     return 6.03;
   }
@@ -216,7 +207,7 @@ public class DumperSwerveConstants extends SwerveConstants {
     turnConfig.Slot0.kA = 0.10881;
     turnConfig.Slot0.kS = 0.7988;
     turnConfig.Slot0.kP = 250.0;
-    turnConfig.Slot0.kD = 1.0; 
+    turnConfig.Slot0.kD = 1.0;
     turnConfig.MotionMagic.MotionMagicCruiseVelocity = (7368 / 60) / getTurnGearRatio();
     turnConfig.MotionMagic.MotionMagicAcceleration = (7368 / 60) / (getTurnGearRatio() * 0.005);
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
@@ -243,6 +234,6 @@ public class DumperSwerveConstants extends SwerveConstants {
 
   @Override
   public boolean getTurnMotorInverted() {
-      return false;
+    return false;
   }
 }

@@ -7,7 +7,6 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -53,7 +52,8 @@ public class Robot extends LoggedRobot {
           new PivotIO(8, SlapdownSubsystem.getPivotConfig(), canBus),
           new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
           new RollerIO(9, SlapdownSubsystem.getRollerConfig(), canBus),
-          new FollowerIO(10, 9, MotorAlignmentValue.Opposed, canBus, SlapdownSubsystem.getRollerConfig()));
+          new FollowerIO(
+              10, 9, MotorAlignmentValue.Opposed, canBus, SlapdownSubsystem.getRollerConfig()));
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
