@@ -5,7 +5,9 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.components.motor.MotorIO;
@@ -23,9 +25,13 @@ public class RollerSubsystem extends SubsystemBase {
 
   private double velocitySetpointRPS = 0.0;
 
+  // TODO
+  private final Timer testTimer = new Timer();
+
   public RollerSubsystem(MotorIO motor, MotorIO follower) {
     this.motor = motor;
     this.follower = follower;
+    testTimer.start();
   }
 
   public static TalonFXConfiguration getConfig() {
@@ -39,9 +45,9 @@ public class RollerSubsystem extends SubsystemBase {
     // Velocity PID and feedforward gains.
     // Replace these with values tuned for this roller.
     config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.0;
+    config.Slot0.kV = 10.0;
     config.Slot0.kA = 0.0;
-    config.Slot0.kP = 0.0;
+    config.Slot0.kP = 10.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.0;
 
@@ -75,13 +81,37 @@ public class RollerSubsystem extends SubsystemBase {
     setVelocity(0.0);
   }
 
+  public Command testRoller() {
+    return Commands.sequence(
+        Commands.runOnce(() -> setVelocity(0.0)),
+        Commands.waitSeconds(1.0),
+        Commands.runOnce(() -> setVelocity(10.0)),
+        Commands.waitSeconds(2.0),
+        Commands.runOnce(() -> setVelocity(20.0)),
+        Commands.waitSeconds(2.0),
+        Commands.runOnce(() -> setVelocity(30.0)),
+        Commands.waitSeconds(2.0),
+        Commands.runOnce(this::stop));
+  }
+
   @Override
   public void periodic() {
     motor.updateInputs(inputs);
-    Commands.run(() -> setVelocity(10));
-    // Logger.processInputs("Roller/Motor", inputs);
     Logger.processInputs("Roller", inputs);
-    // TODO
-    // Logger.recordOutput("Roller/VelocitySetpointRPS", velocitySetpointRPS);
+
+    double time = testTimer.get();
+
+    if (time < 2.0) {
+      setVelocity(0.0);
+    } else if (time < 5.0) {
+      setVelocity(10.0);
+    } else if (time < 8.0) {
+      setVelocity(20.0);
+    } else if (time < 11.0) {
+      setVelocity(0.0);
+    } else {
+      setVelocity(30.0); // motor.setVoltage(30); //
+      // testTimer.stop();
+    }
   }
 }

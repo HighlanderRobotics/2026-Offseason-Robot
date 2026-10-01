@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.components.motor.MotorIO;
 import frc.robot.components.motor.MotorIOSim;
+import frc.robot.subsystems.RollerSubsystem;
 import frc.robot.subsystems.arm.ArmSubsystem;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -33,6 +34,7 @@ public class Robot extends LoggedRobot {
   public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
 
   ArmSubsystem arm;
+  RollerSubsystem roller;
   public static CANBus canivore = new CANBus("*");
 
   public Robot() {
@@ -86,10 +88,20 @@ public class Robot extends LoggedRobot {
 
     if (Robot.isReal()) {
       arm = new ArmSubsystem(new MotorIO(10, arm.getConfig(), canivore));
+      roller =
+          new RollerSubsystem(
+              new MotorIO(11, roller.getConfig(), canivore),
+              new MotorIO(12, roller.getConfig(), canivore));
     } else {
       arm =
           new ArmSubsystem(
               new MotorIOSim(10, arm.getConfig(), arm.getSim(), MotorType.KrakenX60, canivore));
+      roller =
+          new RollerSubsystem(
+              new MotorIOSim(
+                  11, roller.getConfig(), roller.getSim(), MotorType.KrakenX60, canivore),
+              new MotorIOSim(
+                  12, roller.getConfig(), roller.getSim(), MotorType.KrakenX60, canivore));
     }
   }
 
