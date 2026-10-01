@@ -10,8 +10,14 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.components.follower.FollowerIO;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
@@ -22,10 +28,13 @@ import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
+import java.util.Optional;
+import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
@@ -60,6 +69,9 @@ public class Robot extends LoggedRobot {
 
   private Superstructure superstructure =
       new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
+
+  private LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto");
+  private Optional<Alliance> lastAlliance = Optional.empty();
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
@@ -110,6 +122,8 @@ public class Robot extends LoggedRobot {
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
 
+    SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
+
     swerve.setDefaultCommand(
         swerve
             .driveOpenLoopFieldRelative(
@@ -132,6 +146,31 @@ public class Robot extends LoggedRobot {
 
     driver.a().whileTrue(drum.setFlywheelAndHoodVoltage(() -> 10.0, () -> 10.0));
     driver.b().whileTrue(drum.runCurrentZeroing());
+
+    // Run auto when auto starts. Matches Choreolib's defer impl
+    RobotModeTriggers.autonomous()
+        .whileTrue(Commands.defer(() -> autoChooser.get().asProxy(), Set.of()));
+
+    // Add autos on alliance change
+    new Trigger(
+            () -> {
+              boolean allianceChanged = !DriverStation.getAlliance().equals(lastAlliance);
+              lastAlliance = DriverStation.getAlliance();
+              return allianceChanged && DriverStation.getAlliance().isPresent();
+            })
+        .onTrue(Commands.runOnce(() -> addAutos()));
+  }
+
+  private void addAutos() {
+    autoChooser.addDefaultOption("None", Commands.none());
+
+    // Sysids
+    autoChooser.addOption("Hood Sysid", drum.runHoodSysid());
+    autoChooser.addOption("Flywheel Sysid", drum.runFlywheelSysid());
+    autoChooser.addOption("Indexer Sysid", indexer.runIndexerSysid());
+    autoChooser.addOption("Kicker Sysid", indexer.runKickerSysid());
+    autoChooser.addOption("Intake Roller Sysid", intake.runRollerSysid());
+    autoChooser.addOption("Intake Pivot Sysid", intake.runPivotSysid());
   }
 
   @Override

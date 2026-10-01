@@ -48,7 +48,7 @@ public class IndexerIO {
 
   // Set gear ratios
   public static final double GEAR_RATIO = 50 / 12;
-  public static final double KICKER_GEAR_RATIO = 30 / 12;
+  public static final double KICKER_GEAR_RATIO = 30.0 / 12;
 
   protected final TalonFX indexerMotor;
   protected final TalonFX kickerLeaderMotor;
