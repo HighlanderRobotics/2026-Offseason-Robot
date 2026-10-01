@@ -66,14 +66,14 @@ public class DrumSubsystem extends SubsystemBase {
   private SysIdRoutine flywheelSysid =
       new SysIdRoutine(
           new Config(
-              null, null, null, (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state)),
+              null, null, null, (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state.toString())),
           new Mechanism((voltage) -> flywheelIO.setVoltage(voltage.in(Volts)), null, this));
 
   // TODO: PROBABLY NEED TO REDUCE RAMP RATE ETC TO MAKE WORK
   private SysIdRoutine hoodSysid =
       new SysIdRoutine(
           new Config(
-              null, null, null, (state) -> Logger.recordOutput("Drum/Hood/SysID State", state)),
+              null, null, null, (state) -> Logger.recordOutput("Drum/Hood/SysID State", state.toString())),
           new Mechanism((voltage) -> hoodIO.setVoltage(voltage.in(Volts)), null, this));
 
   // For current zeroing
