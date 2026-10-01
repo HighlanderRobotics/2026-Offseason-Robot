@@ -6,7 +6,6 @@ package frc.robot;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -18,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.components.follower.FollowerIO;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.CANcoderIO;
@@ -64,18 +62,12 @@ public class Robot extends LoggedRobot {
               new PivotIOSim(8, SlapdownSubsystem.getPivotConfig(), canBus),
               new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
               new RollerIOSim(9, SlapdownSubsystem.getRollerConfig(), canBus),
-              new FollowerIO(
-                  10,
-                  9,
-                  MotorAlignmentValue.Opposed,
-                  canBus,
-                  SlapdownSubsystem.getRollerConfig())) // TODO: INTEGRATE SIM (idc enough rn)
+              canBus)
           : new SlapdownSubsystem(
               new PivotIO(8, SlapdownSubsystem.getPivotConfig(), canBus),
               new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
               new RollerIO(9, SlapdownSubsystem.getRollerConfig(), canBus),
-              new FollowerIO(
-                  10, 9, MotorAlignmentValue.Opposed, canBus, SlapdownSubsystem.getRollerConfig()));
+              canBus);
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);

@@ -32,9 +32,12 @@ public class RollerIOSim extends RollerIO {
     notifier =
         new Notifier(
             () -> {
-              double deltaTime = (Utils.getCurrentTimeSeconds() - lastLoopTime);
-              lastLoopTime = Utils.getCurrentTimeSeconds();
+              double currentTime = Utils.getCurrentTimeSeconds();
+              double deltaTime = (currentTime - lastLoopTime);
+              lastLoopTime = currentTime;
+
               talonSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+
               rollerSim.setInputVoltage(talonSim.getMotorVoltage());
               rollerSim.update(deltaTime);
               talonSim.setRawRotorPosition(

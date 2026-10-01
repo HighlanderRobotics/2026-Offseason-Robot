@@ -2,11 +2,13 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.MathUtil;
@@ -20,8 +22,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
+import frc.robot.Robot;
 import frc.robot.components.follower.FollowerIO;
 import frc.robot.components.follower.FollowerIOInputsAutoLogged;
+import frc.robot.components.follower.FollowerIOSim;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -66,11 +70,26 @@ public class SlapdownSubsystem extends SubsystemBase {
 
   // TODO: find actual filter value
   public SlapdownSubsystem(
-      PivotIO pivotIO, CANcoderIO cancoderIO, RollerIO rollerIO, FollowerIO followerIO) {
+      PivotIO pivotIO, CANcoderIO cancoderIO, RollerIO rollerIO, CANBus canBus) {
     this.pivotIO = pivotIO;
     this.cancoderIO = cancoderIO;
     this.rollerIO = rollerIO;
-    this.followerIO = followerIO;
+
+    if (Robot.isSimulation()) {
+      this.followerIO =
+          new FollowerIOSim(
+              10,
+              rollerIO.getMotorId(),
+              MotorAlignmentValue.Opposed,
+              canBus,
+              getRollerConfig(),
+              () -> rollerIOInputs.positionRotations,
+              () -> rollerIOInputs.velocityRotsPerSec);
+    } else {
+      this.followerIO =
+          new FollowerIO(
+              10, rollerIO.getMotorId(), MotorAlignmentValue.Opposed, canBus, getRollerConfig());
+    }
 
     rollerSysid =
         new SysIdRoutine(
@@ -239,8 +258,7 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-    config.Feedback.FeedbackRemoteSensorID = 0;
-    // TODO: set feedback remote sensorID
+    config.Feedback.FeedbackRemoteSensorID = 4;
     config.Feedback.RotorToSensorRatio = PIVOT_GEAR_RATIO;
 
     config.Feedback.SensorToMechanismRatio = CANCODER_TO_PIVOT;
@@ -258,9 +276,9 @@ public class SlapdownSubsystem extends SubsystemBase {
 
     config.CurrentLimits.StatorCurrentLimit = 30.0;
 
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimitEnable = false;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimitEnable = false;
     // TODO: set stator current limit, stator current lim enable, supply current
     // lim, supply current
     // lim enable
@@ -289,9 +307,9 @@ public class SlapdownSubsystem extends SubsystemBase {
     // TODO: set kS, kV, kA, kP, kD
 
     config.CurrentLimits.StatorCurrentLimit = 20.0;
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 0.0;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimitEnable = false;
+    config.CurrentLimits.SupplyCurrentLimit = 40.0;
+    config.CurrentLimits.SupplyCurrentLimitEnable = false;
     // TODO: set stator current lim, stator current lim enable, supply current lim,
     // supply current
     // lim enable
