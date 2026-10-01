@@ -5,6 +5,8 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -16,17 +18,16 @@ public class RollerIOSim extends RollerIO {
   // TODO: Find last loop time
   Notifier notifier;
 
-  public RollerIOSim(
-      int motorID,
-      TalonFXConfiguration config,
-      DCMotorSim motorSim,
-      MotorType motorType,
-      CANBus canbus) {
+  public RollerIOSim(int motorID, TalonFXConfiguration config, CANBus canbus) {
 
     super(motorID, config, canbus);
-    rollerSim = motorSim;
+    rollerSim =
+        new DCMotorSim(
+            LinearSystemId.createDCMotorSystem(
+                DCMotor.getKrakenX60Foc(2), 0.001, SlapdownSubsystem.ROLLER_GEAR_RATIO),
+            DCMotor.getKrakenX60Foc(2));
     talonSim = motor.getSimState();
-    talonSim.setMotorType(motorType);
+    talonSim.setMotorType(MotorType.KrakenX60);
 
     notifier =
         new Notifier(

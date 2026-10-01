@@ -23,7 +23,9 @@ import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.CANcoderIO;
 import frc.robot.subsystems.intake.PivotIO;
+import frc.robot.subsystems.intake.PivotIOSim;
 import frc.robot.subsystems.intake.RollerIO;
+import frc.robot.subsystems.intake.RollerIOSim;
 import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
@@ -57,12 +59,23 @@ public class Robot extends LoggedRobot {
   private IndexerSubsystem indexer = new IndexerSubsystem(canBus);
   private DrumSubsystem drum = new DrumSubsystem(canBus);
   private SlapdownSubsystem intake =
-      new SlapdownSubsystem(
-          new PivotIO(8, SlapdownSubsystem.getPivotConfig(), canBus),
-          new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
-          new RollerIO(9, SlapdownSubsystem.getRollerConfig(), canBus),
-          new FollowerIO(
-              10, 9, MotorAlignmentValue.Opposed, canBus, SlapdownSubsystem.getRollerConfig()));
+      Robot.isSimulation()
+          ? new SlapdownSubsystem(
+              new PivotIOSim(8, SlapdownSubsystem.getPivotConfig(), canBus),
+              new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
+              new RollerIOSim(9, SlapdownSubsystem.getRollerConfig(), canBus),
+              new FollowerIO(
+                  10,
+                  9,
+                  MotorAlignmentValue.Opposed,
+                  canBus,
+                  SlapdownSubsystem.getRollerConfig())) // TODO: INTEGRATE SIM (idc enough rn)
+          : new SlapdownSubsystem(
+              new PivotIO(8, SlapdownSubsystem.getPivotConfig(), canBus),
+              new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
+              new RollerIO(9, SlapdownSubsystem.getRollerConfig(), canBus),
+              new FollowerIO(
+                  10, 9, MotorAlignmentValue.Opposed, canBus, SlapdownSubsystem.getRollerConfig()));
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
