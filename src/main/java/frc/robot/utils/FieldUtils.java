@@ -147,8 +147,10 @@ public class FieldUtils {
       double minDistance = Double.MAX_VALUE;
       Pose2d trench = Pose2d.kZero;
       for (TrenchPoses t : TRENCH_POSES_LIST) {
-        if (Math.abs(t.pose.minus(pose).getTranslation().getNorm()) < minDistance) {
+        double distance = Math.abs(t.pose.minus(pose).getTranslation().getNorm());
+        if (distance < minDistance) {
           trench = t.pose;
+          minDistance = distance;
         }
       }
       return trench;
