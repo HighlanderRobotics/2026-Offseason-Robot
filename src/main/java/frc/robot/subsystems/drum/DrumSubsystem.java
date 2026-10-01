@@ -183,9 +183,12 @@ public class DrumSubsystem extends SubsystemBase {
   }
 
   public Command shoot(Supplier<ShotData> shotDataSupplier) {
-    return setFlywheelAndHood(
-        () -> shotDataSupplier.get().flywheelVelocityRotPerSec(),
-        () -> shotDataSupplier.get().hoodAngle());
+    return this.run(
+        () -> {
+          ShotData shotData = shotDataSupplier.get();
+          hoodIO.setPositionSetpoint(shotData.hoodAngle());
+          flywheelIO.setVelocitySetpoint(shotData.flywheelVelocityRotPerSec());
+        });
   }
 
   public Command spit() {
