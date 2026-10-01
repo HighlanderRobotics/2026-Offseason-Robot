@@ -106,12 +106,12 @@ public class InterpolatingShotTree {
    * @param down the smaller key
    * @return
    */
-  private double inverseInterpolate(Double up, Double query, Double down) {
-    double upperToLower = up.doubleValue() - down.doubleValue();
+  private double inverseInterpolate(double up, double query, double down) {
+    double upperToLower = up - down;
     if (upperToLower <= 0) {
       return 0.0;
     }
-    double queryToLower = query.doubleValue() - down.doubleValue();
+    double queryToLower = query - down;
     if (queryToLower <= 0) {
       return 0.0;
     }
