@@ -14,8 +14,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.components.follower.FollowerIO;
 import frc.robot.components.follower.FollowerIOInputsAutoLogged;
+
+import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -55,12 +61,27 @@ public class SlapdownSubsystem extends SubsystemBase {
   @AutoLogOutput(key = "Intake/Pivot/Current Filter Value")
   private double currentFilterValue = 0.0;
 
+  private SysIdRoutine rollerSysid;
+
+  private SysIdRoutine pivotSysid;
+
   // TODO: find actual filter value
   public SlapdownSubsystem(PivotIO pivotIO, CANcoderIO cancoderIO, RollerIO rollerIO, FollowerIO followerIO) {
     this.pivotIO = pivotIO;
     this.cancoderIO = cancoderIO;
     this.rollerIO = rollerIO;
     this.followerIO = followerIO;
+
+    rollerSysid =
+      new SysIdRoutine(
+          new Config(
+              null, null, null, (state) -> Logger.recordOutput("Intake/Roller/SysID State", state)),
+          new Mechanism((voltage) -> rollerIO.setRollerVoltage(voltage.in(Volts)), null, this));
+    pivotSysid =
+      new SysIdRoutine(
+          new Config(
+              null, null, null, (state) -> Logger.recordOutput("Intake/Pivot/SysID State", state)),
+          new Mechanism((voltage) -> pivotIO.setMotorVoltage(voltage.in(Volts)), null, this));
   }
 
   // TODO Auto-generated constructor stub
@@ -166,6 +187,31 @@ public class SlapdownSubsystem extends SubsystemBase {
   public boolean atExtension() {
     return MathUtil.isNear(getPositionSetpoint().getDegrees(), getPosition().getDegrees(), 10.0);
     // TODO: set .isNear tolerance
+  }
+
+  // Sysids
+  public Command runRollerSysid() {
+    return Commands.sequence(
+        rollerSysid.quasistatic(Direction.kForward),
+        rollerSysid.quasistatic(Direction.kReverse),
+        rollerSysid.dynamic(Direction.kForward),
+        rollerSysid.dynamic(Direction.kReverse));
+  }
+
+  public Command runPivotSysid() {
+    return Commands.sequence(
+        pivotSysid
+            .quasistatic(Direction.kForward)
+            .until(() -> pivotIOInputs.position.getDegrees() > (PIVOT_MAX_POSITION.getDegrees() - 5)),
+        pivotSysid
+            .quasistatic(Direction.kReverse)
+            .until(() -> pivotIOInputs.position.getDegrees() < (PIVOT_MIN_POSITION.getDegrees() + 5)),
+        pivotSysid
+            .dynamic(Direction.kForward)
+            .until(() -> pivotIOInputs.position.getDegrees() > (PIVOT_MAX_POSITION.getDegrees() - 5)),
+        pivotSysid
+            .dynamic(Direction.kReverse)
+            .until(() -> pivotIOInputs.position.getDegrees() < (PIVOT_MIN_POSITION.getDegrees() + 5)));
   }
 
   public static TalonFXConfiguration getPivotConfig() {
