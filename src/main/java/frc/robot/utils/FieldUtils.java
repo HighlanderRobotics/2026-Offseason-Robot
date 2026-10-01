@@ -46,7 +46,7 @@ public class FieldUtils {
     RED_BACK_RIGHT(ChoreoAllianceFlipUtil.flip(BLUE_BACK_RIGHT.getPose())),
     RED_BACK_LEFT(ChoreoAllianceFlipUtil.flip(BLUE_BACK_LEFT.getPose()));
 
-    private Pose2d targetPose;
+    private final Pose2d targetPose;
 
     private FeedTargets(Pose2d pose) {
       this.targetPose = pose;
@@ -98,9 +98,9 @@ public class FieldUtils {
     RED_RIGHT(ChoreoAllianceFlipUtil.flip(BLUE_RIGHT.getPose()), false, false),
     RED_LEFT(ChoreoAllianceFlipUtil.flip(BLUE_LEFT.getPose()), true, false);
 
-    private Pose2d targetPose;
-    private boolean leftHanded;
-    private boolean isBlueAlliance;
+    private final Pose2d targetPose;
+    private final boolean leftHanded;
+    private final boolean isBlueAlliance;
 
     private ClimbTargets(Pose2d pose, boolean leftHanded, boolean isBlueAlliance) {
       this.targetPose = pose;
@@ -130,7 +130,7 @@ public class FieldUtils {
     RED_LEFT(ChoreoAllianceFlipUtil.flip(BLUE_LEFT.getPose())),
     RED_RIGHT(ChoreoAllianceFlipUtil.flip(BLUE_RIGHT.getPose()));
 
-    private Pose2d pose;
+    private final Pose2d pose;
 
     private TrenchPoses(Pose2d pose) {
       this.pose = pose;
