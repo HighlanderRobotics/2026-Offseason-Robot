@@ -83,16 +83,13 @@ public class IndexerIO {
       new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
   public IndexerIO(CANBus canBus) {
-    // TODO: set motor ID for indexer
-    indexerMotor = new TalonFX(16, canBus);
+    indexerMotor = new TalonFX(11, canBus);
     indexerMotor.getConfigurator().apply(IndexerIO.getIndexerConfiguration());
 
-    // TODO: set motor ID for kicker leader
-    kickerLeaderMotor = new TalonFX(15, canBus);
+    kickerLeaderMotor = new TalonFX(12, canBus);
     kickerLeaderMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
 
-    // TODO: set motor ID for kicker follower
-    kickerFollowerMotor = new TalonFX(14, canBus);
+    kickerFollowerMotor = new TalonFX(13, canBus);
     kickerFollowerMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
 
     // Set kicker follower to follow leader
