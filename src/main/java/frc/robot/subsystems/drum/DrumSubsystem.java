@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -66,14 +67,20 @@ public class DrumSubsystem extends SubsystemBase {
   private SysIdRoutine flywheelSysid =
       new SysIdRoutine(
           new Config(
-              null, null, null, (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state.toString())),
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state.toString())),
           new Mechanism((voltage) -> flywheelIO.setVoltage(voltage.in(Volts)), null, this));
 
   // TODO: PROBABLY NEED TO REDUCE RAMP RATE ETC TO MAKE WORK
   private SysIdRoutine hoodSysid =
       new SysIdRoutine(
           new Config(
-              null, null, null, (state) -> Logger.recordOutput("Drum/Hood/SysID State", state.toString())),
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Drum/Hood/SysID State", state.toString())),
           new Mechanism((voltage) -> hoodIO.setVoltage(voltage.in(Volts)), null, this));
 
   // For current zeroing
@@ -255,9 +262,10 @@ public class DrumSubsystem extends SubsystemBase {
     config.MotionMagic.MotionMagicAcceleration = 10.0; // TODO: CALCULATE ACTUAL VALUE
 
     // Slot 0 is motion magic velocity pidf
+    // TODO: RETUNE. FROM SIM
     config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.0;
-    config.Slot0.kA = 0.0;
+    config.Slot0.kV = 0.16507;
+    config.Slot0.kA = 0.005124;
     config.Slot0.kP = 0.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.0;
@@ -285,12 +293,15 @@ public class DrumSubsystem extends SubsystemBase {
     config.MotionMagic.MotionMagicAcceleration = 10.0;
 
     // Slot 0 is motion magic position pidf
-    config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.0;
-    config.Slot0.kA = 0.0;
-    config.Slot0.kP = 0.0;
+    // TODO: RETUNE. FROM SIM
+    config.Slot0.kS = 0.0081573;
+    config.Slot0.kV = 4.1623;
+    config.Slot0.kA = 0.12057;
+    config.Slot0.kG = 0.30471;
+    config.Slot0.kP = 10.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.0;
+    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
     return config;
   }

@@ -158,9 +158,11 @@ public class IndexerIO {
     config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
     // Set PID values
+    // TODO: NEEDS RETUNING! FROM SIM
     config.Slot0.kS = 0;
     config.Slot0.kG = 0;
-    config.Slot0.kV = 0;
+    config.Slot0.kV = 0.49448;
+    config.Slot0.kA = 0.032974;
     config.Slot0.kP = 0;
     config.Slot0.kD = 0;
 
@@ -182,9 +184,11 @@ public class IndexerIO {
     config.Feedback.SensorToMechanismRatio = KICKER_GEAR_RATIO;
 
     // Set PID values
-    config.Slot0.kS = 0;
+    // TODO: RETUNE IRL
+    config.Slot0.kS = 0.018992;
     config.Slot0.kG = 0;
-    config.Slot0.kV = 0;
+    config.Slot0.kV = 0.30798;
+    config.Slot0.kA = 0.022312;
     config.Slot0.kP = 0;
     config.Slot0.kD = 0;
 
