@@ -241,9 +241,13 @@ public class DrumSubsystem extends SubsystemBase {
   public boolean readyToShoot() {
     // TODO: TUNE tolerances
     return MathUtil.isNear(
-            flywheelIO.getSetpointRotPerSec(), flywheelIOInputs.velocityRotPerSec, FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC)
+            flywheelIO.getSetpointRotPerSec(),
+            flywheelIOInputs.velocityRotPerSec,
+            FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC)
         && MathUtil.isNear(
-            hoodIO.getAngleSetpoint().getDegrees(), hoodIOInputs.position.getDegrees(), HOOD_ANGLE_TOLERANCE_DEG);
+            hoodIO.getAngleSetpoint().getDegrees(),
+            hoodIOInputs.position.getDegrees(),
+            HOOD_ANGLE_TOLERANCE_DEG);
   }
 
   // Configs
