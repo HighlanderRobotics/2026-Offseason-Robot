@@ -12,12 +12,45 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Mass;
+import frc.robot.components.camera.Camera.CameraConstants;
 import frc.robot.subsystems.swerve.module.Module.ModuleConstants;
 
 public class DumperSwerveConstants extends SwerveConstants {
 
+  @Override
+  public CameraConstants[] getCameraConstants() {
+    final CameraConstants backLeftCameraConstants = 
+      new CameraConstants(
+        "Back_Left", 
+        // TODO: FROM CAD
+        new Transform3d(
+          new Translation3d(-0.342612, -0.255814, 0.480683),
+          new Rotation3d(0.0, 0.0, 0.0)
+        ), 
+        null, 
+        null
+      );
+    final CameraConstants backRightCameraConstants = 
+      new CameraConstants(
+        "Back_Right", 
+        // TODO: FROM CAD
+        new Transform3d(
+          new Translation3d(-0.342502, 0.256376, 0.480406),
+          new Rotation3d(0.0, 0.0, 0.0)
+        ), 
+        null, 
+        null
+      );
+    return new CameraConstants[] {
+      backLeftCameraConstants,
+      backRightCameraConstants
+    };
+  }
 
   @Override
   public String getName() {
