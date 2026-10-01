@@ -14,6 +14,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.components.follower.FollowerIO;
+import frc.robot.components.follower.FollowerIOInputsAutoLogged;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -42,6 +45,9 @@ public class SlapdownSubsystem extends SubsystemBase {
   private final RollerIO rollerIO;
   private RollerIOInputsAutoLogged rollerIOInputs = new RollerIOInputsAutoLogged();
 
+  private final FollowerIO followerIO;
+  private FollowerIOInputsAutoLogged followerIOInputs = new FollowerIOInputsAutoLogged();
+
   private Trigger atExtensionTrigger = new Trigger(this::atExtension).debounce(0.0);
   // TODO: find actual trigger debounce
   private LinearFilter currentFilter = LinearFilter.movingAverage(5);
@@ -50,10 +56,11 @@ public class SlapdownSubsystem extends SubsystemBase {
   private double currentFilterValue = 0.0;
 
   // TODO: find actual filter value
-  public SlapdownSubsystem(PivotIO pivotIO, CANcoderIO cancoderIO, RollerIO rollerIO) {
+  public SlapdownSubsystem(PivotIO pivotIO, CANcoderIO cancoderIO, RollerIO rollerIO, FollowerIO followerIO) {
     this.pivotIO = pivotIO;
     this.cancoderIO = cancoderIO;
     this.rollerIO = rollerIO;
+    this.followerIO = followerIO;
   }
 
   // TODO Auto-generated constructor stub
@@ -71,7 +78,10 @@ public class SlapdownSubsystem extends SubsystemBase {
     Logger.processInputs("Intake/CANcoder", cancoderIOInputs);
 
     rollerIO.updateInputs(rollerIOInputs);
-    Logger.processInputs("Intake/Roller", rollerIOInputs);
+    Logger.processInputs("Intake/Roller Leader", rollerIOInputs);
+
+    followerIO.updateInputs(followerIOInputs);
+    Logger.processInputs("Intake/Roller Follower", followerIOInputs);
 
     Logger.recordOutput("Intake/Pivot/Setpoint", pivotIO.getSetpoint());
 

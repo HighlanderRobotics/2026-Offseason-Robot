@@ -6,11 +6,14 @@ package frc.robot;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.components.follower.FollowerIO;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.CANcoderIO;
@@ -47,9 +50,10 @@ public class Robot extends LoggedRobot {
   private DrumSubsystem drum = new DrumSubsystem(canBus);
   private SlapdownSubsystem intake =
       new SlapdownSubsystem(
-          new PivotIO(0, SlapdownSubsystem.getPivotConfig(), canBus),
-          new CANcoderIO(0, SlapdownSubsystem.getCancoderConfig(), canBus),
-          new RollerIO(0, SlapdownSubsystem.getRollerConfig(), canBus));
+          new PivotIO(8, SlapdownSubsystem.getPivotConfig(), canBus),
+          new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
+          new RollerIO(9, SlapdownSubsystem.getRollerConfig(), canBus),
+          new FollowerIO(10, 9, MotorAlignmentValue.Opposed, canBus, SlapdownSubsystem.getRollerConfig()));
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
