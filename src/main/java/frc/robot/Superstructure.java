@@ -26,6 +26,8 @@ public class Superstructure {
     FEED_FLOW,
     SPIN_UP_SCORE,
     SPIN_UP_FEED,
+    SPIN_UP_SCORE_FLOW,
+    SPIN_UP_FEED_FLOW,
     DEFENSE,
     SPIT;
 
@@ -132,19 +134,23 @@ public class Superstructure {
     bindTransition(SuperState.IDLE, intakeReq, SuperState.INTAKE);
     bindTransition(SuperState.INTAKE, intakeReq.negate(), SuperState.IDLE);
 
-    bindTransition(SuperState.IDLE, scoreReq, SuperState.SPIN_UP_SCORE);
+    bindTransition(SuperState.IDLE, scoreReq.and(flowReq.negate()), SuperState.SPIN_UP_SCORE);
+    bindTransition(SuperState.IDLE, scoreReq.and(flowReq), SuperState.SPIN_UP_SCORE_FLOW);
     bindTransition(SuperState.SPIN_UP_SCORE, scoreReq.negate(), SuperState.IDLE);
+    bindTransition(SuperState.SPIN_UP_SCORE_FLOW, scoreReq.negate(), SuperState.IDLE);
     bindTransition(SuperState.SPIN_UP_SCORE, shooterReady.and(flowReq.negate()), SuperState.SCORE);
-    bindTransition(SuperState.SPIN_UP_SCORE, shooterReady.and(flowReq), SuperState.SCORE_FLOW);
+    bindTransition(SuperState.SPIN_UP_SCORE_FLOW, shooterReady.and(flowReq), SuperState.SCORE_FLOW);
     bindTransition(SuperState.SCORE, flowReq, SuperState.SCORE_FLOW);
     bindTransition(SuperState.SCORE_FLOW, flowReq.negate(), SuperState.SCORE);
     bindTransition(SuperState.SCORE, scoreReq.negate(), SuperState.IDLE);
     bindTransition(SuperState.SCORE_FLOW, scoreReq.negate(), SuperState.IDLE);
 
-    bindTransition(SuperState.IDLE, feedReq, SuperState.SPIN_UP_FEED);
+    bindTransition(SuperState.IDLE, feedReq.and(flowReq.negate()), SuperState.SPIN_UP_FEED);
+    bindTransition(SuperState.IDLE, feedReq.and(flowReq), SuperState.SPIN_UP_FEED_FLOW);
     bindTransition(SuperState.SPIN_UP_FEED, feedReq.negate(), SuperState.IDLE);
+    bindTransition(SuperState.SPIN_UP_FEED_FLOW, feedReq.negate(), SuperState.IDLE);
     bindTransition(SuperState.SPIN_UP_FEED, shooterReady.and(flowReq.negate()), SuperState.FEED);
-    bindTransition(SuperState.SPIN_UP_FEED, shooterReady.and(flowReq), SuperState.FEED_FLOW);
+    bindTransition(SuperState.SPIN_UP_FEED_FLOW, shooterReady.and(flowReq), SuperState.FEED_FLOW);
     bindTransition(SuperState.FEED, flowReq, SuperState.FEED_FLOW);
     bindTransition(SuperState.FEED_FLOW, flowReq.negate(), SuperState.FEED);
     bindTransition(SuperState.FEED, feedReq.negate(), SuperState.IDLE);
