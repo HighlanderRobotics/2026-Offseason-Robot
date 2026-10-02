@@ -23,6 +23,10 @@ public class Autos {
   public static Trigger autoIntakeReq =
       new Trigger(() -> autoIntake).and(DriverStation::isAutonomous);
 
+  @AutoLogOutput(key = "Superstructure/Auto Score Request")
+  public static Trigger autoScoreReq =
+      new Trigger(() -> autoScore).and(DriverStation::isAutonomous);
+
   public enum Action {
     NOTHING,
     DELAYED_SCORE,
@@ -31,10 +35,15 @@ public class Autos {
 
   // testing please organize later :)
   public enum Path {
-    // testing
-    LStartToFirstDip("LTStartToFirstDip", Action.NOTHING),
-    LDipToFirstShoot("LTDipToFirstShootBump", Action.NOTHING),
-    LSecondDip("LTSecondDip", Action.NOTHING);
+    // intake
+    LStartToFirstDip("LTStartToFirstDip", Action.INTAKE),
+    LSecondDip("LTSecondDip", Action.INTAKE),
+    RStartToFirstDip("RTStartToFirstDip", Action.INTAKE),
+    RTSecondDip("RTSecondDip", Action.INTAKE),
+
+    // shoot
+    LDipToFirstShoot("LTDipToFirstShootBump", Action.DELAYED_SCORE),
+    RDipToFirstShoot("RTDipToFirstShootBump", Action.DELAYED_SCORE);
 
     private final String name;
     private final Action action;
@@ -100,7 +109,8 @@ public class Autos {
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()),
         stopIntaking(),
         startScoring(),
-        Commands.waitSeconds(3));
+        swerve.stopForTime(() -> 4),
+        stopScoring());
   }
 
   public Command intakeScorePath(Path path, AutoRoutine routine) {
@@ -109,6 +119,7 @@ public class Autos {
         startIntaking(),
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()));
   }
+
 
   public Command shootPreload() {
     return Commands.sequence(startScoring(), swerve.stop().repeatedly().withTimeout(3));
@@ -154,11 +165,19 @@ public class Autos {
     return createAuto("Single dip auto", new Path[] {Path.LStartToFirstDip, Path.LDipToFirstShoot});
   }
 
-  public Command getTestDoubleDipAuto() {
+  public Command getLTDoubleDipAuto() {
     return createAuto(
-        "Single dip auto",
+        "Left Trench Double Dip Auto",
         new Path[] {
           Path.LStartToFirstDip, Path.LDipToFirstShoot, Path.LSecondDip, Path.LDipToFirstShoot
+        });
+  }
+
+  public Command getRTDoubleDipAuto() {
+    return createAuto(
+        "Right Trench Double Dip Auto",
+        new Path[] {
+          Path.RStartToFirstDip, Path.RDipToFirstShoot, Path.RTSecondDip, Path.RDipToFirstShoot
         });
   }
 }

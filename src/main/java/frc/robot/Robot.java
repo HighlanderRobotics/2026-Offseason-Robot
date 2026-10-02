@@ -172,7 +172,8 @@ public class Robot extends LoggedRobot {
         "Regenerating Autos on " + DriverStation.getAlliance().map((a) -> a.toString()));
 
     autoChooser.addOption("Single Dip Auto TEST", autos.getTesting());
-    autoChooser.addOption("Double Auto TEST", autos.getTestDoubleDipAuto());
+    autoChooser.addOption("Double Dip Auto Left Trench", autos.getLTDoubleDipAuto());
+    autoChooser.addOption("Double Dip Auto Right Trench", autos.getRTDoubleDipAuto());
 
     haveAutosGenerated = true;
     System.out.println("Done generating autos");
