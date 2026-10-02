@@ -174,6 +174,8 @@ public class Robot extends LoggedRobot {
     autoChooser.addOption("Single Dip Auto TEST", autos.getTesting());
     autoChooser.addOption("Double Dip Auto Left Trench", autos.getLTDoubleDipAuto());
     autoChooser.addOption("Double Dip Auto Right Trench", autos.getRTDoubleDipAuto());
+    autoChooser.addOption("Partner Single Dip Left Trench", autos.getLTPartnerSingleDipAuto());
+    autoChooser.addOption("Partner Single Dip Right Trench", autos.getRTPartnerSingleDipAuto());
 
     haveAutosGenerated = true;
     System.out.println("Done generating autos");

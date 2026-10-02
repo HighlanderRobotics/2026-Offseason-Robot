@@ -38,9 +38,12 @@ public class Autos {
     // intake
     LStartToFirstDip("LTStartToFirstDip", Action.INTAKE),
     LSecondDip("LTSecondDip", Action.INTAKE),
+    LPartnerStartToFirstDip("PartnerLStartTrenchToFirstDip", Action.INTAKE),
+    LPartnerSecondDip("PartnerLTSecondDip", Action.INTAKE),
     RStartToFirstDip("RTStartToFirstDip", Action.INTAKE),
     RTSecondDip("RTSecondDip", Action.INTAKE),
-
+    RPartnerStartToFirstDip("PartnerRStartTrenchToFirstDip", Action.INTAKE),
+    RPartnerTSecondDip("PartnerRTSecondDip", Action.INTAKE),
     // shoot
     LDipToFirstShoot("LTDipToFirstShootBump", Action.DELAYED_SCORE),
     RDipToFirstShoot("RTDipToFirstShootBump", Action.DELAYED_SCORE);
@@ -120,7 +123,6 @@ public class Autos {
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()));
   }
 
-
   public Command shootPreload() {
     return Commands.sequence(startScoring(), swerve.stop().repeatedly().withTimeout(3));
   }
@@ -179,5 +181,17 @@ public class Autos {
         new Path[] {
           Path.RStartToFirstDip, Path.RDipToFirstShoot, Path.RTSecondDip, Path.RDipToFirstShoot
         });
+  }
+
+  public Command getRTPartnerSingleDipAuto() {
+    return createAuto(
+        "Partner Right Trench Single Dip Auto",
+        new Path[] {Path.RPartnerStartToFirstDip, Path.RDipToFirstShoot, Path.RPartnerTSecondDip});
+  }
+
+  public Command getLTPartnerSingleDipAuto() {
+    return createAuto(
+        "Partner Left Trench Single Dip Auto",
+        new Path[] {Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot, Path.LPartnerSecondDip});
   }
 }
