@@ -9,6 +9,8 @@
 - FEED_FLOW (Intake and shoot at feed zone at same time)
 - SPIN_UP_SCORE (wait for flywheel to spin to velocity before indexing)
 - SPIN_UP_FEED (wait for flywheel to spin up before indexing)
+- SPIN_UP_SCORE_FLOW (intake while waiting for flywheel to spin to velocity before indexing)
+- SPIN_UP_FEED_FLOW (intake while waiting for flywheel to spin up before indexing)
 
 ## Transitions
 IDLE goes to INTAKE on an intake request, and INTAKE returns to IDLE when the request ends
