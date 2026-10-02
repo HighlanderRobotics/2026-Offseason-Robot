@@ -1,5 +1,7 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -10,6 +12,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import org.littletonrobotics.junction.Logger;
 
 public class RollerIOSim extends RollerIO {
   private final DCMotorSim rollerSim;
@@ -38,13 +41,41 @@ public class RollerIOSim extends RollerIO {
 
               talonSim.setSupplyVoltage(RobotController.getBatteryVoltage());
 
-              rollerSim.setInputVoltage(talonSim.getMotorVoltage());
+              rollerSim.setInputVoltage(-talonSim.getMotorVoltage());
               rollerSim.update(deltaTime);
               talonSim.setRawRotorPosition(
-                  rollerSim.getAngularPositionRotations() * rollerSim.getGearing());
+                  rollerSim.getAngularPositionRotations() * SlapdownSubsystem.ROLLER_GEAR_RATIO);
               talonSim.setRotorVelocity(
-                  (rollerSim.getAngularVelocityRPM() * 60) * rollerSim.getGearing());
+                  rollerSim.getAngularVelocity().in(RotationsPerSecond)
+                      * SlapdownSubsystem.ROLLER_GEAR_RATIO);
             });
     notifier.startPeriodic(0.002);
   }
+
+  // @Override
+  // public void updateInputs(RollerIOInputs inputs) {
+  //   double batVoltage = RobotController.getBatteryVoltage();
+  //   Logger.recordOutput("Battery Voltage", batVoltage);
+  //   talonSim.setSupplyVoltage(batVoltage);
+
+  //   Logger.recordOutput("Intake/Motor Voltage", talonSim.getMotorVoltage());
+
+  //   rollerSim.setInputVoltage(talonSim.getMotorVoltage());
+  //   rollerSim.update(0.02);
+
+  //   Logger.recordOutput("Sim roller pos", rollerSim.getAngularPosition());
+  //   Logger.recordOutput("Sim roller vel", rollerSim.getAngularVelocity().in(RotationsPerSecond));
+
+  //   super.updateInputs(inputs);
+
+  //   inputs.appliedVoltage = rollerSim.getInputVoltage();
+  //   // inputs.positionRotations = rollerSim.getAngularPositionRotations();
+  //   // inputs.velocityRotsPerSec =
+  //   // Units.radiansToRotations(rollerSim.getAngularVelocityRadPerSec());
+  //   talonSim.setRawRotorPosition(
+  //       rollerSim.getAngularPositionRotations() * SlapdownSubsystem.ROLLER_GEAR_RATIO);
+  //   talonSim.setRotorVelocity(
+  //       (rollerSim.getAngularVelocity().in(RotationsPerSecond))
+  //           * SlapdownSubsystem.ROLLER_GEAR_RATIO);
+  // }
 }
