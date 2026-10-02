@@ -13,6 +13,10 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
+import frc.robot.subsystems.intake.CANcoderIO;
+import frc.robot.subsystems.intake.PivotIO;
+import frc.robot.subsystems.intake.RollerIO;
+import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
@@ -41,9 +45,17 @@ public class Robot extends LoggedRobot {
   private SwerveSubsystem swerve = new SwerveSubsystem(canBus);
   private IndexerSubsystem indexer = new IndexerSubsystem(canBus);
   private DrumSubsystem drum = new DrumSubsystem(canBus);
+  private SlapdownSubsystem intake =
+      new SlapdownSubsystem(
+          new PivotIO(0, SlapdownSubsystem.getPivotConfig(), canBus),
+          new CANcoderIO(0, SlapdownSubsystem.getCancoderConfig(), canBus),
+          new RollerIO(0, SlapdownSubsystem.getRollerConfig(), canBus));
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
+
+  private Superstructure superstructure =
+      new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
@@ -109,6 +121,8 @@ public class Robot extends LoggedRobot {
             .withName("Teleop drive"));
 
     indexer.setDefaultCommand(indexer.rest());
+    intake.setDefaultCommand(intake.restExtended());
+    drum.setDefaultCommand(drum.rest());
 
     drum.setDefaultCommand(drum.setFlywheelAndHoodVoltage(() -> 0.0, () -> 0.0));
 
@@ -119,6 +133,11 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    superstructure.simulationPeriodic();
   }
 
   // Use obstacle-free simulation arena
