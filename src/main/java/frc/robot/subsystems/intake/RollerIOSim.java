@@ -50,31 +50,5 @@ public class RollerIOSim extends RollerIO {
             });
     notifier.startPeriodic(0.002);
   }
-
-  // @Override
-  // public void updateInputs(RollerIOInputs inputs) {
-  //   double batVoltage = RobotController.getBatteryVoltage();
-  //   Logger.recordOutput("Battery Voltage", batVoltage);
-  //   talonSim.setSupplyVoltage(batVoltage);
-
-  //   Logger.recordOutput("Intake/Motor Voltage", talonSim.getMotorVoltage());
-
-  //   rollerSim.setInputVoltage(talonSim.getMotorVoltage());
-  //   rollerSim.update(0.02);
-
-  //   Logger.recordOutput("Sim roller pos", rollerSim.getAngularPosition());
-  //   Logger.recordOutput("Sim roller vel", rollerSim.getAngularVelocity().in(RotationsPerSecond));
-
-  //   super.updateInputs(inputs);
-
-  //   inputs.appliedVoltage = rollerSim.getInputVoltage();
-  //   // inputs.positionRotations = rollerSim.getAngularPositionRotations();
-  //   // inputs.velocityRotsPerSec =
-  //   // Units.radiansToRotations(rollerSim.getAngularVelocityRadPerSec());
-  //   talonSim.setRawRotorPosition(
-  //       rollerSim.getAngularPositionRotations() * SlapdownSubsystem.ROLLER_GEAR_RATIO);
-  //   talonSim.setRotorVelocity(
-  //       (rollerSim.getAngularVelocity().in(RotationsPerSecond))
-  //           * SlapdownSubsystem.ROLLER_GEAR_RATIO);
-  // }
+  
 }
