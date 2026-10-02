@@ -12,7 +12,6 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import org.littletonrobotics.junction.Logger;
 
 public class RollerIOSim extends RollerIO {
   private final DCMotorSim rollerSim;
@@ -27,7 +26,7 @@ public class RollerIOSim extends RollerIO {
     rollerSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX60Foc(2), 0.001, SlapdownSubsystem.ROLLER_GEAR_RATIO),
+                DCMotor.getKrakenX60Foc(2), 0.00001, SlapdownSubsystem.ROLLER_GEAR_RATIO),
             DCMotor.getKrakenX60Foc(2));
     talonSim = motor.getSimState();
     talonSim.setMotorType(MotorType.KrakenX60);
@@ -41,7 +40,7 @@ public class RollerIOSim extends RollerIO {
 
               talonSim.setSupplyVoltage(RobotController.getBatteryVoltage());
 
-              rollerSim.setInputVoltage(-talonSim.getMotorVoltage());
+              rollerSim.setInputVoltage(talonSim.getMotorVoltage());
               rollerSim.update(deltaTime);
               talonSim.setRawRotorPosition(
                   rollerSim.getAngularPositionRotations() * SlapdownSubsystem.ROLLER_GEAR_RATIO);

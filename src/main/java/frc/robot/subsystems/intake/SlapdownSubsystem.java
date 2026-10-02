@@ -97,7 +97,7 @@ public class SlapdownSubsystem extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("Intake/Roller/SysID State", state)),
+                (state) -> Logger.recordOutput("Intake/Roller/SysID State", state.toString())),
             new Mechanism((voltage) -> rollerIO.setRollerVoltage(voltage.in(Volts)), null, this));
     pivotSysid =
         new SysIdRoutine(
@@ -105,7 +105,7 @@ public class SlapdownSubsystem extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("Intake/Pivot/SysID State", state)),
+                (state) -> Logger.recordOutput("Intake/Pivot/SysID State", state.toString())),
             new Mechanism((voltage) -> pivotIO.setMotorVoltage(voltage.in(Volts)), null, this));
   }
 
