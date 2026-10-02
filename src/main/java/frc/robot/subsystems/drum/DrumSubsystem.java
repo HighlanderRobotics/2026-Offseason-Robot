@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
@@ -29,12 +30,15 @@ import frc.robot.subsystems.drum.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.drum.hood.HoodIO;
 import frc.robot.subsystems.drum.hood.HoodIOInputsAutoLogged;
 import frc.robot.subsystems.drum.hood.HoodIOSim;
+import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class DrumSubsystem extends SubsystemBase {
+  public static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0;
+  public static final double FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC = 5.0;
   public static final int FLYWHEEL_LEADER_ID = 15;
   // Ratio to main drum
   public static final double FLYWHEEL_GEAR_RATIO = 24.0 / 18.0;
@@ -173,6 +177,25 @@ public class DrumSubsystem extends SubsystemBase {
         });
   }
 
+  public Command rest() {
+    // Maybe should keep spinning somewhat
+    return setFlywheelAndHood(() -> 0.0, () -> HOOD_MIN_ANGLE);
+  }
+
+  public Command shoot(Supplier<ShotData> shotDataSupplier) {
+    return this.run(
+        () -> {
+          ShotData shotData = shotDataSupplier.get();
+          hoodIO.setPositionSetpoint(shotData.hoodAngle());
+          flywheelIO.setVelocitySetpoint(shotData.flywheelVelocityRotPerSec());
+        });
+  }
+
+  public Command spit() {
+    // Might need to tune this...
+    return setFlywheelAndHood(() -> 30.0, () -> HOOD_MIN_ANGLE);
+  }
+
   // TODO: MORE COMMANDS WHEN SUPERSTRUCTURE IS INTEGRATED
 
   // Current zeroing
@@ -207,6 +230,18 @@ public class DrumSubsystem extends SubsystemBase {
         hoodSysid
             .dynamic(Direction.kReverse)
             .until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)));
+  }
+
+  public boolean readyToShoot() {
+    // TODO: TUNE tolerances
+    return MathUtil.isNear(
+            flywheelIO.getSetpointRotPerSec(),
+            flywheelIOInputs.velocityRotPerSec,
+            FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC)
+        && MathUtil.isNear(
+            hoodIO.getAngleSetpoint().getDegrees(),
+            hoodIOInputs.position.getDegrees(),
+            HOOD_ANGLE_TOLERANCE_DEG);
   }
 
   // Configs

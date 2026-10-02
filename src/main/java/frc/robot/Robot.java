@@ -19,6 +19,10 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
+import frc.robot.subsystems.intake.CANcoderIO;
+import frc.robot.subsystems.intake.PivotIO;
+import frc.robot.subsystems.intake.RollerIO;
+import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
@@ -51,6 +55,11 @@ public class Robot extends LoggedRobot {
   private SwerveSubsystem swerve = new SwerveSubsystem(canBus);
   private IndexerSubsystem indexer = new IndexerSubsystem(canBus);
   private DrumSubsystem drum = new DrumSubsystem(canBus);
+  private SlapdownSubsystem intake =
+      new SlapdownSubsystem(
+          new PivotIO(0, SlapdownSubsystem.getPivotConfig(), canBus),
+          new CANcoderIO(0, SlapdownSubsystem.getCancoderConfig(), canBus),
+          new RollerIO(0, SlapdownSubsystem.getRollerConfig(), canBus));
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
@@ -60,6 +69,9 @@ public class Robot extends LoggedRobot {
   private Optional<Alliance> lastAlliance = Optional.empty();
   @AutoLogOutput boolean haveAutosGenerated = false;
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Autos");
+
+  private Superstructure superstructure =
+      new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
@@ -159,6 +171,15 @@ public class Robot extends LoggedRobot {
                   "Interrputing: "
                       + (interrupting.isPresent() ? interrupting.get().getName() : "none"));
             });
+
+    indexer.setDefaultCommand(indexer.rest());
+    intake.setDefaultCommand(intake.restExtended());
+    drum.setDefaultCommand(drum.rest());
+
+    drum.setDefaultCommand(drum.setFlywheelAndHoodVoltage(() -> 0.0, () -> 0.0));
+
+    driver.a().whileTrue(drum.setFlywheelAndHoodVoltage(() -> 10.0, () -> 10.0));
+    driver.b().whileTrue(drum.runCurrentZeroing());
   }
 
   @Override
@@ -179,6 +200,11 @@ public class Robot extends LoggedRobot {
 
     haveAutosGenerated = true;
     System.out.println("Done generating autos");
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    superstructure.simulationPeriodic();
   }
 
   // Use obstacle-free simulation arena
