@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Autos.Action;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.utils.FieldUtils;
+import frc.robot.utils.FieldUtils.TrenchPoses;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -122,6 +125,21 @@ public class Autos {
         startIntaking(),
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()));
   }
+  public void lockHoodUnderTrench(AutoRoutine routine, double toleranceMeters) {
+    routine
+        .observe(
+            () ->
+            // swerve.getPose().getTranslation().minus(trench.getTranslation()).getNorm()
+            // swerve.getPose().minus(trench).getTranslation().getNorm() < tolerance)
+            {
+              for (TrenchPoses t : FieldUtils.TrenchPoses.values()) {
+                if (swerve.getPose().minus(t.getPose()).getTranslation().getNorm()
+                    < toleranceMeters) return true;
+              }
+              return false;
+            })
+        .whileTrue(Commands.run(() -> stopScoring()));
+  }
 
   public Command shootPreload() {
     return Commands.sequence(startScoring(), swerve.stop().repeatedly().withTimeout(3));
@@ -154,6 +172,7 @@ public class Autos {
 
   public Command createAuto(String name, Path[] paths, Command... startingCommands) {
     final AutoRoutine routine = factory.newRoutine(name);
+    lockHoodUnderTrench(routine, 1);
 
     Command autoCommand = paths[0].getTrajectory(routine).resetOdometry().andThen(startingCommands);
     for (Path p : paths) {
