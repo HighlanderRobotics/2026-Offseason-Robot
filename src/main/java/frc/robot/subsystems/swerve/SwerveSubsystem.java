@@ -35,7 +35,7 @@ import frc.robot.Robot.RobotMode;
 import frc.robot.components.camera.Camera;
 import frc.robot.components.camera.CameraIOReal;
 import frc.robot.components.camera.CameraIOSim;
-import frc.robot.subsystems.swerve.constants.AlphaSwerveConstants;
+import frc.robot.subsystems.swerve.constants.DumperSwerveConstants;
 import frc.robot.subsystems.swerve.constants.SwerveConstants;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
@@ -69,7 +69,7 @@ import org.littletonrobotics.junction.Logger;
 public class SwerveSubsystem extends SubsystemBase {
   // decide which set of swerve constants to use based on robot edition
   // defaulting to comp is probably safer?
-  public static final SwerveConstants SWERVE_CONSTANTS = new AlphaSwerveConstants();
+  public static final SwerveConstants SWERVE_CONSTANTS = new DumperSwerveConstants();
 
   private final Module[] modules; // Front Left, Front Right, Back Left, Back Right
   private final GyroIO gyroIO;
@@ -186,14 +186,6 @@ public class SwerveSubsystem extends SubsystemBase {
             new Camera(
                 new CameraIOSim(
                     SWERVE_CONSTANTS.getCameraConstants()[1],
-                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()))),
-            new Camera(
-                new CameraIOSim(
-                    SWERVE_CONSTANTS.getCameraConstants()[2],
-                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()))),
-            new Camera(
-                new CameraIOSim(
-                    SWERVE_CONSTANTS.getCameraConstants()[3],
                     () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose())))
           };
     } else {

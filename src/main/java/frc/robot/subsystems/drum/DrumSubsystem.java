@@ -256,13 +256,13 @@ public class DrumSubsystem extends SubsystemBase {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
     // TODO: VALUE FROM CAD
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     config.MotorOutput.NeutralMode =
         NeutralModeValue.Brake; // Its possible that we should actually coast on this mech but idk
 
     // TODO: BUDGET CURRENT
     config.CurrentLimits.StatorCurrentLimit = 45.0;
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimitEnable = false;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = false;
 
