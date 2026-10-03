@@ -50,9 +50,7 @@ public class DumperSwerveConstants extends SwerveConstants {
             new Transform3d(
                 new Translation3d(-0.342612, -0.255814, 0.480683),
                 new Rotation3d(
-                    Degree.of(0.0),
-                    Degree.of(-90 + 70.3426427),
-                    Degree.of(-50.0 + 180))),
+                    Degree.of(0.0), Degree.of(-90 + 70.3426427), Degree.of(-50.0 + 180))),
             BACK_LEFT_CAMERA_MATRIX,
             BACK_LEFT_DIST_COEFFS);
     final CameraConstants backLeftCameraConstants =
@@ -61,10 +59,7 @@ public class DumperSwerveConstants extends SwerveConstants {
             // TODO: FROM CAD
             new Transform3d(
                 new Translation3d(-0.342502, 0.256376, 0.480406),
-                new Rotation3d(
-                    Degree.of(0.0),
-                    Degree.of(-90 + 70.3426427),
-                    Degree.of(180 + 50.0))),
+                new Rotation3d(Degree.of(0.0), Degree.of(-90 + 70.3426427), Degree.of(180 + 50.0))),
             BACK_RIGHT_CAMERA_MATRIX,
             BACK_RIGHT_DIST_COEFFS);
     return new CameraConstants[] {backRightCameraConstants, backLeftCameraConstants};
@@ -119,7 +114,7 @@ public class DumperSwerveConstants extends SwerveConstants {
   @Override
   public double getTurnGearRatio() {
     // For SDS Mk5n
-    return 287 / 11;
+    return 287.0 / 11.0;
   }
 
   @Override
