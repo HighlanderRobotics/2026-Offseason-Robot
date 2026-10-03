@@ -2,7 +2,7 @@
 
 | CAN ID | Device Name            | Device Type     | Inventory ID |
 | ------ | ---------------------- | --------------- | ------------ |
-| 0      | Front Left Drive       | X60             | TODO         |
+| 0      | Front Left Drive       | X60             | X60-055         |
 | 1      | Front Left Turn        | X44             | X44-010         |
 | 2      | Front Right Drive      | X60             | X60-067         |
 | 3      | Front Right Turn       | X44             | X44-029         |
