@@ -50,5 +50,4 @@ public class RollerIOSim extends RollerIO {
             });
     notifier.startPeriodic(0.002);
   }
-  
 }
