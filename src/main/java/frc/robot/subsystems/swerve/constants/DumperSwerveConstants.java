@@ -43,25 +43,31 @@ public class DumperSwerveConstants extends SwerveConstants {
     final Matrix<N8, N1> BACK_RIGHT_DIST_COEFFS =
         MatBuilder.fill(
             Nat.N8(), Nat.N1(), 0.058, -0.09, 0.006, -0.003, 0.022, -0.002, 0.004, -0.001);
-    final CameraConstants backLeftCameraConstants =
-        new CameraConstants(
-            "Back_Left",
-            // TODO: FROM CAD
-            new Transform3d(
-                new Translation3d(-0.342612, -0.255814, 0.480683),
-                new Rotation3d(Degree.of(0.0), Degree.of(50.0 + 180), Degree.of(-70.3426427))),
-            BACK_LEFT_CAMERA_MATRIX,
-            BACK_LEFT_DIST_COEFFS);
     final CameraConstants backRightCameraConstants =
         new CameraConstants(
             "Back_Right",
             // TODO: FROM CAD
             new Transform3d(
+                new Translation3d(-0.342612, -0.255814, 0.480683),
+                new Rotation3d(
+                    Degree.of(0.0),
+                    Degree.of(-90 + 70.3426427),
+                    Degree.of(-50.0 + 180))),
+            BACK_LEFT_CAMERA_MATRIX,
+            BACK_LEFT_DIST_COEFFS);
+    final CameraConstants backLeftCameraConstants =
+        new CameraConstants(
+            "Back_Left",
+            // TODO: FROM CAD
+            new Transform3d(
                 new Translation3d(-0.342502, 0.256376, 0.480406),
-                new Rotation3d(Degree.of(0.0), Degree.of(50.0 + 180), Degree.of(70.3426427))),
+                new Rotation3d(
+                    Degree.of(0.0),
+                    Degree.of(-90 + 70.3426427),
+                    Degree.of(180 + 50.0))),
             BACK_RIGHT_CAMERA_MATRIX,
             BACK_RIGHT_DIST_COEFFS);
-    return new CameraConstants[] {backLeftCameraConstants, backRightCameraConstants};
+    return new CameraConstants[] {backRightCameraConstants, backLeftCameraConstants};
   }
 
   @Override
