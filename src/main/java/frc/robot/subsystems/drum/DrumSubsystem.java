@@ -258,7 +258,7 @@ public class DrumSubsystem extends SubsystemBase {
     // TODO: VALUE FROM CAD
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     config.MotorOutput.NeutralMode =
-        NeutralModeValue.Brake; // Its possible that we should actually coast on this mech but idk
+        NeutralModeValue.Coast; // Its possible that we should actually coast on this mech but idk
 
     // TODO: BUDGET CURRENT
     config.CurrentLimits.StatorCurrentLimit = 45.0;
