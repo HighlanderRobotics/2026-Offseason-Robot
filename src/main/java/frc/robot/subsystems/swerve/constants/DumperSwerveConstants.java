@@ -167,10 +167,9 @@ public class DumperSwerveConstants extends SwerveConstants {
   @Override
   public Pigeon2Configuration getGyroConfig() {
     Pigeon2Configuration config = new Pigeon2Configuration();
-    // TODO: FIND MOUNT POSE OFFSETS
-    config.MountPose.MountPosePitch = 0.0;
-    config.MountPose.MountPoseRoll = 0.0;
-    config.MountPose.MountPoseYaw = 0.0;
+    config.MountPose.MountPosePitch = 1.1281073093414307;
+    config.MountPose.MountPoseRoll = -0.039543408900499344;
+    config.MountPose.MountPoseYaw = 89.08586883544922;
     return config;
   }
 
