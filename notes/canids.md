@@ -26,4 +26,4 @@
 | 1      | Front Right CANcoder   | CANcoder        | ???         |
 | 2      | Back Left CANcoder     | CANcoder        | ???         |
 | 3      | Back Right CANcoder    | CANcoder        | ???         |
-| 4      | Intake CANcoder        | WCP Throughbore | TODO         |
+| 4      | Intake CANcoder        | WCP Throughbore | THB-001         |
