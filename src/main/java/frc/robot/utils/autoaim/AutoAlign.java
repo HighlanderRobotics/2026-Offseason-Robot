@@ -1,5 +1,6 @@
 package frc.robot.utils.autoaim;
 
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -8,130 +9,172 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
+
+
 import org.littletonrobotics.junction.Logger;
 
+
 public class AutoAlign {
-  public static final double MAX_ANGULAR_SPEED_RAD_PER_SEC = 8.989;
-  public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = 90.090;
-  public static final double MAX_TRANSLATIONAL_SPEED_METERS_PER_SEC = 3.511;
-  public static final double MAX_TRANSLATIONAL_ACCELERATION_METERS_PER_SEC_SQ = 16.740;
+ // public static final double MAX_ANGULAR_SPEED_RAD_PER_SEC = 8.989;
+ public final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = 90.090;
+ // public static final double MAX_TRANSLATIONAL_SPEED_METERS_PER_SEC = 3.511;
+ public final double MAX_TRANSLATIONAL_ACCELERATION_METERS_PER_SEC_SQ = 16.740;
 
-  // Define constraints
-  public static final Constraints DEFAULT_TRANSLATIONAL_CONSTRAINTS =
-      new Constraints(
-          MAX_TRANSLATIONAL_SPEED_METERS_PER_SEC, MAX_TRANSLATIONAL_ACCELERATION_METERS_PER_SEC_SQ);
-  public static final Constraints DEFAULT_ANGULAR_CONSTRAINTS =
-      new Constraints(MAX_ANGULAR_SPEED_RAD_PER_SEC, MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ);
 
-  public static final double TRANSLATION_TOLERANCE_METERS = Units.inchesToMeters(1.0);
-  public static final double ROTATION_TOLERANCE_RADIANS = Units.degreesToRadians(2.0);
-  public static final double VELOCITY_TOLERANCE_METERSPERSECOND = 0.5;
+ // Define constraints
+ public final Constraints DEFAULT_TRANSLATIONAL_CONSTRAINTS =
+     new Constraints(
+         SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(), MAX_TRANSLATIONAL_ACCELERATION_METERS_PER_SEC_SQ);
+ public final Constraints DEFAULT_ANGULAR_CONSTRAINTS =
+     new Constraints(SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed(), MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ);
 
-  // Velocity controllers
-  public ProfiledPIDController VX_CONTROLLER;
-  public ProfiledPIDController VY_CONTROLLER;
-  public ProfiledPIDController HEADING_CONTROLLER;
 
-  public AutoAlign() {
-    // Velocity controllers
-    VX_CONTROLLER = new ProfiledPIDController(10.0, 0.01, 0.02, DEFAULT_TRANSLATIONAL_CONSTRAINTS);
-    VY_CONTROLLER = new ProfiledPIDController(10.0, 0.01, 0.02, DEFAULT_TRANSLATIONAL_CONSTRAINTS);
-    HEADING_CONTROLLER = new ProfiledPIDController(5.0, 0.0, 0.08, DEFAULT_ANGULAR_CONSTRAINTS);
+ public final double TRANSLATION_TOLERANCE_METERS = Units.inchesToMeters(1.0);
+ public final double ROTATION_TOLERANCE_RADIANS = Units.degreesToRadians(2.0);
+ public final double VELOCITY_TOLERANCE_METERSPERSECOND = 0.5;
 
-    HEADING_CONTROLLER.enableContinuousInput(
-        -Math.PI, Math.PI); // continuous because it's an angle controller
-  }
 
-  public void resetPIDControllers(Pose2d robotPose, ChassisSpeeds robotVelocityFieldRelative) {
-    VX_CONTROLLER.reset(robotPose.getX(), robotVelocityFieldRelative.vxMetersPerSecond);
-    VY_CONTROLLER.reset(robotPose.getY(), robotVelocityFieldRelative.vyMetersPerSecond);
-    HEADING_CONTROLLER.reset(
-        robotPose.getRotation().getRadians(), robotVelocityFieldRelative.omegaRadiansPerSecond);
-  }
+ // Velocity controllers
+ public ProfiledPIDController VX_CONTROLLER;
+ public ProfiledPIDController VY_CONTROLLER;
+ public ProfiledPIDController HEADING_CONTROLLER;
 
-  public void resetHeadingController(
-      Rotation2d robotHeading, ChassisSpeeds robotVelocityFieldRelative) {
-    HEADING_CONTROLLER.reset(
-        robotHeading.getRadians(), robotVelocityFieldRelative.omegaRadiansPerSecond);
-  }
 
-  public void resetYController(double robotY, double robotVY) {
-    VY_CONTROLLER.reset(robotY, robotVY);
-  }
+ public AutoAlign() {
+   // Velocity controllers
+   VX_CONTROLLER = new ProfiledPIDController(10.0, 0.01, 0.02, DEFAULT_TRANSLATIONAL_CONSTRAINTS);
+   VY_CONTROLLER = new ProfiledPIDController(10.0, 0.01, 0.02, DEFAULT_TRANSLATIONAL_CONSTRAINTS);
+   HEADING_CONTROLLER = new ProfiledPIDController(5.0, 0.0, 0.08, DEFAULT_ANGULAR_CONSTRAINTS);
 
-  public double calculateYVelocity(double robotY, double targetY) {
-    return VY_CONTROLLER.calculate(robotY, targetY) + VY_CONTROLLER.getSetpoint().velocity;
-  }
 
-  /**
-   * Use PID to calculate the velocity required to align the robot heading to the target heading
-   *
-   * @param robotHeading
-   * @param targetHeading
-   * @return the calculated velocity
-   */
-  public double calculateRotationVelocity(Rotation2d robotHeading, Rotation2d targetHeading) {
-    double omegaRadsPerSec =
-        HEADING_CONTROLLER.calculate(robotHeading.getRadians(), targetHeading.getRadians())
-            + HEADING_CONTROLLER.getSetpoint().velocity;
-    Logger.recordOutput(
-        "AutoAlign/Target Speeds Robot Relative", new ChassisSpeeds(0.0, 0.0, omegaRadsPerSec));
-    return omegaRadsPerSec;
-  }
+   HEADING_CONTROLLER.enableContinuousInput(
+       -Math.PI, Math.PI); // continuous because it's an angle controller
+ }
 
-  public ChassisSpeeds calculateSpeeds(Pose2d robotPose, Pose2d target) {
-    return calculateSpeeds(
-        robotPose,
-        target,
-        DEFAULT_TRANSLATIONAL_CONSTRAINTS,
-        DEFAULT_TRANSLATIONAL_CONSTRAINTS,
-        DEFAULT_ANGULAR_CONSTRAINTS);
-  }
 
-  public ChassisSpeeds calculateSpeeds(
-      Pose2d robotPose,
-      Pose2d target,
-      Constraints xConstraints,
-      Constraints yConstraints,
-      Constraints headingConstraints) {
-    VX_CONTROLLER.setConstraints(xConstraints);
-    VY_CONTROLLER.setConstraints(yConstraints);
-    HEADING_CONTROLLER.setConstraints(headingConstraints);
+ public void resetPIDControllers(Pose2d robotPose, ChassisSpeeds robotVelocityFieldRelative) {
+   VX_CONTROLLER.reset(robotPose.getX(), robotVelocityFieldRelative.vxMetersPerSecond);
+   VY_CONTROLLER.reset(robotPose.getY(), robotVelocityFieldRelative.vyMetersPerSecond);
+   HEADING_CONTROLLER.reset(
+       robotPose.getRotation().getRadians(), robotVelocityFieldRelative.omegaRadiansPerSecond);
+ }
 
-    ChassisSpeeds speeds;
 
-    // if the pose is close enough to the target then autoAlign is complete
-    if (isInTolerance(
-        robotPose, target, TRANSLATION_TOLERANCE_METERS, ROTATION_TOLERANCE_RADIANS)) {
-      speeds = new ChassisSpeeds();
-    } else { // otherwise use PID controllers to calculate speed
-      speeds =
-          new ChassisSpeeds(
-              VX_CONTROLLER.calculate(robotPose.getX(), target.getX())
-                  + VX_CONTROLLER.getSetpoint().velocity,
-              VY_CONTROLLER.calculate(robotPose.getY(), target.getY())
-                  + VY_CONTROLLER.getSetpoint().velocity,
-              HEADING_CONTROLLER.calculate(
-                      robotPose.getRotation().getRadians(), target.getRotation().getRadians())
-                  + HEADING_CONTROLLER.getSetpoint().velocity);
-    }
-    Logger.recordOutput(
-        "AutoAlign/Target Speeds Robot Relative",
-        ChassisSpeeds.fromFieldRelativeSpeeds(speeds, robotPose.getRotation()));
+ public void resetHeadingController(
+     Rotation2d robotHeading, ChassisSpeeds robotVelocityFieldRelative) {
+   HEADING_CONTROLLER.reset(
+       robotHeading.getRadians(), robotVelocityFieldRelative.omegaRadiansPerSecond);
+ }
 
-    return speeds;
-  }
 
-  public boolean isInTolerance(
-      Pose2d current,
-      Pose2d target,
-      double translationalToleranceMeters,
-      double angularToleranceRadians) {
-    Transform2d diff = current.minus(target);
-    return MathUtil.isNear(0.0, Math.hypot(diff.getX(), diff.getY()), translationalToleranceMeters)
-        && MathUtil.isNear(
-            target.getRotation().getRadians(),
-            current.getRotation().getRadians(),
-            angularToleranceRadians);
-  }
+ public void resetYController(double robotY, double robotVY) {
+   VY_CONTROLLER.reset(robotY, robotVY);
+ }
+
+
+ public double calculateYVelocity(double robotY, double targetY) {
+   return VY_CONTROLLER.calculate(robotY, targetY) + VY_CONTROLLER.getSetpoint().velocity;
+ }
+
+
+ /**
+  * Use PID to calculate the velocity required to align the robot heading to the target heading
+  *
+  * @param robotHeading
+  * @param targetHeading
+  * @return the calculated velocity
+  */
+ public double calculateRotationVelocity(Rotation2d robotHeading, Rotation2d targetHeading) {
+   double omegaRadsPerSec =
+       HEADING_CONTROLLER.calculate(robotHeading.getRadians(), targetHeading.getRadians())
+           + HEADING_CONTROLLER.getSetpoint().velocity;
+   Logger.recordOutput(
+       "AutoAlign/Target Speeds Robot Relative", new ChassisSpeeds(0.0, 0.0, omegaRadsPerSec));
+   return omegaRadsPerSec;
+ }
+
+
+ public ChassisSpeeds calculateSpeeds(Pose2d robotPose, Pose2d target) {
+   return calculateSpeeds(
+       robotPose,
+       target,
+       DEFAULT_TRANSLATIONAL_CONSTRAINTS,
+       DEFAULT_TRANSLATIONAL_CONSTRAINTS,
+       DEFAULT_ANGULAR_CONSTRAINTS);
+ }
+
+
+ /**
+  * Use PID to calculate the velocity required to align the robot to the target pose
+  *
+  * @param robotPose
+  * @param target
+  * @param xConstraints
+  * @param yConstraints
+  * @param headingConstraints
+  * @return the calculated velocity
+  */
+ public ChassisSpeeds calculateSpeeds(
+     Pose2d robotPose,
+     Pose2d target,
+     Constraints xConstraints,
+     Constraints yConstraints,
+     Constraints headingConstraints) {
+   VX_CONTROLLER.setConstraints(xConstraints);
+   VY_CONTROLLER.setConstraints(yConstraints);
+   HEADING_CONTROLLER.setConstraints(headingConstraints);
+
+
+   ChassisSpeeds speeds;
+
+
+   // if the pose is close enough to the target then autoAlign is complete
+   if (isInTolerance(
+       robotPose, target, TRANSLATION_TOLERANCE_METERS, ROTATION_TOLERANCE_RADIANS)) {
+     speeds = new ChassisSpeeds();
+   } else { // otherwise use PID controllers to calculate speed
+     speeds =
+         new ChassisSpeeds(
+             VX_CONTROLLER.calculate(robotPose.getX(), target.getX())
+                 + VX_CONTROLLER.getSetpoint().velocity,
+             VY_CONTROLLER.calculate(robotPose.getY(), target.getY())
+                 + VY_CONTROLLER.getSetpoint().velocity,
+             HEADING_CONTROLLER.calculate(
+                     robotPose.getRotation().getRadians(), target.getRotation().getRadians())
+                 + HEADING_CONTROLLER.getSetpoint().velocity);
+   }
+   Logger.recordOutput(
+       "AutoAlign/Target Speeds Robot Relative",
+       ChassisSpeeds.fromFieldRelativeSpeeds(speeds, robotPose.getRotation()));
+
+
+   return speeds;
+ }
+
+
+ public boolean isInTolerance(
+     Pose2d current,
+     Pose2d target,
+     double translationalToleranceMeters,
+     double angularToleranceRadians) {
+   Transform2d diff = current.minus(target);
+   return MathUtil.isNear(0.0, Math.hypot(diff.getX(), diff.getY()), translationalToleranceMeters)
+       && MathUtil.isNear(
+           target.getRotation().getRadians(),
+           current.getRotation().getRadians(),
+           angularToleranceRadians);
+ }
+
+
+ public boolean isInTolerance(
+     Pose2d current,
+     Pose2d target) {
+   Transform2d diff = current.minus(target);
+   return MathUtil.isNear(0.0, Math.hypot(diff.getX(), diff.getY()), TRANSLATION_TOLERANCE_METERS)
+       && MathUtil.isNear(
+           target.getRotation().getRadians(),
+           current.getRotation().getRadians(),
+           ROTATION_TOLERANCE_RADIANS);
+ }
 }
