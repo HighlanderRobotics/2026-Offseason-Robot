@@ -276,7 +276,7 @@ public class SlapdownSubsystem extends SubsystemBase {
 
     config.CurrentLimits.StatorCurrentLimit = 30.0;
 
-    config.CurrentLimits.StatorCurrentLimitEnable = false;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = false;
     // TODO: set stator current limit, stator current lim enable, supply current
@@ -307,7 +307,7 @@ public class SlapdownSubsystem extends SubsystemBase {
     // TODO: set kS, kV, kA, kP, kD
 
     config.CurrentLimits.StatorCurrentLimit = 20.0;
-    config.CurrentLimits.StatorCurrentLimitEnable = false;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = false;
     // TODO: set stator current lim, stator current lim enable, supply current lim,
