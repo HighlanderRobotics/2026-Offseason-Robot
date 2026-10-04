@@ -217,8 +217,26 @@ public class DrumSubsystem extends SubsystemBase {
   public Command runFlywheelSysid() {
     return Commands.sequence(
         flywheelSysid.quasistatic(Direction.kForward),
+        Commands.waitUntil(
+            () ->
+                MathUtil.isNear(
+                    0.0,
+                    flywheelIOInputs.velocityRotPerSec,
+                    1.0)), // Wait until we're nearly stopped
         flywheelSysid.quasistatic(Direction.kReverse),
+        Commands.waitUntil(
+            () ->
+                MathUtil.isNear(
+                    0.0,
+                    flywheelIOInputs.velocityRotPerSec,
+                    1.0)), // Wait until we're nearly stopped
         flywheelSysid.dynamic(Direction.kForward),
+        Commands.waitUntil(
+            () ->
+                MathUtil.isNear(
+                    0.0,
+                    flywheelIOInputs.velocityRotPerSec,
+                    1.0)), // Wait until we're nearly stopped
         flywheelSysid.dynamic(Direction.kReverse));
   }
 
@@ -257,8 +275,7 @@ public class DrumSubsystem extends SubsystemBase {
 
     // TODO: VALUE FROM CAD
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    config.MotorOutput.NeutralMode =
-        NeutralModeValue.Coast; // Its possible that we should actually coast on this mech but idk
+    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     // TODO: BUDGET CURRENT
     config.CurrentLimits.StatorCurrentLimit = 45.0;
