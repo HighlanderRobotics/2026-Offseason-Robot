@@ -127,26 +127,26 @@ public class DumperSwerveConstants extends SwerveConstants {
   public ModuleConstants getFrontLeftModuleConstants() {
     // TODO: CANCODER OFFSET
     return new ModuleConstants(
-        0, "Front Left", 0, 1, 0, Rotation2d.fromRotations(0.0).plus(Rotation2d.k180deg));
+        0, "Front Left", 0, 1, 0, Rotation2d.fromRotations(0.337646).plus(Rotation2d.k180deg));
   }
 
   @Override
   public ModuleConstants getFrontRightModuleConstants() {
     // TODO: CANCODER OFFSET
-    return new ModuleConstants(1, "Front Right", 2, 3, 1, Rotation2d.fromRotations(0.0));
+    return new ModuleConstants(1, "Front Right", 2, 3, 1, Rotation2d.fromRotations(0.145264));
   }
 
   @Override
   public ModuleConstants getBackLeftModuleConstants() {
     // TODO: CANCODER OFFSET
     return new ModuleConstants(
-        2, "Back Left", 4, 5, 2, Rotation2d.fromRotations(0.0).plus(Rotation2d.k180deg));
+        2, "Back Left", 4, 5, 2, Rotation2d.fromRotations(0.42627).plus(Rotation2d.k180deg));
   }
 
   @Override
   public ModuleConstants getBackRightModuleConstants() {
     // TODO: CANCODER OFFSET
-    return new ModuleConstants(3, "Back Right", 6, 7, 3, Rotation2d.fromRotations(0.0));
+    return new ModuleConstants(3, "Back Right", 6, 7, 3, Rotation2d.fromRotations(0.067383));
   }
 
   @Override
@@ -216,7 +216,7 @@ public class DumperSwerveConstants extends SwerveConstants {
         getTurnMotorInverted()
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
-    turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     // Fused Cancoder
     turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     turnConfig.Feedback.FeedbackRemoteSensorID = cancoderID;
