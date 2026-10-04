@@ -262,17 +262,15 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.Feedback.RotorToSensorRatio = PIVOT_GEAR_RATIO;
 
     config.Feedback.SensorToMechanismRatio = CANCODER_TO_PIVOT;
-    // TODO: set sensor to mech ratio
 
-    config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.0;
+    config.Slot0.kS = 0.07;
+    config.Slot0.kV = 6.25;
     config.Slot0.kA = 0.0;
-    config.Slot0.kG = 0.0;
+    config.Slot0.kG = 0.5;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     config.Slot0.GravityArmPositionOffset = 0.0;
-    config.Slot0.kP = 0.0;
-    config.Slot0.kD = 0.0;
-    // TODO: set kS, kV, kS, kG, GravityArmPositionOffset, kP, kD
+    config.Slot0.kP = 10.0;
+    config.Slot0.kD = 0.05;
 
     config.CurrentLimits.StatorCurrentLimit = 30.0;
 
@@ -283,9 +281,8 @@ public class SlapdownSubsystem extends SubsystemBase {
     // lim, supply current
     // lim enable
 
-    config.MotionMagic.MotionMagicCruiseVelocity = 0.0;
-    config.MotionMagic.MotionMagicAcceleration = 0.0;
-    // TODO: set cruise velocity, and acceleration
+    config.MotionMagic.MotionMagicCruiseVelocity = 0.5;
+    config.MotionMagic.MotionMagicAcceleration = 5.0;
 
     return config;
   }
