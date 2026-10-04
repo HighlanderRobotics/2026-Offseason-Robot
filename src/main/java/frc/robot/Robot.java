@@ -129,19 +129,30 @@ public class Robot extends LoggedRobot {
 
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
 
+    // swerve.setDefaultCommand(
+    //     swerve
+    //         .driveOpenLoopFieldRelative(
+    //             () ->
+    //                 new ChassisSpeeds(
+    //                         modifyJoystick(driver.getLeftY())
+    //                             * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+    //                         modifyJoystick(driver.getLeftX())
+    //                             * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+    //                         modifyJoystick(driver.getRightX())
+    //                             * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
+    //                     .times(-1))
+    //         .withName("Teleop drive"));
     swerve.setDefaultCommand(
-        swerve
-            .driveOpenLoopFieldRelative(
-                () ->
-                    new ChassisSpeeds(
-                            modifyJoystick(driver.getLeftY())
-                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                            modifyJoystick(driver.getLeftX())
-                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                            modifyJoystick(driver.getRightX())
-                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
-                        .times(-1))
-            .withName("Teleop drive"));
+        swerve.driveOpenLoopRobotRelative(
+            () ->
+                new ChassisSpeeds(
+                        modifyJoystick(driver.getLeftY())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                        modifyJoystick(driver.getLeftX())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                        modifyJoystick(driver.getRightX())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
+                    .times(-1)));
 
     indexer.setDefaultCommand(indexer.rest());
     intake.setDefaultCommand(intake.restExtended());
