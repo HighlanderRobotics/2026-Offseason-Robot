@@ -187,6 +187,7 @@ public class Robot extends LoggedRobot {
     autoChooser.addOption("Kicker Sysid", indexer.runKickerSysid());
     autoChooser.addOption("Intake Roller Sysid", intake.runRollerSysid());
     autoChooser.addOption("Intake Pivot Sysid", intake.runPivotSysid());
+    autoChooser.addDefaultOption("Swerve turn sysid", swerve.runTurnSysid());
   }
 
   @Override
