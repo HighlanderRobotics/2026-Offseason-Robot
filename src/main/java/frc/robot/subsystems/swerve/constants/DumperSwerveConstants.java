@@ -226,9 +226,9 @@ public class DumperSwerveConstants extends SwerveConstants {
     // Controls Gains
     // Copied from Wisp
     // TODO: RETUNE
-    turnConfig.Slot0.kV = 0.40607;
-    turnConfig.Slot0.kA = 0.014153;
-    turnConfig.Slot0.kS = 0.079265;
+    turnConfig.Slot0.kV = 2.557;
+    turnConfig.Slot0.kA = 0.07029;
+    turnConfig.Slot0.kS = 0.073114;
     turnConfig.Slot0.kP = 0.0;
     turnConfig.Slot0.kD = 0.0;
     turnConfig.MotionMagic.MotionMagicCruiseVelocity = (7368 / 60) / getTurnGearRatio();
