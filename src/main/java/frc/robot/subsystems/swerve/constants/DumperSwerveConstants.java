@@ -229,8 +229,8 @@ public class DumperSwerveConstants extends SwerveConstants {
     turnConfig.Slot0.kV = 2.557;
     turnConfig.Slot0.kA = 0.07029;
     turnConfig.Slot0.kS = 0.073114;
-    turnConfig.Slot0.kP = 0.0;
-    turnConfig.Slot0.kD = 0.0;
+    turnConfig.Slot0.kP = 250.0;
+    turnConfig.Slot0.kD = 0.5;
     turnConfig.MotionMagic.MotionMagicCruiseVelocity = (7368 / 60) / getTurnGearRatio();
     turnConfig.MotionMagic.MotionMagicAcceleration = (7368 / 60) / (getTurnGearRatio() * 0.005);
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
@@ -257,6 +257,6 @@ public class DumperSwerveConstants extends SwerveConstants {
 
   @Override
   public boolean getTurnMotorInverted() {
-    return false;
+    return true;
   }
 }
