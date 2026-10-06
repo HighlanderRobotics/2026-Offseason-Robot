@@ -91,13 +91,13 @@ public class DrumSubsystem extends SubsystemBase {
       // TODO: CORRECT VALUES
       followerIOs[0] =
           new FollowerIO(
-              0, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Aligned, canBus, getFlywheelConfig());
+              16, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Aligned, canBus, getFlywheelConfig());
       followerIOs[1] =
           new FollowerIO(
-              0, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
+              17, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
       followerIOs[2] =
           new FollowerIO(
-              0, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
+              18, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
     } else {
       flywheelIO = new FlywheelIOSim(canBus);
       hoodIO = new HoodIOSim(canBus);
@@ -250,13 +250,13 @@ public class DrumSubsystem extends SubsystemBase {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
     // TODO: VALUE FROM CAD
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     config.MotorOutput.NeutralMode =
         NeutralModeValue.Brake; // Its possible that we should actually coast on this mech but idk
 
     // TODO: BUDGET CURRENT
     config.CurrentLimits.StatorCurrentLimit = 45.0;
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimitEnable = false;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = false;
 
