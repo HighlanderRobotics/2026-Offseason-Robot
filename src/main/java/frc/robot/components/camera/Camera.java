@@ -169,18 +169,20 @@ public class Camera {
         if (true) {
           Logger.recordOutput("Vision/" + getName() + "/Pose3d", visionPose);
           Logger.recordOutput("Vision/" + getName() + "/Pose2d", visionPose.toPose2d());
-          Pose3d[] targetPoses =
-              estPose.get().targetsUsed.stream()
-                  .map(
-                      (target) -> {
-                        return SwerveSubsystem.SWERVE_CONSTANTS
-                            .getFieldTagLayout()
-                            .getTagPose(
-                                inputs.result.targets.get(target.fiducialId).getFiducialId())
-                            .get();
-                      })
-                  .toArray(Pose3d[]::new);
-          Logger.recordOutput("Vision/" + getName() + "/Target Poses", targetPoses);
+          Tracer.trace(
+              "Log Tag Poses",
+              () -> {
+                Pose3d[] targetPose3ds = new Pose3d[inputs.result.targets.size()];
+                for (int j = 0; j < inputs.result.targets.size(); j++) {
+                  targetPose3ds[j] =
+                      SwerveSubsystem.SWERVE_CONSTANTS
+                          .getFieldTagLayout()
+                          .getTagPose(inputs.result.targets.get(j).getFiducialId())
+                          .get();
+                }
+                if (Robot.ROBOT_MODE != RobotMode.REAL)
+                  Logger.recordOutput("Vision/" + getName() + "/Target Poses", targetPose3ds);
+              });
         }
         final Matrix<N3, N1> deviations = findVisionMeasurementStdDevs(estPose.get());
         if (Robot.ROBOT_MODE != RobotMode.REAL)

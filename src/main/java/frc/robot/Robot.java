@@ -49,7 +49,7 @@ public class Robot extends LoggedRobot {
     REPLAY;
   }
 
-  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
+  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
 
   private CANBus canBus = new CANBus("*");
 
@@ -208,7 +208,9 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationInit() {
     // Reset odo pose to maple sim pose
-    swerve.resetMapleSimPose();
+    if (ROBOT_MODE == RobotMode.SIM) {
+      swerve.resetMapleSimPose();
+    }
   }
 
   @Override
