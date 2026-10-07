@@ -216,7 +216,7 @@ public class DumperSwerveConstants extends SwerveConstants {
         getTurnMotorInverted()
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
-    turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     // Fused Cancoder
     turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     turnConfig.Feedback.FeedbackRemoteSensorID = cancoderID;

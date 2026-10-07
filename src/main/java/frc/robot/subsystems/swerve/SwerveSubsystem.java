@@ -356,6 +356,9 @@ public class SwerveSubsystem extends SubsystemBase {
       cameras[i].updateCamera(estimator);
       cameraPoses[i] = cameras[i].getPose();
     }
+
+    Logger.recordOutput("Vision/Camera Poses", cameraPoses);
+
     Pose3d[] arr = new Pose3d[cameras.length];
     for (int k = 0; k < cameras.length; k++) {
       if (Robot.ROBOT_MODE == RobotMode.SIM) {
@@ -366,7 +369,7 @@ public class SwerveSubsystem extends SubsystemBase {
         arr[k] = getPose3d().transformBy(cameras[k].getCameraConstants().robotToCamera());
       }
     }
-    if (RobotMode.SIM != null) {
+    if (RobotMode.REAL != Robot.ROBOT_MODE) {
       Logger.recordOutput("Vision/Camera Poses on Robot", arr);
     }
   }
