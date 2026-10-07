@@ -289,10 +289,10 @@ public class DrumSubsystem extends SubsystemBase {
 
     // Slot 0 is motion magic velocity pidf
     // TODO: RETUNE. FROM SIM
-    config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.16507;
-    config.Slot0.kA = 0.005124;
-    config.Slot0.kP = 0.0;
+    config.Slot0.kS = 0.31;
+    config.Slot0.kV = 0.17433;
+    config.Slot0.kA = 0.10015;
+    config.Slot0.kP = 1.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.0;
 

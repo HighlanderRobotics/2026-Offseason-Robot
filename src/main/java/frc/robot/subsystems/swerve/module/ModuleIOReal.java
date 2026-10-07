@@ -223,7 +223,7 @@ public class ModuleIOReal {
   }
 
   public void setTurnPositionSetpoint(Rotation2d setpoint) {
-    turnTalon.setControl(turnPID.withPosition(setpoint.getRotations()));
+    // turnTalon.setControl(turnPID.withPosition(setpoint.getRotations()));
   }
 
   public ModuleConstants getModuleConstants() {
