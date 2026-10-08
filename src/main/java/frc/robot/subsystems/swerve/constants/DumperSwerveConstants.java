@@ -212,10 +212,7 @@ public class DumperSwerveConstants extends SwerveConstants {
     turnConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
     turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     // Inverts
-    turnConfig.MotorOutput.Inverted =
-        getTurnMotorInverted()
-            ? InvertedValue.Clockwise_Positive
-            : InvertedValue.CounterClockwise_Positive;
+    turnConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     // Fused Cancoder
     turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
@@ -251,10 +248,7 @@ public class DumperSwerveConstants extends SwerveConstants {
   public CANcoderConfiguration getCancoderConfig(Rotation2d cancoderOffset) {
     final var cancoderConfig = new CANcoderConfiguration();
     cancoderConfig.MagnetSensor.MagnetOffset = cancoderOffset.getRotations();
-    cancoderConfig.MagnetSensor.SensorDirection =
-        getTurnMotorInverted()
-            ? SensorDirectionValue.Clockwise_Positive
-            : SensorDirectionValue.CounterClockwise_Positive;
+    cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     return cancoderConfig;
   }
 
