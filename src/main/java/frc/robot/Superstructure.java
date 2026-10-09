@@ -182,28 +182,25 @@ public class Superstructure {
         drum.rest());
 
     SuperState.SPIN_UP_SCORE.bindCommands(
-        indexer.rest(), intake.restExtended(), drum.shoot(this::getHubShotData));
+        indexer.rest(), intake.restExtended(), drum.testShot());
 
     SuperState.SPIN_UP_SCORE_FLOW.bindCommands(
         indexer.rest(), intake.intake(), drum.shoot(this::getHubShotData));
 
     SuperState.SCORE.bindCommands(
-        indexer.kick(), intake.restExtended(), drum.shoot(this::getHubShotData));
+        indexer.kick(), intake.restExtended(), drum.testShot());
 
     SuperState.SCORE_FLOW.bindCommands(
         indexer.kick(), intake.intake(), drum.shoot(this::getHubShotData));
 
     SuperState.SPIN_UP_FEED.bindCommands(
-        indexer.rest(), intake.restExtended(), drum.shoot(this::getFeedShotData));
-
-    SuperState.SPIN_UP_FEED_FLOW.bindCommands(
-        indexer.rest(), intake.intake(), drum.shoot(this::getFeedShotData));
+        indexer.rest(), intake.restExtended(), drum.testShot());
 
     SuperState.SPIN_UP_FEED_FLOW.bindCommands(
         indexer.rest(), intake.intake(), drum.shoot(this::getFeedShotData));
 
     SuperState.FEED.bindCommands(
-        indexer.kick(), intake.restExtended(), drum.shoot(this::getFeedShotData));
+        indexer.kick(), intake.restExtended(), drum.testShot());
 
     SuperState.FEED_FLOW.bindCommands(
         indexer.kick(), intake.intake(), drum.shoot(this::getFeedShotData));
