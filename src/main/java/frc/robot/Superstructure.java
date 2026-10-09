@@ -44,6 +44,13 @@ public class Superstructure {
     public void bindCommands(Command... commands) {
       stateTrigger.whileTrue(Commands.parallel(commands));
     }
+
+    public boolean isASpinUpState() {
+      return this.equals(SPIN_UP_FEED)
+          || this.equals(SPIN_UP_SCORE)
+          || this.equals(SPIN_UP_FEED_FLOW)
+          || this.equals(SPIN_UP_SCORE_FLOW);
+    }
   }
 
   public enum FeedTarget {
@@ -105,6 +112,7 @@ public class Superstructure {
     Logger.recordOutput("Superstructure/Defense", defenseReq);
     Logger.recordOutput("Superstructure/Shooter Ready", shooterReady);
     Logger.recordOutput("Superstructure/Feed Target", feedTarget);
+    Logger.recordOutput("Superstructure/Is a spin up state", state.isASpinUpState());
   }
 
   private void addRequests(

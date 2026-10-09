@@ -193,11 +193,12 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    superstructure.simulationPeriodic(); // TODO: REMOVE
   }
 
   @Override
   public void simulationPeriodic() {
-    superstructure.simulationPeriodic();
+    // superstructure.simulationPeriodic();
   }
 
   // Use obstacle-free simulation arena
