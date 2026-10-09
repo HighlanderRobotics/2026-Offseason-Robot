@@ -34,7 +34,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Robot;
 import frc.robot.Robot.RobotMode;
-import frc.robot.subsystems.swerve.constants.AlphaSwerveConstants;
+import frc.robot.components.camera.Camera;
+import frc.robot.components.camera.CameraIOReal;
+import frc.robot.components.camera.CameraIOSim;
+import frc.robot.subsystems.swerve.constants.DumperSwerveConstants;
 import frc.robot.subsystems.swerve.constants.SwerveConstants;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
@@ -69,11 +72,13 @@ import org.littletonrobotics.junction.Logger;
 public class SwerveSubsystem extends SubsystemBase {
   // decide which set of swerve constants to use based on robot edition
   // defaulting to comp is probably safer?
-  public static final SwerveConstants SWERVE_CONSTANTS = new AlphaSwerveConstants();
+  public static final SwerveConstants SWERVE_CONSTANTS = new DumperSwerveConstants();
 
   private final Module[] modules; // Front Left, Front Right, Back Left, Back Right
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+  private final Camera[] cameras;
+  private final Pose3d[] cameraPoses;
   private final OdometryThreadIO odometryThread;
   private final OdometryThreadIOInputs odometryThreadInputs = new OdometryThreadIOInputs();
   private double lastOdometryUpdateTimestamp = 0.0;
@@ -177,6 +182,17 @@ public class SwerveSubsystem extends SubsystemBase {
                     swerveSimulation.getModules()[3],
                     canbus))
           };
+      cameras =
+          new Camera[] {
+            new Camera(
+                new CameraIOSim(
+                    SWERVE_CONSTANTS.getCameraConstants()[0],
+                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose()))),
+            new Camera(
+                new CameraIOSim(
+                    SWERVE_CONSTANTS.getCameraConstants()[1],
+                    () -> new Pose3d(swerveSimulation.getSimulatedDriveTrainPose())))
+          };
     } else {
       // Add real modules
       modules =
@@ -186,6 +202,15 @@ public class SwerveSubsystem extends SubsystemBase {
             new Module(new ModuleIOReal(SWERVE_CONSTANTS.getBackLeftModuleConstants(), canbus)),
             new Module(new ModuleIOReal(SWERVE_CONSTANTS.getBackRightModuleConstants(), canbus))
           };
+      cameras =
+          Arrays.stream(SWERVE_CONSTANTS.getCameraConstants())
+              .map((constants) -> new Camera(new CameraIOReal(constants)))
+              .toArray(Camera[]::new);
+    }
+
+    this.cameraPoses = new Pose3d[cameras.length];
+    for (int i = 0; i < cameras.length; i++) {
+      cameraPoses[i] = Pose3d.kZero;
     }
 
     this.gyroIO =
@@ -246,7 +271,12 @@ public class SwerveSubsystem extends SubsystemBase {
             Tracer.trace("Update module inputs for " + module.getPrefix(), module::periodic);
           }
 
+          for (Camera camera : cameras) {
+            Tracer.trace("Camera" + camera.getName() + " Periodic ", camera::periodic);
+          }
+
           Tracer.trace("Update odometry", this::updateOdometry);
+          Tracer.trace("Update vision", this::updateVision);
 
           // Logger.recordOutput("Current Hub Pose", FieldUtils.getCurrentHubPose());
         });
@@ -325,6 +355,26 @@ public class SwerveSubsystem extends SubsystemBase {
 
       // Apply update
       estimator.updateWithTime(sample.timestamp(), rawGyroRotation, modulePositions);
+    }
+  }
+
+  private void updateVision() {
+    for (int i = 0; i < cameras.length; i++) {
+      cameras[i].updateCamera(estimator);
+      cameraPoses[i] = cameras[i].getPose();
+    }
+    Pose3d[] arr = new Pose3d[cameras.length];
+    for (int k = 0; k < cameras.length; k++) {
+      if (Robot.ROBOT_MODE == RobotMode.SIM) {
+        arr[k] =
+            new Pose3d(swerveSimulation.getSimulatedDriveTrainPose())
+                .transformBy(cameras[k].getCameraConstants().robotToCamera());
+      } else {
+        arr[k] = getPose3d().transformBy(cameras[k].getCameraConstants().robotToCamera());
+      }
+    }
+    if (RobotMode.SIM != null) {
+      Logger.recordOutput("Vision/Camera Poses on Robot", arr);
     }
   }
 
