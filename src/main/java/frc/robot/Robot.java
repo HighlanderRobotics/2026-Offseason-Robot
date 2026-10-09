@@ -143,7 +143,7 @@ public class Robot extends LoggedRobot {
     //                     .times(-1))
     //         .withName("Teleop drive"));
     swerve.setDefaultCommand(
-        swerve.driveOpenLoopRobotRelative(
+        swerve.driveClosedLoopRobotRelative(
             () ->
                 new ChassisSpeeds(
                         modifyJoystick(driver.getLeftY())
