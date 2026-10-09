@@ -5,6 +5,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
@@ -156,5 +157,16 @@ public class AutoAlign {
             target.getRotation().getRadians(),
             current.getRotation().getRadians(),
             ROTATION_TOLERANCE_RADIANS);
+  }
+
+  public static Rotation2d getTargetHeading(Pose2d robotPose, Translation2d targetPosition) {
+    Translation2d robotPosition = robotPose.getTranslation();
+    Translation2d robotToTargetVec = targetPosition.minus(robotPosition);
+
+    Rotation2d targetRotation = robotToTargetVec.getAngle();
+
+    Logger.recordOutput("AutoAim/Target rotation", targetRotation);
+
+    return targetRotation;
   }
 }

@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -28,6 +29,9 @@ import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
+import frc.robot.utils.FieldUtils;
+import frc.robot.utils.autoaim.AutoAlign;
+
 import java.util.Optional;
 import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
@@ -162,6 +166,21 @@ public class Robot extends LoggedRobot {
 
     driver.a().whileTrue(drum.setFlywheelAndHoodVoltage(() -> 10.0, () -> 10.0));
     driver.b().whileTrue(drum.runCurrentZeroing());
+
+    // TODO: FEED POS IF FEEDING
+    driver.rightBumper().whileTrue(swerve.alignToHeading(
+      () -> {
+        Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+        return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+      }, 
+      () -> new ChassisSpeeds(
+                        modifyJoystick(driver.getLeftY())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                        modifyJoystick(driver.getLeftX())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                        0.0)
+                    .times(-1))
+    );
 
     // Run auto when auto starts. Matches Choreolib's defer impl
     RobotModeTriggers.autonomous()
