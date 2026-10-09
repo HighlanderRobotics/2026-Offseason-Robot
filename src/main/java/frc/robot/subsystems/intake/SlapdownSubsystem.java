@@ -1,10 +1,14 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Volts;
+
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.MathUtil;
@@ -14,6 +18,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
+import frc.robot.Robot;
+import frc.robot.components.follower.FollowerIO;
+import frc.robot.components.follower.FollowerIOInputsAutoLogged;
+import frc.robot.components.follower.FollowerIOSim;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -25,7 +37,7 @@ public class SlapdownSubsystem extends SubsystemBase {
   public static final Rotation2d PIVOT_EXTENDED_POSITION = PIVOT_MIN_POSITION;
   public static final Rotation2d PIVOT_RETRACTED_POSITION = PIVOT_MAX_POSITION;
   public static final double CURRENT_ZEROING_THRESHOLD = 0.0;
-  public static final double ROLLER_GEAR_RATIO = 3.0 / 1.0;
+  public static final double ROLLER_GEAR_RATIO = 36.0 / 12.0;
   public static final double PIVOT_GEAR_RATIO = (60.0 / 8.0) * (64.0 / 16.0);
   public static final double PIVOT_TO_CANCODER = 1.0 / 1.77777778;
   public static final double CANCODER_TO_PIVOT = 1.77777778 / 1.0;
@@ -42,6 +54,9 @@ public class SlapdownSubsystem extends SubsystemBase {
   private final RollerIO rollerIO;
   private RollerIOInputsAutoLogged rollerIOInputs = new RollerIOInputsAutoLogged();
 
+  private final FollowerIO followerIO;
+  private FollowerIOInputsAutoLogged followerIOInputs = new FollowerIOInputsAutoLogged();
+
   private Trigger atExtensionTrigger = new Trigger(this::atExtension).debounce(0.0);
   // TODO: find actual trigger debounce
   private LinearFilter currentFilter = LinearFilter.movingAverage(5);
@@ -49,11 +64,49 @@ public class SlapdownSubsystem extends SubsystemBase {
   @AutoLogOutput(key = "Intake/Pivot/Current Filter Value")
   private double currentFilterValue = 0.0;
 
+  private SysIdRoutine rollerSysid;
+
+  private SysIdRoutine pivotSysid;
+
   // TODO: find actual filter value
-  public SlapdownSubsystem(PivotIO pivotIO, CANcoderIO cancoderIO, RollerIO rollerIO) {
+  public SlapdownSubsystem(
+      PivotIO pivotIO, CANcoderIO cancoderIO, RollerIO rollerIO, CANBus canBus) {
     this.pivotIO = pivotIO;
     this.cancoderIO = cancoderIO;
     this.rollerIO = rollerIO;
+
+    if (Robot.isSimulation()) {
+      this.followerIO =
+          new FollowerIOSim(
+              10,
+              rollerIO.getMotorId(),
+              MotorAlignmentValue.Opposed,
+              canBus,
+              getRollerConfig(),
+              () -> rollerIOInputs.positionRotations,
+              () -> rollerIOInputs.velocityRotsPerSec);
+    } else {
+      this.followerIO =
+          new FollowerIO(
+              10, rollerIO.getMotorId(), MotorAlignmentValue.Opposed, canBus, getRollerConfig());
+    }
+
+    rollerSysid =
+        new SysIdRoutine(
+            new Config(
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Intake/Roller/SysID State", state.toString())),
+            new Mechanism((voltage) -> rollerIO.setRollerVoltage(voltage.in(Volts)), null, this));
+    pivotSysid =
+        new SysIdRoutine(
+            new Config(
+                null,
+                null,
+                null,
+                (state) -> Logger.recordOutput("Intake/Pivot/SysID State", state.toString())),
+            new Mechanism((voltage) -> pivotIO.setMotorVoltage(voltage.in(Volts)), null, this));
   }
 
   // TODO Auto-generated constructor stub
@@ -71,7 +124,10 @@ public class SlapdownSubsystem extends SubsystemBase {
     Logger.processInputs("Intake/CANcoder", cancoderIOInputs);
 
     rollerIO.updateInputs(rollerIOInputs);
-    Logger.processInputs("Intake/Roller", rollerIOInputs);
+    Logger.processInputs("Intake/Roller Leader", rollerIOInputs);
+
+    followerIO.updateInputs(followerIOInputs);
+    Logger.processInputs("Intake/Roller Follower", followerIOInputs);
 
     Logger.recordOutput("Intake/Pivot/Setpoint", pivotIO.getSetpoint());
 
@@ -101,9 +157,8 @@ public class SlapdownSubsystem extends SubsystemBase {
   public Command intake() {
     return this.run(
         () -> {
-          pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION, 0.0);
-          rollerIO.setRollerVelocity(0.0);
-          // TODO: find pivotio feed forward volts, and roller velocity
+          pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION, -1.0);
+          rollerIO.setRollerVoltage(10.0); // TODO: Might have to retune this
         });
   }
 
@@ -153,47 +208,80 @@ public class SlapdownSubsystem extends SubsystemBase {
     return pivotIO.getSetpoint();
   }
 
+  public double getRollerVelocityRotsPerSec() {
+    return rollerIOInputs.velocityRotsPerSec;
+  }
+
+  public double getRollerPosRots() {
+    return rollerIOInputs.positionRotations;
+  }
+
   public boolean atExtension() {
     return MathUtil.isNear(getPositionSetpoint().getDegrees(), getPosition().getDegrees(), 10.0);
     // TODO: set .isNear tolerance
+  }
+
+  // Sysids
+  public Command runRollerSysid() {
+    return Commands.sequence(
+        rollerSysid.quasistatic(Direction.kForward),
+        rollerSysid.quasistatic(Direction.kReverse),
+        rollerSysid.dynamic(Direction.kForward),
+        rollerSysid.dynamic(Direction.kReverse));
+  }
+
+  public Command runPivotSysid() {
+    return Commands.sequence(
+        pivotSysid
+            .quasistatic(Direction.kForward)
+            .until(
+                () -> pivotIOInputs.position.getDegrees() > (PIVOT_MAX_POSITION.getDegrees() - 5)),
+        pivotSysid
+            .quasistatic(Direction.kReverse)
+            .until(
+                () -> pivotIOInputs.position.getDegrees() < (PIVOT_MIN_POSITION.getDegrees() + 5)),
+        pivotSysid
+            .dynamic(Direction.kForward)
+            .until(
+                () -> pivotIOInputs.position.getDegrees() > (PIVOT_MAX_POSITION.getDegrees() - 5)),
+        pivotSysid
+            .dynamic(Direction.kReverse)
+            .until(
+                () -> pivotIOInputs.position.getDegrees() < (PIVOT_MIN_POSITION.getDegrees() + 5)));
   }
 
   public static TalonFXConfiguration getPivotConfig() {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-    config.Feedback.FeedbackRemoteSensorID = 0;
-    // TODO: set feedback remote sensorID
+    config.Feedback.FeedbackRemoteSensorID = 4;
     config.Feedback.RotorToSensorRatio = PIVOT_GEAR_RATIO;
 
     config.Feedback.SensorToMechanismRatio = CANCODER_TO_PIVOT;
-    // TODO: set sensor to mech ratio
 
-    config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.0;
+    config.Slot0.kS = 0.07;
+    config.Slot0.kV = 6.25;
     config.Slot0.kA = 0.0;
-    config.Slot0.kG = 0.0;
+    config.Slot0.kG = 0.5;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     config.Slot0.GravityArmPositionOffset = 0.0;
-    config.Slot0.kP = 0.0;
-    config.Slot0.kD = 0.0;
-    // TODO: set kS, kV, kS, kG, GravityArmPositionOffset, kP, kD
+    config.Slot0.kP = 10.0;
+    config.Slot0.kD = 0.05;
 
     config.CurrentLimits.StatorCurrentLimit = 30.0;
 
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimitEnable = false;
     // TODO: set stator current limit, stator current lim enable, supply current
     // lim, supply current
     // lim enable
 
-    config.MotionMagic.MotionMagicCruiseVelocity = 0.0;
-    config.MotionMagic.MotionMagicAcceleration = 0.0;
-    // TODO: set cruise velocity, and acceleration
+    config.MotionMagic.MotionMagicCruiseVelocity = 0.5;
+    config.MotionMagic.MotionMagicAcceleration = 5.0;
 
     return config;
   }
@@ -216,8 +304,8 @@ public class SlapdownSubsystem extends SubsystemBase {
 
     config.CurrentLimits.StatorCurrentLimit = 20.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 0.0;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = 40.0;
+    config.CurrentLimits.SupplyCurrentLimitEnable = false;
     // TODO: set stator current lim, stator current lim enable, supply current lim,
     // supply current
     // lim enable
@@ -228,9 +316,9 @@ public class SlapdownSubsystem extends SubsystemBase {
   public static CANcoderConfiguration getCancoderConfig() {
     CANcoderConfiguration config = new CANcoderConfiguration();
 
-    config.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    config.MagnetSensor.MagnetOffset = 0.0;
-    config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.0;
+    config.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+    config.MagnetSensor.MagnetOffset = -0.0705;
+    config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.9;
     // TODO: set magnet offset, abs sensor discontinuity point
 
     return config;

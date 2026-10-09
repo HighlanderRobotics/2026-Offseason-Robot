@@ -191,6 +191,9 @@ public class Superstructure {
     SuperState.SPIN_UP_FEED_FLOW.bindCommands(
         indexer.rest(), intake.intake(), drum.shoot(this::getFeedShotData));
 
+    SuperState.SPIN_UP_FEED_FLOW.bindCommands(
+        indexer.rest(), intake.intake(), drum.shoot(this::getFeedShotData));
+
     SuperState.FEED.bindCommands(
         indexer.kick(), intake.restExtended(), drum.shoot(this::getFeedShotData));
 

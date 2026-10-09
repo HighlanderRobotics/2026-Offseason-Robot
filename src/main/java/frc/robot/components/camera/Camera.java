@@ -166,15 +166,24 @@ public class Camera {
         // Sets the pose on the sim field
         setSimPose(estPose, !inputs.stale);
 
-        if (Robot.ROBOT_MODE != RobotMode.REAL)
+        if (true) {
           Logger.recordOutput("Vision/" + getName() + "/Pose3d", visionPose);
-        Logger.recordOutput("Vision/" + getName() + "/Pose2d", visionPose.toPose2d());
-        // if (Robot.ROBOT_MODE != RobotMode.REAL){
-        //   List<Pose3d> targetPoses = estPose.get().targetsUsed.stream().map((target) -> {
-
-        //   }).collect(List::new);
-        //   Logger.recordOutput("Vision/" + getName() + "/Target Pose", estPose.get().targetsUsed);
-        // }
+          Logger.recordOutput("Vision/" + getName() + "/Pose2d", visionPose.toPose2d());
+          Tracer.trace(
+              "Log Tag Poses",
+              () -> {
+                Pose3d[] targetPose3ds = new Pose3d[inputs.result.targets.size()];
+                for (int j = 0; j < inputs.result.targets.size(); j++) {
+                  targetPose3ds[j] =
+                      SwerveSubsystem.SWERVE_CONSTANTS
+                          .getFieldTagLayout()
+                          .getTagPose(inputs.result.targets.get(j).getFiducialId())
+                          .get();
+                }
+                if (Robot.ROBOT_MODE != RobotMode.REAL)
+                  Logger.recordOutput("Vision/" + getName() + "/Target Poses", targetPose3ds);
+              });
+        }
         final Matrix<N3, N1> deviations = findVisionMeasurementStdDevs(estPose.get());
         if (Robot.ROBOT_MODE != RobotMode.REAL)
           Logger.recordOutput("Vision/" + getName() + "/Deviations", deviations.getData());
@@ -192,22 +201,6 @@ public class Camera {
             });
 
         hasFutureData |= inputs.result.metadata.captureTimestampMicros > RobotController.getTime();
-
-        Tracer.trace(
-            "Log Tag Poses",
-            () -> {
-              Pose3d[] targetPose3ds = new Pose3d[inputs.result.targets.size()];
-              for (int j = 0; j < inputs.result.targets.size(); j++) {
-                targetPose3ds[j] =
-                    SwerveSubsystem.SWERVE_CONSTANTS
-                        .getFieldTagLayout()
-                        .getTagPose(inputs.result.targets.get(j).getFiducialId())
-                        .get();
-              }
-              if (Robot.ROBOT_MODE != RobotMode.REAL)
-                Logger.recordOutput("Vision/" + getName() + "/Target Poses", targetPose3ds);
-            });
-
       } else {
         ;
       }

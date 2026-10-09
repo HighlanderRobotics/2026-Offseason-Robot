@@ -48,7 +48,7 @@ public class IndexerIO {
 
   // Set gear ratios
   public static final double GEAR_RATIO = 50 / 12;
-  public static final double KICKER_GEAR_RATIO = 30 / 12;
+  public static final double KICKER_GEAR_RATIO = 30.0 / 12;
 
   protected final TalonFX indexerMotor;
   protected final TalonFX kickerLeaderMotor;
@@ -83,16 +83,13 @@ public class IndexerIO {
       new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
 
   public IndexerIO(CANBus canBus) {
-    // TODO: set motor ID for indexer
-    indexerMotor = new TalonFX(16, canBus);
+    indexerMotor = new TalonFX(11, canBus);
     indexerMotor.getConfigurator().apply(IndexerIO.getIndexerConfiguration());
 
-    // TODO: set motor ID for kicker leader
-    kickerLeaderMotor = new TalonFX(15, canBus);
+    kickerLeaderMotor = new TalonFX(12, canBus);
     kickerLeaderMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
 
-    // TODO: set motor ID for kicker follower
-    kickerFollowerMotor = new TalonFX(14, canBus);
+    kickerFollowerMotor = new TalonFX(13, canBus);
     kickerFollowerMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
 
     // Set kicker follower to follow leader
@@ -161,9 +158,11 @@ public class IndexerIO {
     config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
     // Set PID values
+    // TODO: NEEDS RETUNING! FROM SIM
     config.Slot0.kS = 0;
     config.Slot0.kG = 0;
-    config.Slot0.kV = 0;
+    config.Slot0.kV = 0.49448;
+    config.Slot0.kA = 0.032974;
     config.Slot0.kP = 0;
     config.Slot0.kD = 0;
 
@@ -180,14 +179,16 @@ public class IndexerIO {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake; // precise stopping
-    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // sets direction
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // sets direction
 
     config.Feedback.SensorToMechanismRatio = KICKER_GEAR_RATIO;
 
     // Set PID values
-    config.Slot0.kS = 0;
+    // TODO: RETUNE IRL
+    config.Slot0.kS = 0.018992;
     config.Slot0.kG = 0;
-    config.Slot0.kV = 0;
+    config.Slot0.kV = 0.30798;
+    config.Slot0.kA = 0.022312;
     config.Slot0.kP = 0;
     config.Slot0.kD = 0;
 

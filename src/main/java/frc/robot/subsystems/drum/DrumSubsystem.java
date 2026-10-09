@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -68,14 +69,20 @@ public class DrumSubsystem extends SubsystemBase {
   private SysIdRoutine flywheelSysid =
       new SysIdRoutine(
           new Config(
-              null, null, null, (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state)),
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state.toString())),
           new Mechanism((voltage) -> flywheelIO.setVoltage(voltage.in(Volts)), null, this));
 
   // TODO: PROBABLY NEED TO REDUCE RAMP RATE ETC TO MAKE WORK
   private SysIdRoutine hoodSysid =
       new SysIdRoutine(
           new Config(
-              null, null, null, (state) -> Logger.recordOutput("Drum/Hood/SysID State", state)),
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Drum/Hood/SysID State", state.toString())),
           new Mechanism((voltage) -> hoodIO.setVoltage(voltage.in(Volts)), null, this));
 
   // For current zeroing
@@ -88,7 +95,6 @@ public class DrumSubsystem extends SubsystemBase {
 
       hoodIO = new HoodIO(canBus);
 
-      // TODO: CORRECT VALUES
       followerIOs[0] =
           new FollowerIO(
               16, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Aligned, canBus, getFlywheelConfig());
@@ -211,8 +217,26 @@ public class DrumSubsystem extends SubsystemBase {
   public Command runFlywheelSysid() {
     return Commands.sequence(
         flywheelSysid.quasistatic(Direction.kForward),
+        Commands.waitUntil(
+            () ->
+                MathUtil.isNear(
+                    0.0,
+                    flywheelIOInputs.velocityRotPerSec,
+                    1.0)), // Wait until we're nearly stopped
         flywheelSysid.quasistatic(Direction.kReverse),
+        Commands.waitUntil(
+            () ->
+                MathUtil.isNear(
+                    0.0,
+                    flywheelIOInputs.velocityRotPerSec,
+                    1.0)), // Wait until we're nearly stopped
         flywheelSysid.dynamic(Direction.kForward),
+        Commands.waitUntil(
+            () ->
+                MathUtil.isNear(
+                    0.0,
+                    flywheelIOInputs.velocityRotPerSec,
+                    1.0)), // Wait until we're nearly stopped
         flywheelSysid.dynamic(Direction.kReverse));
   }
 
@@ -251,12 +275,11 @@ public class DrumSubsystem extends SubsystemBase {
 
     // TODO: VALUE FROM CAD
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    config.MotorOutput.NeutralMode =
-        NeutralModeValue.Brake; // Its possible that we should actually coast on this mech but idk
+    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     // TODO: BUDGET CURRENT
     config.CurrentLimits.StatorCurrentLimit = 45.0;
-    config.CurrentLimits.StatorCurrentLimitEnable = false;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = false;
 
@@ -265,10 +288,11 @@ public class DrumSubsystem extends SubsystemBase {
     config.MotionMagic.MotionMagicAcceleration = 10.0; // TODO: CALCULATE ACTUAL VALUE
 
     // Slot 0 is motion magic velocity pidf
-    config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.0;
-    config.Slot0.kA = 0.0;
-    config.Slot0.kP = 0.0;
+    // TODO: RETUNE. FROM SIM
+    config.Slot0.kS = 0.31;
+    config.Slot0.kV = 0.17433;
+    config.Slot0.kA = 0.10015;
+    config.Slot0.kP = 1.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.0;
 
@@ -279,7 +303,7 @@ public class DrumSubsystem extends SubsystemBase {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
     // TODO: VALUE FROM CAD
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     // TODO: BUDGET CURRENT
@@ -295,12 +319,15 @@ public class DrumSubsystem extends SubsystemBase {
     config.MotionMagic.MotionMagicAcceleration = 10.0;
 
     // Slot 0 is motion magic position pidf
-    config.Slot0.kS = 0.62;
-    config.Slot0.kV = 0.15;
-    config.Slot0.kA = 0.0;
-    config.Slot0.kP = 350.0;
+    // TODO: RETUNE. FROM SIM
+    config.Slot0.kS = 0.0081573;
+    config.Slot0.kV = 4.1623;
+    config.Slot0.kA = 0.12057;
+    config.Slot0.kG = 0.30471;
+    config.Slot0.kP = 10.0;
     config.Slot0.kI = 0.0;
-    config.Slot0.kD = 12.0;
+    config.Slot0.kD = 0.0;
+    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
     return config;
   }

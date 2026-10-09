@@ -8,13 +8,13 @@ public class ShotTrees {
 
   static {
     // TODO: POPULATE AND REMOVE THIS
-    HUB_SHOT_TREE.put(0.0, new ShotData(new Rotation2d(), 0.0, 0.0));
+    HUB_SHOT_TREE.put(0.0, new ShotData(Rotation2d.fromDegrees(25), 30.0, 0.0));
   }
 
   public static final InterpolatingShotTree FEED_SHOT_TREE = new InterpolatingShotTree();
 
   static {
     // TODO: POPULATE AND REMOVE THIS
-    FEED_SHOT_TREE.put(0.0, new ShotData(new Rotation2d(), 0.0, 0.0));
+    FEED_SHOT_TREE.put(0.0, new ShotData(Rotation2d.fromDegrees(25), 30.0, 0.0));
   }
 }

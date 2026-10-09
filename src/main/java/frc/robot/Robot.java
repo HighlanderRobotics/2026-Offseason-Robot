@@ -9,21 +9,32 @@ import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.CANcoderIO;
 import frc.robot.subsystems.intake.PivotIO;
+import frc.robot.subsystems.intake.PivotIOSim;
 import frc.robot.subsystems.intake.RollerIO;
+import frc.robot.subsystems.intake.RollerIOSim;
 import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
+import java.util.Optional;
+import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
@@ -46,16 +57,26 @@ public class Robot extends LoggedRobot {
   private IndexerSubsystem indexer = new IndexerSubsystem(canBus);
   private DrumSubsystem drum = new DrumSubsystem(canBus);
   private SlapdownSubsystem intake =
-      new SlapdownSubsystem(
-          new PivotIO(0, SlapdownSubsystem.getPivotConfig(), canBus),
-          new CANcoderIO(0, SlapdownSubsystem.getCancoderConfig(), canBus),
-          new RollerIO(0, SlapdownSubsystem.getRollerConfig(), canBus));
+      Robot.isSimulation()
+          ? new SlapdownSubsystem(
+              new PivotIOSim(8, SlapdownSubsystem.getPivotConfig(), canBus),
+              new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
+              new RollerIOSim(9, SlapdownSubsystem.getRollerConfig(), canBus),
+              canBus)
+          : new SlapdownSubsystem(
+              new PivotIO(8, SlapdownSubsystem.getPivotConfig(), canBus),
+              new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
+              new RollerIO(9, SlapdownSubsystem.getRollerConfig(), canBus),
+              canBus);
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
 
   private Superstructure superstructure =
       new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
+
+  private LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto");
+  private Optional<Alliance> lastAlliance = Optional.empty();
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
@@ -106,19 +127,32 @@ public class Robot extends LoggedRobot {
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
 
+    SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
+
+    // swerve.setDefaultCommand(
+    //     swerve
+    //         .driveOpenLoopFieldRelative(
+    //             () ->
+    //                 new ChassisSpeeds(
+    //                         modifyJoystick(driver.getLeftY())
+    //                             * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+    //                         modifyJoystick(driver.getLeftX())
+    //                             * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+    //                         modifyJoystick(driver.getRightX())
+    //                             * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
+    //                     .times(-1))
+    //         .withName("Teleop drive"));
     swerve.setDefaultCommand(
-        swerve
-            .driveOpenLoopFieldRelative(
-                () ->
-                    new ChassisSpeeds(
-                            modifyJoystick(driver.getLeftY())
-                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                            modifyJoystick(driver.getLeftX())
-                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                            modifyJoystick(driver.getRightX())
-                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
-                        .times(-1))
-            .withName("Teleop drive"));
+        swerve.driveClosedLoopRobotRelative(
+            () ->
+                new ChassisSpeeds(
+                        modifyJoystick(driver.getLeftY())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                        modifyJoystick(driver.getLeftX())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                        modifyJoystick(driver.getRightX())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
+                    .times(-1)));
 
     indexer.setDefaultCommand(indexer.rest());
     intake.setDefaultCommand(intake.restExtended());
@@ -128,6 +162,32 @@ public class Robot extends LoggedRobot {
 
     driver.a().whileTrue(drum.setFlywheelAndHoodVoltage(() -> 10.0, () -> 10.0));
     driver.b().whileTrue(drum.runCurrentZeroing());
+
+    // Run auto when auto starts. Matches Choreolib's defer impl
+    RobotModeTriggers.autonomous()
+        .whileTrue(Commands.defer(() -> autoChooser.get().asProxy(), Set.of()));
+
+    // Add autos on alliance change
+    new Trigger(
+            () -> {
+              boolean allianceChanged = !DriverStation.getAlliance().equals(lastAlliance);
+              lastAlliance = DriverStation.getAlliance();
+              return allianceChanged && DriverStation.getAlliance().isPresent();
+            })
+        .onTrue(Commands.runOnce(() -> addAutos()));
+  }
+
+  private void addAutos() {
+    autoChooser.addDefaultOption("None", Commands.none());
+
+    // Sysids
+    autoChooser.addOption("Hood Sysid", drum.runHoodSysid());
+    autoChooser.addOption("Flywheel Sysid", drum.runFlywheelSysid());
+    autoChooser.addOption("Indexer Sysid", indexer.runIndexerSysid());
+    autoChooser.addOption("Kicker Sysid", indexer.runKickerSysid());
+    autoChooser.addOption("Intake Roller Sysid", intake.runRollerSysid());
+    autoChooser.addOption("Intake Pivot Sysid", intake.runPivotSysid());
+    autoChooser.addDefaultOption("Swerve turn sysid", swerve.runTurnSysid());
   }
 
   @Override
@@ -148,7 +208,9 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationInit() {
     // Reset odo pose to maple sim pose
-    swerve.resetMapleSimPose();
+    if (ROBOT_MODE == RobotMode.SIM) {
+      swerve.resetMapleSimPose();
+    }
   }
 
   @Override
