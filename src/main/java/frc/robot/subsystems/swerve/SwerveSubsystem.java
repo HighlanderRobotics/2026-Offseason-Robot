@@ -42,7 +42,6 @@ import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
 import frc.robot.subsystems.swerve.gyro.GyroIOReal;
 import frc.robot.subsystems.swerve.gyro.GyroIOSim;
 import frc.robot.subsystems.swerve.module.Module;
-import frc.robot.subsystems.swerve.module.ModuleIOBlank;
 import frc.robot.subsystems.swerve.module.ModuleIOReal;
 import frc.robot.subsystems.swerve.module.ModuleIOSim;
 import frc.robot.subsystems.swerve.odometry.OdometryThreadIO;
@@ -194,9 +193,9 @@ public class SwerveSubsystem extends SubsystemBase {
       modules =
           new Module[] {
             new Module(new ModuleIOReal(SWERVE_CONSTANTS.getFrontLeftModuleConstants(), canbus)),
-            new Module(new ModuleIOBlank(SWERVE_CONSTANTS.getFrontRightModuleConstants(), canbus)),
-            new Module(new ModuleIOBlank(SWERVE_CONSTANTS.getBackLeftModuleConstants(), canbus)),
-            new Module(new ModuleIOBlank(SWERVE_CONSTANTS.getBackRightModuleConstants(), canbus))
+            new Module(new ModuleIOReal(SWERVE_CONSTANTS.getFrontRightModuleConstants(), canbus)),
+            new Module(new ModuleIOReal(SWERVE_CONSTANTS.getBackLeftModuleConstants(), canbus)),
+            new Module(new ModuleIOReal(SWERVE_CONSTANTS.getBackRightModuleConstants(), canbus))
           };
       cameras =
           Arrays.stream(SWERVE_CONSTANTS.getCameraConstants())
