@@ -125,28 +125,25 @@ public class DumperSwerveConstants extends SwerveConstants {
 
   @Override
   public ModuleConstants getFrontLeftModuleConstants() {
-    // TODO: CANCODER OFFSET
     return new ModuleConstants(
-        0, "Front Left", 0, 1, 0, Rotation2d.fromRotations(0.337646).plus(Rotation2d.k180deg));
+        0, "Front Left", 0, 1, 0, Rotation2d.fromRotations(-0.337646).plus(Rotation2d.k180deg));
   }
 
   @Override
   public ModuleConstants getFrontRightModuleConstants() {
-    // TODO: CANCODER OFFSET
-    return new ModuleConstants(1, "Front Right", 2, 3, 1, Rotation2d.fromRotations(0.145264));
+    return new ModuleConstants(1, "Front Right", 2, 3, 1, Rotation2d.fromRotations(-0.145264));
   }
 
   @Override
   public ModuleConstants getBackLeftModuleConstants() {
-    // TODO: CANCODER OFFSET
     return new ModuleConstants(
-        2, "Back Left", 4, 5, 2, Rotation2d.fromRotations(0.42627).plus(Rotation2d.k180deg));
+        2, "Back Left", 4, 5, 2, Rotation2d.fromRotations(-0.42627).plus(Rotation2d.k180deg));
   }
 
   @Override
   public ModuleConstants getBackRightModuleConstants() {
-    // TODO: CANCODER OFFSET
-    return new ModuleConstants(3, "Back Right", 6, 7, 3, Rotation2d.fromRotations(0.067383));
+    return new ModuleConstants(
+        3, "Back Right", 6, 7, 3, Rotation2d.fromRotations(0.4548).plus(Rotation2d.k180deg));
   }
 
   @Override
@@ -212,10 +209,7 @@ public class DumperSwerveConstants extends SwerveConstants {
     turnConfig.CurrentLimits.SupplyCurrentLimit = 20.0;
     turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     // Inverts
-    turnConfig.MotorOutput.Inverted =
-        getTurnMotorInverted()
-            ? InvertedValue.Clockwise_Positive
-            : InvertedValue.CounterClockwise_Positive;
+    turnConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     // Fused Cancoder
     turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
@@ -223,14 +217,23 @@ public class DumperSwerveConstants extends SwerveConstants {
     turnConfig.Feedback.RotorToSensorRatio = getTurnGearRatio();
     turnConfig.Feedback.SensorToMechanismRatio = 1.0;
     turnConfig.Feedback.FeedbackRotorOffset = 0.0;
+
+    // turnConfig.Feedback.SensorToMechanismRatio = getTurnGearRatio();
+
+    // turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+    // turnConfig.Feedback.FeedbackRemoteSensorID = cancoderID;
+    // turnConfig.Feedback.RotorToSensorRatio = getTurnGearRatio();
+    // turnConfig.Feedback.SensorToMechanismRatio = 1.0;
+    // turnConfig.Feedback.FeedbackRotorOffset = 0.0;
+
     // Controls Gains
     // Copied from Wisp
     // TODO: RETUNE
     turnConfig.Slot0.kV = 2.557;
     turnConfig.Slot0.kA = 0.07029;
     turnConfig.Slot0.kS = 0.073114;
-    turnConfig.Slot0.kP = 250.0;
-    turnConfig.Slot0.kD = 0.5;
+    turnConfig.Slot0.kP = 100.0; // 300.0; // 250.0;
+    turnConfig.Slot0.kD = 1.0; // 0.5;
     turnConfig.MotionMagic.MotionMagicCruiseVelocity = (7368 / 60) / getTurnGearRatio();
     turnConfig.MotionMagic.MotionMagicAcceleration = (7368 / 60) / (getTurnGearRatio() * 0.005);
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
@@ -242,10 +245,7 @@ public class DumperSwerveConstants extends SwerveConstants {
   public CANcoderConfiguration getCancoderConfig(Rotation2d cancoderOffset) {
     final var cancoderConfig = new CANcoderConfiguration();
     cancoderConfig.MagnetSensor.MagnetOffset = cancoderOffset.getRotations();
-    cancoderConfig.MagnetSensor.SensorDirection =
-        getTurnMotorInverted()
-            ? SensorDirectionValue.CounterClockwise_Positive
-            : SensorDirectionValue.Clockwise_Positive;
+    cancoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     return cancoderConfig;
   }
 
