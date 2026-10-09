@@ -31,6 +31,7 @@ import frc.robot.subsystems.drum.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.drum.hood.HoodIO;
 import frc.robot.subsystems.drum.hood.HoodIOInputsAutoLogged;
 import frc.robot.subsystems.drum.hood.HoodIOSim;
+import frc.robot.utils.LoggedTunableNumber;
 import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
@@ -88,6 +89,10 @@ public class DrumSubsystem extends SubsystemBase {
   // For current zeroing
   private LinearFilter currentFilter = LinearFilter.movingAverage(10);
   private double currentFilterValue = 0.0;
+
+  // For shot tuning
+  private LoggedTunableNumber flywheelVelTuner = new LoggedTunableNumber("Flywheel Vel RPS", 30.0);
+  private LoggedTunableNumber hoodAngleTuner = new LoggedTunableNumber("Hood Angle Deg", 10.0);
 
   public DrumSubsystem(CANBus canBus) {
     if (Robot.ROBOT_MODE != RobotMode.SIM) {
@@ -205,7 +210,9 @@ public class DrumSubsystem extends SubsystemBase {
     return setFlywheelAndHood(() -> 30.0, () -> HOOD_MIN_ANGLE);
   }
 
-  // TODO: MORE COMMANDS WHEN SUPERSTRUCTURE IS INTEGRATED
+  public Command testShot() {
+    return setFlywheelAndHood(flywheelVelTuner::get, () -> Rotation2d.fromDegrees(hoodAngleTuner.get()));
+  }
 
   // Current zeroing
   public Command runCurrentZeroing() {
