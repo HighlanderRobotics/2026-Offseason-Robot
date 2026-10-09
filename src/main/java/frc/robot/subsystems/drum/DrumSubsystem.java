@@ -295,12 +295,12 @@ public class DrumSubsystem extends SubsystemBase {
     config.MotionMagic.MotionMagicAcceleration = 10.0;
 
     // Slot 0 is motion magic position pidf
-    config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.0;
+    config.Slot0.kS = 0.62;
+    config.Slot0.kV = 0.15;
     config.Slot0.kA = 0.0;
-    config.Slot0.kP = 0.0;
+    config.Slot0.kP = 350.0;
     config.Slot0.kI = 0.0;
-    config.Slot0.kD = 0.0;
+    config.Slot0.kD = 12.0;
 
     return config;
   }
