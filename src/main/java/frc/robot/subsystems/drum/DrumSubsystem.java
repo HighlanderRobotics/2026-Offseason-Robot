@@ -162,6 +162,9 @@ public class DrumSubsystem extends SubsystemBase {
     hoodDisconnectAlert.set(!hoodIOInputs.connected);
     currentFilterValue = currentFilter.calculate(hoodIOInputs.statorCurrentAmps);
 
+    Logger.recordOutput("Drum/Hood/Setpoint", hoodIO.getAngleSetpoint());
+    Logger.recordOutput("Drum/Flywheel/Setpoint", flywheelIO.getSetpointRotPerSec());
+
     if (Robot.isSimulation())
       Logger.recordOutput("Drum/Hood/Current Filter Value", currentFilterValue);
   }
@@ -319,14 +322,13 @@ public class DrumSubsystem extends SubsystemBase {
     config.MotionMagic.MotionMagicAcceleration = 10.0;
 
     // Slot 0 is motion magic position pidf
-    // TODO: RETUNE. FROM SIM
-    config.Slot0.kS = 0.0081573;
-    config.Slot0.kV = 4.1623;
-    config.Slot0.kA = 0.12057;
-    config.Slot0.kG = 0.30471;
-    config.Slot0.kP = 10.0;
+    config.Slot0.kS = 0.62;
+    config.Slot0.kV = 5.0;
+    config.Slot0.kG = 0.15;
+    config.Slot0.kA = 0.0;
+    config.Slot0.kP = 350.0;
     config.Slot0.kI = 0.0;
-    config.Slot0.kD = 0.0;
+    config.Slot0.kD = 12.0;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
     return config;

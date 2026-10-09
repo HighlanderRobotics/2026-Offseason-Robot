@@ -56,7 +56,7 @@ public class IndexerSubsystem extends SubsystemBase {
     return this.run(
         () -> {
           indexerIO.setIndexerVoltage(10);
-          indexerIO.setKickerVoltage(-7);
+          indexerIO.setKickerVoltage(10);
         });
   }
 
@@ -65,7 +65,7 @@ public class IndexerSubsystem extends SubsystemBase {
     return this.run(
         () -> {
           indexerIO.setIndexerVoltage(7);
-          indexerIO.setKickerVoltage(5.5);
+          indexerIO.setKickerVoltage(0.0);
         });
   }
 
@@ -74,7 +74,7 @@ public class IndexerSubsystem extends SubsystemBase {
     return this.run(
         () -> {
           indexerIO.setIndexerVoltage(-5);
-          indexerIO.setKickerVoltage(-5);
+          indexerIO.setKickerVoltage(5);
         });
   }
 
