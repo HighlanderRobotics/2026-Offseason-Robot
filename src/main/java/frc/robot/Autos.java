@@ -113,7 +113,6 @@ public class Autos {
     return Commands.sequence(
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()),
         stopIntaking(),
-        startScoring(),
         swerve.stopForTime(() -> 4),
         stopScoring());
   }
