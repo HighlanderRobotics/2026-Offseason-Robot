@@ -12,7 +12,6 @@ import frc.robot.Autos.Action;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.FieldUtils;
 import frc.robot.utils.FieldUtils.TrenchPoses;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -125,6 +124,7 @@ public class Autos {
         startIntaking(),
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()));
   }
+
   public void lockHoodUnderTrench(AutoRoutine routine, double toleranceMeters) {
     routine
         .observe(
