@@ -163,7 +163,6 @@ public class Robot extends LoggedRobot {
 
     drum.setDefaultCommand(drum.setFlywheelAndHoodVoltage(() -> 0.0, () -> 0.0));
 
-    driver.a().whileTrue(drum.setFlywheelAndHoodVoltage(() -> 10.0, () -> 10.0));
     driver.b().whileTrue(drum.runCurrentZeroing());
 
     // TODO: FEED POS IF FEEDING

@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -10,6 +11,7 @@ import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.FieldUtils;
+import frc.robot.utils.FieldUtils.TrenchPoses;
 import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
 import frc.robot.utils.autoaim.ShotTrees;
 import java.util.function.Supplier;
@@ -118,8 +120,8 @@ public class Superstructure {
   private void addRequests(
       CommandXboxControllerSubsystem driver, CommandXboxControllerSubsystem operator) {
     intakeReq = driver.leftTrigger();
-    scoreReq = driver.rightTrigger().and(() -> !shouldFeed);
-    feedReq = driver.rightTrigger().and(() -> shouldFeed);
+    scoreReq = driver.rightTrigger().and(() -> !shouldFeed).and(() -> !isNearTrench());
+    feedReq = driver.rightTrigger().and(() -> shouldFeed).and(() -> !isNearTrench());
     flowReq = new Trigger(() -> shouldFlow);
     shooterReady = new Trigger(drum::readyToShoot).debounce(0.25);
     spitReq = driver.povDown();
@@ -223,5 +225,19 @@ public class Superstructure {
   private ShotData getFeedShotData() {
     Translation2d feedTargetPos = FieldUtils.FeedTargets.getFeedTarget(feedTarget).getTranslation();
     return ShotTrees.FEED_SHOT_TREE.calculateShot(robotPoseSupplier.get(), feedTargetPos);
+  }
+
+  @AutoLogOutput(key = "Swerve/Near Trench")
+  public boolean isNearTrench() {
+    double x = robotPoseSupplier.get().getX();
+    double y = robotPoseSupplier.get().getY();
+
+    boolean inXTol =
+        MathUtil.isNear(TrenchPoses.BLUE_RIGHT.getPose().getX(), x, 2)
+            || MathUtil.isNear(TrenchPoses.RED_RIGHT.getPose().getX(), x, 2);
+    boolean inYTol =
+        MathUtil.isNear(TrenchPoses.BLUE_RIGHT.getPose().getY(), y, 0.515)
+            || MathUtil.isNear(TrenchPoses.RED_RIGHT.getPose().getY(), y, 0.515);
+    return inXTol && inYTol;
   }
 }
