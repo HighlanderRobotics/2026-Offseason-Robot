@@ -15,7 +15,6 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.FieldUtils;
 import frc.robot.utils.FieldUtils.TrenchPoses;
 import frc.robot.utils.autoaim.AutoAlign;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -118,12 +117,11 @@ public class Autos {
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()),
         stopIntaking(),
         swerve.alignToHeading(
-                () -> {
-                  Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-                  return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
-                },
-                () ->
-                    new ChassisSpeeds()),
+            () -> {
+              Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+              return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+            },
+            () -> new ChassisSpeeds()),
         stopScoring());
   }
 

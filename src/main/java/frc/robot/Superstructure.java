@@ -126,7 +126,12 @@ public class Superstructure {
   private void addRequests(
       CommandXboxControllerSubsystem driver, CommandXboxControllerSubsystem operator) {
     intakeReq = driver.leftTrigger().or(Autos.autoIntakeReq);
-    scoreReq = driver.rightTrigger().and(() -> !shouldFeed).and(() -> !isNearTrench()).or(Autos.autoScoreReq);
+    scoreReq =
+        driver
+            .rightTrigger()
+            .and(() -> !shouldFeed)
+            .and(() -> !isNearTrench())
+            .or(Autos.autoScoreReq);
     feedReq = driver.rightTrigger().and(() -> shouldFeed).and(() -> !isNearTrench());
     flowReq = new Trigger(() -> shouldFlow);
     shooterReady = new Trigger(drum::readyToShoot).debounce(0.25);

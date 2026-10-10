@@ -37,7 +37,6 @@ import frc.robot.Robot.RobotMode;
 import frc.robot.components.camera.Camera;
 import frc.robot.components.camera.CameraIOReal;
 import frc.robot.components.camera.CameraIOSim;
-import frc.robot.subsystems.swerve.constants.AlphaSwerveConstants;
 import frc.robot.subsystems.swerve.constants.DumperSwerveConstants;
 import frc.robot.subsystems.swerve.constants.SwerveConstants;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
