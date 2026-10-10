@@ -273,7 +273,7 @@ public class Superstructure {
     }
   }
 
-  // MATCH TIMING 
+  // MATCH TIMING
   private String getCurrentShift() {
     if (DriverStation.isDisabled()) return "Disabled";
     if (130.00 < timeLeftinMatch() && timeLeftinMatch() <= 140.00) {
@@ -305,7 +305,7 @@ public class Superstructure {
     return timeLeftinMatch() - offset;
   }
 
-  @AutoLogOutput(key = "Is our shift?")
+  @AutoLogOutput(key = "Superstructure/Is our shift?")
   public boolean isOurShift() {
     if (DriverStation.isDisabled()) return false;
     // only cant score when its the others turn, otherwise everyone can
@@ -324,7 +324,7 @@ public class Superstructure {
     }
   }
 
-  @AutoLogOutput(key = "10s Left (in off shift)")
+  @AutoLogOutput(key = "Superstructure/10s Left (in off shift)")
   public boolean lessThanTenSecsLeftInOffShift() {
     if (!isOurShift() && (10.0 <= getTimeLeftInShift())) {
       return true;
