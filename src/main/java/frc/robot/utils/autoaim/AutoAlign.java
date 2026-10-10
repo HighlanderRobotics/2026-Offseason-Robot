@@ -163,7 +163,7 @@ public class AutoAlign {
     Translation2d robotPosition = robotPose.getTranslation();
     Translation2d robotToTargetVec = targetPosition.minus(robotPosition);
 
-    Rotation2d targetRotation = robotToTargetVec.getAngle();
+    Rotation2d targetRotation = robotToTargetVec.getAngle().plus(Rotation2d.k180deg);
 
     Logger.recordOutput("AutoAim/Target rotation", targetRotation);
 
