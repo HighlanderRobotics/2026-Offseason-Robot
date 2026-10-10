@@ -32,7 +32,7 @@ import org.littletonrobotics.junction.Logger;
 public class SlapdownSubsystem extends SubsystemBase {
   public static final Rotation2d PIVOT_MIN_POSITION = Rotation2d.fromDegrees(0.0);
   // TODO:get pivot min position in degrees
-  public static final Rotation2d PIVOT_MAX_POSITION = Rotation2d.fromDegrees(0.0);
+  public static final Rotation2d PIVOT_MAX_POSITION = Rotation2d.fromDegrees(130.0);
   // TODO: pivot max position degrees
   public static final Rotation2d PIVOT_EXTENDED_POSITION = PIVOT_MIN_POSITION;
   public static final Rotation2d PIVOT_RETRACTED_POSITION = PIVOT_MAX_POSITION;

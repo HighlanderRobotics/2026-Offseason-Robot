@@ -211,7 +211,8 @@ public class DrumSubsystem extends SubsystemBase {
   }
 
   public Command testShot() {
-    return setFlywheelAndHood(flywheelVelTuner::get, () -> Rotation2d.fromDegrees(hoodAngleTuner.get()));
+    return setFlywheelAndHood(
+        flywheelVelTuner::get, () -> Rotation2d.fromDegrees(hoodAngleTuner.get()));
   }
 
   // Current zeroing
