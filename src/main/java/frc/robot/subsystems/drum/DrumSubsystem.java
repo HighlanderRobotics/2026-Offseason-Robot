@@ -200,7 +200,7 @@ public class DrumSubsystem extends SubsystemBase {
     return this.run(
         () -> {
           hoodIO.setPositionSetpoint(HOOD_MIN_ANGLE);
-          flywheelIO.setVoltage(0.0);
+          flywheelIO.setVoltage(2.0);
         });
   }
 
