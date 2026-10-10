@@ -24,5 +24,10 @@ public class ShotTrees {
     FEED_SHOT_TREE.put(5.5, new ShotData(Rotation2d.fromDegrees(35), 35.0, 0.98));
     FEED_SHOT_TREE.put(6.08, new ShotData(Rotation2d.fromDegrees(40), 40.0, 1.02));
     FEED_SHOT_TREE.put(6.87, new ShotData(Rotation2d.fromDegrees(45), 45.0, 1.12));
+    FEED_SHOT_TREE.put(7.29, new ShotData(Rotation2d.fromDegrees(45), 47.0, 1.1));
+    FEED_SHOT_TREE.put(7.98, new ShotData(Rotation2d.fromDegrees(45), 48.0, 1.05));
+    FEED_SHOT_TREE.put(8.45, new ShotData(Rotation2d.fromDegrees(45), 50.0, 1.13));
+    FEED_SHOT_TREE.put(9.05, new ShotData(Rotation2d.fromDegrees(45), 52.0, 1.4));
+    FEED_SHOT_TREE.put(9.9, new ShotData(Rotation2d.fromDegrees(45), 55.0, 1.5));
   }
 }
