@@ -309,7 +309,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledInit() {
     Superstructure.matchStartTime = 0;
-  
+
     addAutos();
   }
 
