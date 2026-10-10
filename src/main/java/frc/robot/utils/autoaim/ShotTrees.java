@@ -20,7 +20,9 @@ public class ShotTrees {
   public static final InterpolatingShotTree FEED_SHOT_TREE = new InterpolatingShotTree();
 
   static {
-    // TODO: POPULATE AND REMOVE THIS
-    FEED_SHOT_TREE.put(0.0, new ShotData(Rotation2d.fromDegrees(25), 30.0, 0.0));
+    FEED_SHOT_TREE.put(4.94, new ShotData(Rotation2d.fromDegrees(35), 30.0, 1.15));
+    FEED_SHOT_TREE.put(5.5, new ShotData(Rotation2d.fromDegrees(35), 35.0, 0.98));
+    FEED_SHOT_TREE.put(6.08, new ShotData(Rotation2d.fromDegrees(40), 40.0, 1.02));
+    FEED_SHOT_TREE.put(6.87, new ShotData(Rotation2d.fromDegrees(45), 45.0, 1.12));
   }
 }

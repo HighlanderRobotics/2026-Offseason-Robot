@@ -115,6 +115,12 @@ public class Superstructure {
     Logger.recordOutput("Superstructure/Shooter Ready", shooterReady);
     Logger.recordOutput("Superstructure/Feed Target", feedTarget);
     Logger.recordOutput("Superstructure/Is a spin up state", state.isASpinUpState());
+
+    Logger.recordOutput(
+        "Distance to feed target",
+        FieldUtils.FeedTargets.getFeedTarget(feedTarget)
+            .getTranslation()
+            .getDistance(robotPoseSupplier.get().getTranslation()));
   }
 
   private void addRequests(
@@ -239,5 +245,13 @@ public class Superstructure {
         MathUtil.isNear(TrenchPoses.BLUE_RIGHT.getPose().getY(), y, 0.515)
             || MathUtil.isNear(TrenchPoses.RED_RIGHT.getPose().getY(), y, 0.515);
     return inXTol && inYTol;
+  }
+
+  public boolean shouldFeed() {
+    return shouldFeed;
+  }
+
+  public FeedTarget getFeedTarget() {
+    return feedTarget;
   }
 }

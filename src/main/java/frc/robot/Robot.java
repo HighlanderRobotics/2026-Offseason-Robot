@@ -171,8 +171,15 @@ public class Robot extends LoggedRobot {
         .whileTrue(
             swerve.alignToHeading(
                 () -> {
-                  Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-                  return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                  if (superstructure.shouldFeed()) {
+                    Translation2d currentFeedPosition =
+                        FieldUtils.FeedTargets.getFeedTarget(superstructure.getFeedTarget())
+                            .getTranslation();
+                    return AutoAlign.getTargetHeading(swerve.getPose(), currentFeedPosition);
+                  } else {
+                    Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+                    return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                  }
                 },
                 () ->
                     new ChassisSpeeds(
