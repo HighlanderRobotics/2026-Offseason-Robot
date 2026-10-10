@@ -36,6 +36,7 @@ import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class DrumSubsystem extends SubsystemBase {
@@ -93,6 +94,9 @@ public class DrumSubsystem extends SubsystemBase {
   // For shot tuning
   private LoggedTunableNumber flywheelVelTuner = new LoggedTunableNumber("Flywheel Vel RPS", 30.0);
   private LoggedTunableNumber hoodAngleTuner = new LoggedTunableNumber("Hood Angle Deg", 10.0);
+
+  @AutoLogOutput(key = "Drum/Flywheel Fudge Factor")
+  private double flywheelFudgeFactor = 0.0;
 
   public DrumSubsystem(CANBus canBus) {
     if (Robot.ROBOT_MODE != RobotMode.SIM) {
@@ -205,7 +209,8 @@ public class DrumSubsystem extends SubsystemBase {
         () -> {
           ShotData shotData = shotDataSupplier.get();
           hoodIO.setPositionSetpoint(shotData.hoodAngle());
-          flywheelIO.setVelocitySetpoint(shotData.flywheelVelocityRotPerSec());
+          flywheelIO.setVelocitySetpoint(
+              shotData.flywheelVelocityRotPerSec() + flywheelFudgeFactor);
         });
   }
 
@@ -281,6 +286,14 @@ public class DrumSubsystem extends SubsystemBase {
             hoodIO.getAngleSetpoint().getDegrees(),
             hoodIOInputs.position.getDegrees(),
             HOOD_ANGLE_TOLERANCE_DEG);
+  }
+
+  public void incrementFudgeFactor() {
+    flywheelFudgeFactor++;
+  }
+
+  public void decrementFudgeFactor() {
+    flywheelFudgeFactor--;
   }
 
   // Configs

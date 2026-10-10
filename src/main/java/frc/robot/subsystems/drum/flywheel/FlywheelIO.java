@@ -44,7 +44,7 @@ public class FlywheelIO {
   private MotionMagicVelocityVoltage motionMagic =
       new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
 
-  private double velocitySetpointRotPerSec = 0.0;
+  private double velocitySetpointRotPerSec = 10.0;
 
   public FlywheelIO(CANBus canBus) {
     // TODO: CORRECT ID

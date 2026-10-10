@@ -130,7 +130,7 @@ public class Superstructure {
     feedReq = driver.rightTrigger().and(() -> shouldFeed).and(() -> !isNearTrench());
     flowReq = new Trigger(() -> shouldFlow);
     shooterReady = new Trigger(drum::readyToShoot).debounce(0.25);
-    spitReq = driver.povDown();
+    spitReq = driver.a();
 
     // TODO: MAKE SINGULAR CONTROLLER MODE
     operator.povUp().onTrue(Commands.runOnce(() -> defense = true));
