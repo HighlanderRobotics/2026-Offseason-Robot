@@ -3,6 +3,9 @@ package frc.robot;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -14,6 +17,7 @@ import frc.robot.utils.FieldUtils;
 import frc.robot.utils.FieldUtils.TrenchPoses;
 import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
 import frc.robot.utils.autoaim.ShotTrees;
+import java.text.DecimalFormat;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -62,6 +66,38 @@ public class Superstructure {
 
   @AutoLogOutput(key = "Superstructure/State")
   private static SuperState state = SuperState.IDLE;
+
+  private Timer stateTimer = new Timer();
+
+  private double getFPGATimestamp() {
+    return Timer.getFPGATimestamp();
+  }
+
+  @AutoLogOutput(key = "Superstructure/match starttime")
+  public static double matchStartTime;
+
+  private double getTimeElapsed() {
+    return getFPGATimestamp() - matchStartTime;
+  }
+
+  private double timeLeftinMatch() {
+    return 140.00 - getTimeElapsed();
+  }
+
+  @AutoLogOutput(key = "Superstructure/Shift Timer")
+  private String getTimeStampLeftInShift() {
+    return new DecimalFormat("#.#").format(getTimeLeftInShift());
+  }
+
+  @AutoLogOutput(key = "Superstructure/Current Shift")
+  private String getCurrentShiftName() {
+    return getCurrentShift();
+  }
+
+  @AutoLogOutput(key = "Scoring/Scoring Active")
+  public boolean isScoringActive() {
+    return isOurShift();
+  }
 
   private boolean shouldFeed = false;
   private boolean shouldFlow = false;
@@ -238,6 +274,85 @@ public class Superstructure {
   private ShotData getFeedShotData() {
     Translation2d feedTargetPos = FieldUtils.FeedTargets.getFeedTarget(feedTarget).getTranslation();
     return ShotTrees.FEED_SHOT_TREE.calculateShot(robotPoseSupplier.get(), feedTargetPos);
+  }
+
+  private Alliance getStartingAlliance() {
+    String gameData = DriverStation.getGameSpecificMessage();
+    // gives first inactive alliance
+    if (gameData.length() > 0) {
+      switch (gameData.charAt(0)) {
+        case 'B':
+          return Alliance.Red;
+        case 'R':
+          return Alliance.Blue;
+        default:
+          return Alliance.Blue;
+      }
+    } else {
+      // not sure
+      return Alliance.Blue;
+    }
+  }
+
+  // MATCH TIMING
+  private String getCurrentShift() {
+    if (DriverStation.isDisabled()) return "Disabled";
+    if (130.00 < timeLeftinMatch() && timeLeftinMatch() <= 140.00) {
+      return "Transition";
+    } else if (105.00 < timeLeftinMatch() && timeLeftinMatch() <= 130.00) {
+      return "Shift 1";
+    } else if (80.00 < timeLeftinMatch() && timeLeftinMatch() <= 105.00) {
+      return "Shift 2";
+    } else if ((55.00 < timeLeftinMatch() && timeLeftinMatch() <= 80.00)) {
+      return "Shift 3";
+    } else if ((30.00 < timeLeftinMatch() && timeLeftinMatch() <= 55.00)) {
+      return "Shift 4";
+    } else {
+      return "End Game";
+    }
+  }
+
+  @AutoLogOutput(key = "Time left in shift")
+  private double getTimeLeftInShift() {
+    if (DriverStation.isDisabled()) return 0;
+    double offset =
+        switch (getCurrentShift()) {
+          case "Transition" -> 130.00;
+          case "Shift 1" -> 105.00;
+          case "Shift 2" -> 80.00;
+          case "Shift 3" -> 55.00;
+          case "Shift 4" -> 30.00;
+          default -> 0.00;
+        };
+    return timeLeftinMatch() - offset;
+  }
+
+  @AutoLogOutput(key = "Superstructure/Is our shift?")
+  public boolean isOurShift() {
+    if (DriverStation.isDisabled()) return false;
+    // only cant score when its the others turn, otherwise everyone can
+    if (getStartingAlliance() == DriverStation.getAlliance().orElse(Alliance.Blue)) {
+      return !(getCurrentShift() == "Shift 2" || getCurrentShift() == "Shift 4");
+    } else {
+      return !(getCurrentShift() == "Shift 1" || getCurrentShift() == "Shift 3");
+    }
+  }
+
+  public boolean tenSecsLeftInOffShift() {
+    if (!isOurShift() && (10.0 <= getTimeLeftInShift() && getTimeLeftInShift() <= 11.0)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @AutoLogOutput(key = "Superstructure/10s Left (in off shift)")
+  public boolean lessThanTenSecsLeftInOffShift() {
+    if (!isOurShift() && (10.0 <= getTimeLeftInShift())) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @AutoLogOutput(key = "Swerve/Near Trench")
