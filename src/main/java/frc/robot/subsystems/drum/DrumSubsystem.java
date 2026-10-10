@@ -193,7 +193,11 @@ public class DrumSubsystem extends SubsystemBase {
 
   public Command rest() {
     // Maybe should keep spinning somewhat
-    return setFlywheelAndHood(() -> 0.0, () -> HOOD_MIN_ANGLE);
+    return this.run(
+        () -> {
+          hoodIO.setPositionSetpoint(HOOD_MIN_ANGLE);
+          flywheelIO.setVoltage(0.0);
+        });
   }
 
   public Command shoot(Supplier<ShotData> shotDataSupplier) {

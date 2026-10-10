@@ -44,7 +44,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
   /** Set to true to use logged tuneable numbers */
-  public static final boolean TUNING_MODE = false;
+  public static final boolean TUNING_MODE = true;
 
   public enum RobotMode {
     REAL,
@@ -215,6 +215,7 @@ public class Robot extends LoggedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     superstructure.simulationPeriodic(); // TODO: REMOVE
+    Logger.recordOutput("Distance to hub", FieldUtils.distanceToHub(swerve.getPose()));
   }
 
   @Override
