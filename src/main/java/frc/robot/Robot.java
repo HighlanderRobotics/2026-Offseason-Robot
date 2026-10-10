@@ -210,8 +210,8 @@ public class Robot extends LoggedRobot {
 
     driver.b().whileTrue(drum.runCurrentZeroing());
 
-    driver.povUp().onTrue(Commands.runOnce(drum::incrementFudgeFactor));
-    driver.povDown().onTrue(Commands.runOnce(drum::decrementFudgeFactor));
+    operator.povRight().onTrue(Commands.runOnce(drum::incrementFudgeFactor));
+    operator.povLeft().onTrue(Commands.runOnce(drum::decrementFudgeFactor));
 
     // TODO: FEED POS IF FEEDING
     driver
