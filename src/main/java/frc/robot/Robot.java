@@ -85,9 +85,6 @@ public class Robot extends LoggedRobot {
   private Superstructure superstructure =
       new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
 
-  private LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Auto");
-  private Optional<Alliance> lastAlliance = Optional.empty();
-
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
     SignalLogger.enableAutoLogging(false);
