@@ -73,7 +73,6 @@ import org.littletonrobotics.junction.Logger;
 public class SwerveSubsystem extends SubsystemBase {
   // decide which set of swerve constants to use based on robot edition
   // defaulting to comp is probably safer?
-  // TODO ALPHA SWERVE CONSTANTS ARE ADDED
   public static final SwerveConstants SWERVE_CONSTANTS = new DumperSwerveConstants();
   // changed to alpha swerve constants since johns is
 

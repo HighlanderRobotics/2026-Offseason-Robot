@@ -27,6 +27,7 @@ import frc.robot.subsystems.intake.RollerIO;
 import frc.robot.subsystems.intake.RollerIOSim;
 import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
 import frc.robot.utils.FieldUtils;
@@ -133,6 +134,8 @@ public class Robot extends LoggedRobot {
     }
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
+
+    PhoenixOdometryThread.getInstance().start();
 
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
 
