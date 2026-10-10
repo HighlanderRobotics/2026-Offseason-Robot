@@ -37,7 +37,7 @@ import frc.robot.Robot.RobotMode;
 import frc.robot.components.camera.Camera;
 import frc.robot.components.camera.CameraIOReal;
 import frc.robot.components.camera.CameraIOSim;
-import frc.robot.subsystems.swerve.constants.DumperSwerveConstants;
+import frc.robot.subsystems.swerve.constants.AlphaSwerveConstants;
 import frc.robot.subsystems.swerve.constants.SwerveConstants;
 import frc.robot.subsystems.swerve.gyro.GyroIO;
 import frc.robot.subsystems.swerve.gyro.GyroIOInputsAutoLogged;
@@ -72,7 +72,9 @@ import org.littletonrobotics.junction.Logger;
 public class SwerveSubsystem extends SubsystemBase {
   // decide which set of swerve constants to use based on robot edition
   // defaulting to comp is probably safer?
-  public static final SwerveConstants SWERVE_CONSTANTS = new DumperSwerveConstants();
+  // TODO ALPHA SWERVE CONSTANTS ARE ADDED
+  public static final SwerveConstants SWERVE_CONSTANTS = new AlphaSwerveConstants();
+  // changed to alpha swerve constants since johns is
 
   private final Module[] modules; // Front Left, Front Right, Back Left, Back Right
   private final GyroIO gyroIO;

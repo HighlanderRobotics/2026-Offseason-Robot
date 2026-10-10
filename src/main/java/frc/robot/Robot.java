@@ -34,6 +34,7 @@ import frc.robot.utils.autoaim.AutoAlign;
 import java.util.Optional;
 import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -74,6 +75,12 @@ public class Robot extends LoggedRobot {
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
+
+  // Auto stuff
+  private final Autos autos;
+  private Optional<Alliance> lastAlliance = Optional.empty();
+  @AutoLogOutput boolean haveAutosGenerated = false;
+  private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Autos");
 
   private Superstructure superstructure =
       new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
@@ -146,16 +153,54 @@ public class Robot extends LoggedRobot {
     //                     .times(-1))
     //         .withName("Teleop drive"));
     swerve.setDefaultCommand(
-        swerve.driveOpenLoopFieldRelative(
+        swerve
+            .driveOpenLoopFieldRelative(
+                () ->
+                    new ChassisSpeeds(
+                            modifyJoystick(driver.getLeftY())
+                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                            modifyJoystick(driver.getLeftX())
+                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                            modifyJoystick(driver.getRightX())
+                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
+                        .times(-1))
+            .withName("Teleop drive"));
+    // Auto things
+    autos = new Autos(swerve);
+    autoChooser.addDefaultOption("None", Commands.none());
+
+    // Run auto when auto starts. Matches Choreolib's defer impl
+    RobotModeTriggers.autonomous()
+        .whileTrue(Commands.defer(() -> autoChooser.get().asProxy(), Set.of()));
+
+    // Add autos on alliance change
+    new Trigger(
+            () -> {
+              var allianceChanged = !DriverStation.getAlliance().equals(lastAlliance);
+              lastAlliance = DriverStation.getAlliance();
+              return allianceChanged && DriverStation.getAlliance().isPresent();
+            })
+        .onTrue(Commands.runOnce(() -> addAutos()));
+    // Add autos when first connecting to DS
+    new Trigger(
             () ->
-                new ChassisSpeeds(
-                        modifyJoystick(driver.getLeftY())
-                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                        modifyJoystick(driver.getLeftX())
-                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                        modifyJoystick(driver.getRightX())
-                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
-                    .times(-1)));
+                DriverStation.isDSAttached()
+                    && DriverStation.getAlliance().isPresent()
+                    && !haveAutosGenerated)
+        .onTrue(Commands.print("connected"))
+        .onTrue(Commands.runOnce(() -> addAutos()).ignoringDisable(true));
+
+    SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
+
+    // log when commands get interrupted
+    CommandScheduler.getInstance()
+        .onCommandInterrupt(
+            (interrupted, interrupting) -> {
+              System.out.println("Interrupted: " + interrupted);
+              System.out.println(
+                  "Interrputing: "
+                      + (interrupting.isPresent() ? interrupting.get().getName() : "none"));
+            });
 
     indexer.setDefaultCommand(indexer.rest());
     intake.setDefaultCommand(intake.restExtended());
@@ -207,24 +252,39 @@ public class Robot extends LoggedRobot {
         .onTrue(Commands.runOnce(() -> addAutos()));
   }
 
-  private void addAutos() {
-    autoChooser.addDefaultOption("None", Commands.none());
+  // private void addAutos() {
+  //   autoChooser.addDefaultOption("None", Commands.none());
 
-    // Sysids
-    autoChooser.addOption("Hood Sysid", drum.runHoodSysid());
-    autoChooser.addOption("Flywheel Sysid", drum.runFlywheelSysid());
-    autoChooser.addOption("Indexer Sysid", indexer.runIndexerSysid());
-    autoChooser.addOption("Kicker Sysid", indexer.runKickerSysid());
-    autoChooser.addOption("Intake Roller Sysid", intake.runRollerSysid());
-    autoChooser.addOption("Intake Pivot Sysid", intake.runPivotSysid());
-    autoChooser.addDefaultOption("Swerve turn sysid", swerve.runTurnSysid());
-  }
+  //   // Sysids
+  //   autoChooser.addOption("Hood Sysid", drum.runHoodSysid());
+  //   autoChooser.addOption("Flywheel Sysid", drum.runFlywheelSysid());
+  //   autoChooser.addOption("Indexer Sysid", indexer.runIndexerSysid());
+  //   autoChooser.addOption("Kicker Sysid", indexer.runKickerSysid());
+  //   autoChooser.addOption("Intake Roller Sysid", intake.runRollerSysid());
+  //   autoChooser.addOption("Intake Pivot Sysid", intake.runPivotSysid());
+  //   autoChooser.addDefaultOption("Swerve turn sysid", swerve.runTurnSysid());
+  // }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     superstructure.simulationPeriodic(); // TODO: REMOVE
     Logger.recordOutput("Distance to hub", FieldUtils.distanceToHub(swerve.getPose()));
+  }
+
+  private void addAutos() {
+    System.out.println("------- Regenerating Autos");
+    System.out.println(
+        "Regenerating Autos on " + DriverStation.getAlliance().map((a) -> a.toString()));
+
+    autoChooser.addOption("Single Dip Auto TEST", autos.getTesting());
+    autoChooser.addOption("Double Dip Auto Left Trench", autos.getLTDoubleDipAuto());
+    autoChooser.addOption("Double Dip Auto Right Trench", autos.getRTDoubleDipAuto());
+    autoChooser.addOption("Partner Single Dip Left Trench", autos.getLTPartnerSingleDipAuto());
+    autoChooser.addOption("Partner Single Dip Right Trench", autos.getRTPartnerSingleDipAuto());
+
+    haveAutosGenerated = true;
+    System.out.println("Done generating autos");
   }
 
   @Override
@@ -246,7 +306,9 @@ public class Robot extends LoggedRobot {
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    addAutos();
+  }
 
   @Override
   public void disabledPeriodic() {}
