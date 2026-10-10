@@ -116,12 +116,15 @@ public class Autos {
     return Commands.sequence(
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()),
         stopIntaking(),
-        swerve.alignToHeading(
-            () -> {
-              Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-              return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
-            },
-            () -> new ChassisSpeeds()),
+        swerve
+            .alignToHeading(
+                () -> {
+                  Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+                  return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                },
+                () -> new ChassisSpeeds())
+            .withTimeout(4.0)
+            .alongWith(startScoring()),
         stopScoring());
   }
 
