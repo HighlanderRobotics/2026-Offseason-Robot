@@ -3,6 +3,8 @@ package frc.robot;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,6 +14,8 @@ import frc.robot.Autos.Action;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.FieldUtils;
 import frc.robot.utils.FieldUtils.TrenchPoses;
+import frc.robot.utils.autoaim.AutoAlign;
+
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -113,7 +117,13 @@ public class Autos {
     return Commands.sequence(
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()),
         stopIntaking(),
-        swerve.stopForTime(() -> 4),
+        swerve.alignToHeading(
+                () -> {
+                  Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+                  return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                },
+                () ->
+                    new ChassisSpeeds()),
         stopScoring());
   }
 
