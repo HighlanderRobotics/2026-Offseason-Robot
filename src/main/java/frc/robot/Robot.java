@@ -87,6 +87,8 @@ public class Robot extends LoggedRobot {
   private Superstructure superstructure =
       new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
 
+  private boolean hoodZeroed = false;
+
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
     SignalLogger.enableAutoLogging(false);
@@ -251,6 +253,9 @@ public class Robot extends LoggedRobot {
               return allianceChanged && DriverStation.getAlliance().isPresent();
             })
         .onTrue(Commands.runOnce(() -> addAutos()));
+
+    // Hood zero on enable
+    RobotModeTriggers.disabled().negate().and(() -> !hoodZeroed).onTrue(drum.runCurrentZeroing());
   }
 
   // private void addAutos() {
