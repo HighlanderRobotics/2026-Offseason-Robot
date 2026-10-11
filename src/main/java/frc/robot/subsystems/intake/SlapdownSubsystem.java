@@ -317,7 +317,7 @@ public class SlapdownSubsystem extends SubsystemBase {
     CANcoderConfiguration config = new CANcoderConfiguration();
 
     config.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
-    config.MagnetSensor.MagnetOffset = -0.0705;
+    config.MagnetSensor.MagnetOffset = -0.4106;
     config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.9;
     // TODO: set magnet offset, abs sensor discontinuity point
 
