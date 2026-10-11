@@ -36,7 +36,7 @@ public class SlapdownSubsystem extends SubsystemBase {
   // TODO: pivot max position degrees
   public static final Rotation2d PIVOT_EXTENDED_POSITION = PIVOT_MIN_POSITION;
   public static final Rotation2d PIVOT_RETRACTED_POSITION = PIVOT_MAX_POSITION;
-  public static final double CURRENT_ZEROING_THRESHOLD = 0.0;
+  public static final double CURRENT_ZEROING_THRESHOLD = 20.0;
   public static final double ROLLER_GEAR_RATIO = 36.0 / 12.0;
   public static final double PIVOT_GEAR_RATIO = (60.0 / 8.0) * (64.0 / 16.0);
   public static final double PIVOT_TO_CANCODER = 1.0 / 1.77777778;
@@ -57,7 +57,7 @@ public class SlapdownSubsystem extends SubsystemBase {
   private final FollowerIO followerIO;
   private FollowerIOInputsAutoLogged followerIOInputs = new FollowerIOInputsAutoLogged();
 
-  private Trigger atExtensionTrigger = new Trigger(this::atExtension).debounce(0.0);
+  private Trigger atExtensionTrigger = new Trigger(this::atExtension).debounce(0.01);
   // TODO: find actual trigger debounce
   private LinearFilter currentFilter = LinearFilter.movingAverage(5);
 
@@ -139,15 +139,15 @@ public class SlapdownSubsystem extends SubsystemBase {
             this.run(
                     () -> {
                       pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION);
-                      rollerIO.setRollerVelocity(0.0);
+                      rollerIO.setRollerVelocity(30.0);
                       // TODO: find roller velocity
                     })
                 .until(atExtensionTrigger),
             this.run(
                     () -> {
                       pivotIO.setMotorPositionSetpoint(
-                          PIVOT_EXTENDED_POSITION.plus(Rotation2d.fromDegrees(0.0)));
-                      rollerIO.setRollerVelocity(0.0);
+                          PIVOT_EXTENDED_POSITION.plus(Rotation2d.fromDegrees(30.0)), 5);
+                      rollerIO.setRollerVelocity(30.0);
                       // TODO: find pivot offset and roller velocity
                     })
                 .until(atExtensionTrigger))
@@ -261,13 +261,14 @@ public class SlapdownSubsystem extends SubsystemBase {
 
     config.Feedback.SensorToMechanismRatio = CANCODER_TO_PIVOT;
 
+    // TODO I think intake pivot needs to be retuned
     config.Slot0.kS = 0.07;
     config.Slot0.kV = 6.25;
     config.Slot0.kA = 0.0;
     config.Slot0.kG = 0.5;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-    config.Slot0.GravityArmPositionOffset = 0.0;
-    config.Slot0.kP = 10.0;
+    config.Slot0.GravityArmPositionOffset = 0.0; // should it be 0.25?
+    config.Slot0.kP = 10.0; // 3; //
     config.Slot0.kD = 0.05;
 
     config.CurrentLimits.StatorCurrentLimit = 30.0;

@@ -209,7 +209,7 @@ public class Robot extends LoggedRobot {
 
     drum.setDefaultCommand(drum.setFlywheelAndHoodVoltage(() -> 0.0, () -> 0.0));
 
-    driver.b().whileTrue(drum.runCurrentZeroing());
+    driver.b().whileTrue(Commands.parallel(drum.runCurrentZeroing(), intake.runCurrentZeroing()));
 
     operator.povRight().onTrue(Commands.runOnce(drum::incrementFudgeFactor));
     operator.povLeft().onTrue(Commands.runOnce(drum::decrementFudgeFactor));
@@ -258,7 +258,7 @@ public class Robot extends LoggedRobot {
 
   //   // Sysids
   //   autoChooser.addOption("Hood Sysid", drum.runHoodSysid());
-  //   autoChooser.addOption("Flywheel Sysid", drum.runFlywheelSysid());
+  //   ooser.addOption("Flywheel Sysid", drum.runFlywheelSysid());
   //   autoChooser.addOption("Indexer Sysid", indexer.runIndexerSysid());
   //   autoChooser.addOption("Kicker Sysid", indexer.runKickerSysid());
   //   autoChooser.addOption("Intake Roller Sysid", intake.runRollerSysid());
