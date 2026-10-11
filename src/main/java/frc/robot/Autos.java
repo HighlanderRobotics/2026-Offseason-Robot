@@ -123,7 +123,7 @@ public class Autos {
                   return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
                 },
                 () -> new ChassisSpeeds())
-            .withTimeout(4.0)
+            .withTimeout(7.0)
             .alongWith(startScoring()),
         stopScoring());
   }
@@ -221,6 +221,6 @@ public class Autos {
   public Command getLTPartnerSingleDipAuto() {
     return createAuto(
         "Partner Left Trench Single Dip Auto",
-        new Path[] {Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot, Path.LPartnerSecondDip});
+        new Path[] {Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot});
   }
 }
