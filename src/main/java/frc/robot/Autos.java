@@ -129,7 +129,7 @@ public class Autos {
                   return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
                 },
                 () -> new ChassisSpeeds())
-            .alongWith(swerve.translateToPoseWithTolerance(poseSupplier, 0.2, 0.2))
+            // .alongWith(swerve.translateToPoseWithTolerance(poseSupplier, 0.2, 0.2))
             .withTimeout(7.0)
             .alongWith(startScoring()),
         stopScoring());
