@@ -605,6 +605,15 @@ public class SwerveSubsystem extends SubsystemBase {
                         headingToleranceRadians));
   }
 
+  public Command translateToPoseWithTolerance(
+      Supplier<Pose2d> target, double xToleranceMeters, double yToleranceMeters) {
+    return translateToPose(target)
+        .until(
+            () ->
+                MathUtil.isNear(target.get().getX(), getPose().getX(), xToleranceMeters)
+                    && MathUtil.isNear(target.get().getY(), getPose().getY(), yToleranceMeters));
+  }
+
   /**
    * Autoaligns to a target heading
    *

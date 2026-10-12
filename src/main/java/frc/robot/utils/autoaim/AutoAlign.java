@@ -14,9 +14,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class AutoAlign {
   // public static final double MAX_ANGULAR_SPEED_RAD_PER_SEC = 8.989;
-  public final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = 90.090;
+  public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = 90.090;
   // public static final double MAX_TRANSLATIONAL_SPEED_METERS_PER_SEC = 3.511;
-  public final double MAX_TRANSLATIONAL_ACCELERATION_METERS_PER_SEC_SQ = 16.740;
+  public static final double MAX_TRANSLATIONAL_ACCELERATION_METERS_PER_SEC_SQ = 16.740;
 
   // Define constraints
   public final Constraints DEFAULT_TRANSLATIONAL_CONSTRAINTS =

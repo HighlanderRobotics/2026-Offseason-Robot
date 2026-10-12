@@ -3,6 +3,7 @@ package frc.robot;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -15,6 +16,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.FieldUtils;
 import frc.robot.utils.FieldUtils.TrenchPoses;
 import frc.robot.utils.autoaim.AutoAlign;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -51,8 +53,8 @@ public class Autos {
     RPartnerTSecondDip("PartnerRTSecondDip", Action.INTAKE),
     // shoot
     LDipToFirstShoot("LTDipToFirstShootBump", Action.DELAYED_SCORE),
-    RDipToFirstShoot("RTDipToFirstShootBump", Action.DELAYED_SCORE);
-
+    RDipToFirstShoot("RTDipToFirstShootBump", Action.DELAYED_SCORE),
+    LSecondDipBack("LSecondDipBack", Action.DELAYED_SCORE);
     private final String name;
     private final Action action;
 
@@ -112,7 +114,11 @@ public class Autos {
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()));
   }
 
+  // TODO: NOT TESTED
   public Command delayedScorePath(Path path, AutoRoutine routine) {
+    // Supplier<Pose2d> poseSupplier = () -> path.getTrajectory(routine).getFinalPose();
+    Supplier<Pose2d> poseSupplier =
+        () -> path.getTrajectory(routine).getFinalPose().orElse(new Pose2d()); // not sure
     return Commands.sequence(
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()),
         stopIntaking(),
@@ -123,6 +129,7 @@ public class Autos {
                   return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
                 },
                 () -> new ChassisSpeeds())
+            .alongWith(swerve.translateToPoseWithTolerance(poseSupplier, 0.2, 0.2))
             .withTimeout(7.0)
             .alongWith(startScoring()),
         stopScoring());
@@ -200,7 +207,7 @@ public class Autos {
     return createAuto(
         "Left Trench Double Dip Auto",
         new Path[] {
-          Path.LStartToFirstDip, Path.LDipToFirstShoot, Path.LSecondDip, Path.LDipToFirstShoot
+          Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot, Path.LSecondDip, Path.LSecondDipBack
         });
   }
 
