@@ -89,6 +89,8 @@ public class Robot extends LoggedRobot {
 
   private boolean hoodZeroed = false;
 
+  private Timer gcTimer = new Timer();
+
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
     SignalLogger.enableAutoLogging(false);
@@ -139,6 +141,8 @@ public class Robot extends LoggedRobot {
     // be added.
 
     PhoenixOdometryThread.getInstance().start();
+
+    gcTimer.start();
 
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
 
@@ -274,8 +278,13 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    superstructure.simulationPeriodic(); // TODO: REMOVE
+    // superstructure.simulationPeriodic(); // TODO: REMOVE
     Logger.recordOutput("Distance to hub", FieldUtils.distanceToHub(swerve.getPose()));
+
+    // run the garbage collector every 5 seconds
+    if (gcTimer.advanceIfElapsed(5)) {
+      System.gc();
+    }
   }
 
   private void addAutos() {
