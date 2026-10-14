@@ -41,7 +41,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class DrumSubsystem extends SubsystemBase {
   public static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0;
-  public static final double FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC = 5.0;
+  public static final double FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC = 3.0;
   public static final int FLYWHEEL_LEADER_ID = 15;
   // Ratio to main drum
   public static final double FLYWHEEL_GEAR_RATIO = 24.0 / 18.0;
@@ -306,7 +306,7 @@ public class DrumSubsystem extends SubsystemBase {
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     // TODO: BUDGET CURRENT
-    config.CurrentLimits.StatorCurrentLimit = 45.0;
+    config.CurrentLimits.StatorCurrentLimit = 75.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = false;

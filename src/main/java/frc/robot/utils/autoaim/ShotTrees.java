@@ -7,14 +7,15 @@ public class ShotTrees {
   public static final InterpolatingShotTree HUB_SHOT_TREE = new InterpolatingShotTree();
 
   static {
-    HUB_SHOT_TREE.put(1.718, new ShotData(Rotation2d.fromDegrees(10), 31.0 + 5, 0.87));
-    HUB_SHOT_TREE.put(2.62, new ShotData(Rotation2d.fromDegrees(17), 30.0 + 5, 0.75));
-    HUB_SHOT_TREE.put(3.39, new ShotData(Rotation2d.fromDegrees(20), 33.0 + 5, 0.81));
-    HUB_SHOT_TREE.put(3.68, new ShotData(Rotation2d.fromDegrees(17), 38.0 + 5, 1.1));
-    HUB_SHOT_TREE.put(3.89, new ShotData(Rotation2d.fromDegrees(19), 39.0 + 5, 1.18));
-    HUB_SHOT_TREE.put(4.48, new ShotData(Rotation2d.fromDegrees(25), 42.0 + 5, 1.23));
-    HUB_SHOT_TREE.put(4.65, new ShotData(Rotation2d.fromDegrees(25), 43.0 + 5, 1.34));
-    HUB_SHOT_TREE.put(5.31, new ShotData(Rotation2d.fromDegrees(26), 44.0 + 5, 1.29));
+    HUB_SHOT_TREE.put(1.87, new ShotData(Rotation2d.fromDegrees(10), 40.0, 0.87));
+    HUB_SHOT_TREE.put(2.38, new ShotData(Rotation2d.fromDegrees(13), 42.0, 0.87));
+    HUB_SHOT_TREE.put(2.62, new ShotData(Rotation2d.fromDegrees(16), 42.0, 0.75));
+    HUB_SHOT_TREE.put(3.39, new ShotData(Rotation2d.fromDegrees(18), 46.0, 0.81));
+    HUB_SHOT_TREE.put(3.67, new ShotData(Rotation2d.fromDegrees(22), 46.0, 1.1));
+    HUB_SHOT_TREE.put(3.86, new ShotData(Rotation2d.fromDegrees(24), 48.0, 1.18));
+    HUB_SHOT_TREE.put(4.27, new ShotData(Rotation2d.fromDegrees(26), 48.0, 1.23));
+    HUB_SHOT_TREE.put(4.65, new ShotData(Rotation2d.fromDegrees(27), 48.0, 1.34));
+    HUB_SHOT_TREE.put(5.25, new ShotData(Rotation2d.fromDegrees(28), 50.0, 1.29));
   }
 
   public static final InterpolatingShotTree FEED_SHOT_TREE = new InterpolatingShotTree();
