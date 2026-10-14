@@ -5,7 +5,7 @@
 | 0      | Front Left Drive       | X60             | X60-055         |
 | 1      | Front Left Turn        | X44             | X44-010         |
 | 2      | Front Right Drive      | X60             | X60-067         |
-| 3      | Front Right Turn       | X44             | X44-029         |
+| 3      | Front Right Turn       | X44             | ~~X44-029~~ X44-009         |
 | 4      | Back Left Drive        | X60             | X60-056         |
 | 5      | Back Left Turn         | X44             | X44-018         |
 | 6      | Back Right Drive       | X60             | X60-062         |
