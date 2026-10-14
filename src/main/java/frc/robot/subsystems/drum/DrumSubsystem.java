@@ -313,10 +313,9 @@ public class DrumSubsystem extends SubsystemBase {
 
     config.Feedback.SensorToMechanismRatio = DrumSubsystem.FLYWHEEL_GEAR_RATIO;
 
-    config.MotionMagic.MotionMagicAcceleration = 10.0; // TODO: CALCULATE ACTUAL VALUE
+    config.MotionMagic.MotionMagicAcceleration = 130.0;
 
     // Slot 0 is motion magic velocity pidf
-    // TODO: RETUNE. FROM SIM
     config.Slot0.kS = 0.31;
     config.Slot0.kV = 0.17433;
     config.Slot0.kA = 0.10015;
