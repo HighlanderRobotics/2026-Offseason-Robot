@@ -230,14 +230,12 @@ public class Superstructure {
         intake.intake(),
         drum.rest());
 
-    SuperState.SPIN_UP_SCORE.bindCommands(
-        indexer.rest(), intake.agitate(), drum.shoot(this::getHubShotData));
+    SuperState.SPIN_UP_SCORE.bindCommands(indexer.rest(), intake.agitate(), drum.testShot());
 
     SuperState.SPIN_UP_SCORE_FLOW.bindCommands(
         indexer.rest(), intake.intake(), drum.shoot(this::getHubShotData));
 
-    SuperState.SCORE.bindCommands(
-        indexer.kick(), intake.agitate(), drum.shoot(this::getHubShotData));
+    SuperState.SCORE.bindCommands(indexer.kick(), intake.agitate(), drum.testShot());
 
     SuperState.SCORE_FLOW.bindCommands(
         indexer.kick(), intake.intake(), drum.shoot(this::getHubShotData));
