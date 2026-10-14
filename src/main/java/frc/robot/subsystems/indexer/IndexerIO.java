@@ -153,7 +153,7 @@ public class IndexerIO {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake; // precise stopping
-    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; // sets direction
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // sets direction
 
     config.Feedback.SensorToMechanismRatio = GEAR_RATIO;
 
