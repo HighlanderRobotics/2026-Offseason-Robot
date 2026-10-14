@@ -145,7 +145,7 @@ public class SlapdownSubsystem extends SubsystemBase {
             this.run(
                     () -> {
                       pivotIO.setMotorPositionSetpoint(
-                          PIVOT_EXTENDED_POSITION.plus(Rotation2d.fromDegrees(60.0)), 5);
+                          PIVOT_EXTENDED_POSITION.plus(Rotation2d.fromDegrees(60.0)));
                       rollerIO.setRollerVoltage(7.0);
                     })
                 .until(atExtensionTrigger))
@@ -270,7 +270,7 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.Slot0.kP = 10.0; // 3; //
     config.Slot0.kD = 0.05;
 
-    config.CurrentLimits.StatorCurrentLimit = 30.0;
+    config.CurrentLimits.StatorCurrentLimit = 50.0;
 
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;

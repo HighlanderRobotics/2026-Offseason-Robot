@@ -114,7 +114,6 @@ public class Autos {
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()));
   }
 
-  // TODO: NOT TESTED
   public Command delayedScorePath(Path path, AutoRoutine routine) {
     // Supplier<Pose2d> poseSupplier = () -> path.getTrajectory(routine).getFinalPose();
     Supplier<Pose2d> poseSupplier =
