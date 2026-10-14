@@ -54,7 +54,7 @@ public class Autos {
     // shoot
     LDipToFirstShoot("LTDipToFirstShootBump", Action.DELAYED_SCORE),
     RDipToFirstShoot("RTDipToFirstShootBump", Action.DELAYED_SCORE),
-    LSecondDipBack("LSecondDipBack", Action.DELAYED_SCORE);
+    LTReturnShot("LTReturnShot", Action.DELAYED_SCORE);
     private final String name;
     private final Action action;
 
@@ -206,7 +206,7 @@ public class Autos {
     return createAuto(
         "Left Trench Double Dip Auto",
         new Path[] {
-          Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot, Path.LSecondDip, Path.LSecondDipBack
+          Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot, Path.LSecondDip, Path.LTReturnShot
         });
   }
 
