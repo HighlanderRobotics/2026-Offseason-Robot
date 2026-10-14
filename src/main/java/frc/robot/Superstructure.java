@@ -226,7 +226,7 @@ public class Superstructure {
     SuperState.IDLE.bindCommands(indexer.rest(), intake.restExtended(), drum.rest());
 
     SuperState.INTAKE.bindCommands(
-        indexer.rest(), // Should we index?
+        indexer.index(), // Should we index?
         intake.intake(),
         drum.rest());
 
