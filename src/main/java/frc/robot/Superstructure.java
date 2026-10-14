@@ -221,7 +221,6 @@ public class Superstructure {
     bindTransition(SuperState.SPIT, spitReq.negate(), SuperState.IDLE);
   }
 
-  // TODO other mechs
   private void bindCommands() {
     SuperState.IDLE.bindCommands(indexer.rest(), intake.restExtended(), drum.rest());
 

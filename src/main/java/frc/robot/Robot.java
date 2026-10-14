@@ -216,7 +216,6 @@ public class Robot extends LoggedRobot {
     operator.povRight().onTrue(Commands.runOnce(drum::incrementFudgeFactor));
     operator.povLeft().onTrue(Commands.runOnce(drum::decrementFudgeFactor));
 
-    // TODO: FEED POS IF FEEDING
     driver
         .rightBumper()
         .whileTrue(

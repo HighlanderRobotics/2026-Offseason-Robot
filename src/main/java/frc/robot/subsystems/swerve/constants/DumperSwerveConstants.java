@@ -46,7 +46,6 @@ public class DumperSwerveConstants extends SwerveConstants {
     final CameraConstants backRightCameraConstants =
         new CameraConstants(
             "Back_Right",
-            // TODO: FROM CAD
             new Transform3d(
                 new Translation3d(-0.342612, -0.255814, 0.480683),
                 new Rotation3d(
@@ -56,7 +55,6 @@ public class DumperSwerveConstants extends SwerveConstants {
     final CameraConstants backLeftCameraConstants =
         new CameraConstants(
             "Back_Left",
-            // TODO: FROM CAD
             new Transform3d(
                 new Translation3d(-0.342502, 0.256376, 0.480406),
                 new Rotation3d(Degree.of(0.0), Degree.of(-90 + 70.3426427), Degree.of(180 + 50.0))),
@@ -227,8 +225,6 @@ public class DumperSwerveConstants extends SwerveConstants {
     // turnConfig.Feedback.FeedbackRotorOffset = 0.0;
 
     // Controls Gains
-    // Copied from Wisp
-    // TODO: RETUNE
     turnConfig.Slot0.kV = 2.557;
     turnConfig.Slot0.kA = 0.07029;
     turnConfig.Slot0.kS = 0.073114;

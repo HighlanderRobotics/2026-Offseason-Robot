@@ -50,7 +50,7 @@ public class DrumSubsystem extends SubsystemBase {
   public static final Rotation2d HOOD_MIN_ANGLE = Rotation2d.fromDegrees(10);
   public static final Rotation2d HOOD_MAX_ANGLE = Rotation2d.fromDegrees(45);
 
-  public static final double HOOD_CURRENT_ZEROING_THRESHOLD_AMPS = 30.0; // TODO: Tune
+  public static final double HOOD_CURRENT_ZEROING_THRESHOLD_AMPS = 30.0;
 
   private FlywheelIO flywheelIO;
   private FlywheelIOInputsAutoLogged flywheelIOInputs = new FlywheelIOInputsAutoLogged();
@@ -226,7 +226,6 @@ public class DrumSubsystem extends SubsystemBase {
 
   // Current zeroing
   public Command runCurrentZeroing() {
-    // TODO: May need to tune voltages etc.
     return this.run(() -> hoodIO.setVoltage(-3.0))
         .until(() -> currentFilterValue > HOOD_CURRENT_ZEROING_THRESHOLD_AMPS)
         .andThen(
@@ -301,7 +300,6 @@ public class DrumSubsystem extends SubsystemBase {
   public static TalonFXConfiguration getFlywheelConfig() {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
-    // TODO: VALUE FROM CAD
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
@@ -329,7 +327,6 @@ public class DrumSubsystem extends SubsystemBase {
   public static TalonFXConfiguration getHoodConfig() {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
-    // TODO: VALUE FROM CAD
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
@@ -341,7 +338,6 @@ public class DrumSubsystem extends SubsystemBase {
 
     config.Feedback.SensorToMechanismRatio = DrumSubsystem.HOOD_GEAR_RATIO;
 
-    // TODO: CALCULATE ACTUAL VALUE
     config.MotionMagic.MotionMagicCruiseVelocity = 1.0;
     config.MotionMagic.MotionMagicAcceleration = 10.0;
 

@@ -31,9 +31,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class SlapdownSubsystem extends SubsystemBase {
   public static final Rotation2d PIVOT_MIN_POSITION = Rotation2d.fromDegrees(0.0);
-  // TODO:get pivot min position in degrees
   public static final Rotation2d PIVOT_MAX_POSITION = Rotation2d.fromDegrees(130.0);
-  // TODO: pivot max position degrees
   public static final Rotation2d PIVOT_EXTENDED_POSITION = PIVOT_MIN_POSITION;
   public static final Rotation2d PIVOT_RETRACTED_POSITION = PIVOT_MAX_POSITION;
   public static final double CURRENT_ZEROING_THRESHOLD = 20.0;
@@ -41,7 +39,6 @@ public class SlapdownSubsystem extends SubsystemBase {
   public static final double PIVOT_GEAR_RATIO = (60.0 / 8.0) * (64.0 / 16.0);
   public static final double PIVOT_TO_CANCODER = 1.0 / 1.77777778;
   public static final double CANCODER_TO_PIVOT = 1.77777778 / 1.0;
-  // TODO: implement true ratios for roller gear ratio, and pivot gear ratio,
   // pivot to cancoder and
   // cancoder to pivots
   // find zeroing threshold
@@ -58,7 +55,6 @@ public class SlapdownSubsystem extends SubsystemBase {
   private FollowerIOInputsAutoLogged followerIOInputs = new FollowerIOInputsAutoLogged();
 
   private Trigger atExtensionTrigger = new Trigger(this::atExtension).debounce(0.01);
-  // TODO: find actual trigger debounce
   private LinearFilter currentFilter = LinearFilter.movingAverage(5);
 
   @AutoLogOutput(key = "Intake/Pivot/Current Filter Value")
@@ -68,7 +64,6 @@ public class SlapdownSubsystem extends SubsystemBase {
 
   private SysIdRoutine pivotSysid;
 
-  // TODO: find actual filter value
   public SlapdownSubsystem(
       PivotIO pivotIO, CANcoderIO cancoderIO, RollerIO rollerIO, CANBus canBus) {
     this.pivotIO = pivotIO;
@@ -182,7 +177,6 @@ public class SlapdownSubsystem extends SubsystemBase {
         () -> {
           pivotIO.setMotorPositionSetpoint(PIVOT_RETRACTED_POSITION);
           rollerIO.setRollerVoltage(0.0);
-          // TODO: set roller voltage
         });
   }
 
@@ -260,7 +254,6 @@ public class SlapdownSubsystem extends SubsystemBase {
 
     config.Feedback.SensorToMechanismRatio = CANCODER_TO_PIVOT;
 
-    // TODO I think intake pivot needs to be retuned
     config.Slot0.kS = 0.07;
     config.Slot0.kV = 6.25;
     config.Slot0.kA = 0.0;
@@ -275,7 +268,6 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = false;
-    // TODO: set stator current limit, stator current lim enable, supply current
     // lim, supply current
     // lim enable
 
@@ -290,7 +282,6 @@ public class SlapdownSubsystem extends SubsystemBase {
 
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    // TODO: clockwise postitive
 
     config.Feedback.SensorToMechanismRatio = ROLLER_GEAR_RATIO;
 
@@ -299,13 +290,12 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.Slot0.kA = 0.0;
     config.Slot0.kP = 0.0;
     config.Slot0.kD = 0.0;
-    // TODO: set kS, kV, kA, kP, kD
 
     config.CurrentLimits.StatorCurrentLimit = 20.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = false;
-    // TODO: set stator current lim, stator current lim enable, supply current lim,
+    // TODO: try raising current limit?
     // supply current
     // lim enable
 
@@ -318,7 +308,6 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     config.MagnetSensor.MagnetOffset = -0.4106;
     config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.9;
-    // TODO: set magnet offset, abs sensor discontinuity point
 
     return config;
   }
