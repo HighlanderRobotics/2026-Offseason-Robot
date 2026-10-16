@@ -4,8 +4,8 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -121,13 +121,24 @@ public class Autos {
     return Commands.sequence(
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()),
         stopIntaking(),
+        // swerve
+        //     .alignToHeading(
+        //         () -> {
+        //           Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+        //           return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+        //         },
+        //         () -> new ChassisSpeeds())
         swerve
-            .alignToHeading(
+            .translateToPose(
                 () -> {
                   Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-                  return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                  Rotation2d targetRotation =
+                      AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                  return new Pose2d(
+                      path.getTrajectory(routine).getFinalPose().get().getTranslation(),
+                      targetRotation);
                 },
-                () -> new ChassisSpeeds())
+                null)
             // .alongWith(swerve.translateToPoseWithTolerance(poseSupplier, 0.2, 0.2))
             .withTimeout(7.0)
             .alongWith(startScoring()),

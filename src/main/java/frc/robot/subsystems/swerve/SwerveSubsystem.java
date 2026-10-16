@@ -576,7 +576,7 @@ public class SwerveSubsystem extends SubsystemBase {
    *     requested speeds to drive along a line
    * @return Command driving to the target
    */
-  private Command translateToPose(Supplier<Pose2d> target) {
+  public Command translateToPose(Supplier<Pose2d> target) {
     return translateToPose(target, () -> new ChassisSpeeds());
   }
 
