@@ -712,6 +712,10 @@ public class SwerveSubsystem extends SubsystemBase {
     return new Pose3d(getPose());
   }
 
+  public void headingReset(Rotation2d newHeading) {
+    estimator.resetRotation(newHeading);
+  }
+
   /**
    * Returns the pose estimator rotation, as returned by {@link #getPose()}. between -180 and 180
    */
