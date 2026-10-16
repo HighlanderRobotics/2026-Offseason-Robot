@@ -216,7 +216,7 @@ public class DrumSubsystem extends SubsystemBase {
 
   public Command spit() {
     // Might need to tune this...
-    return setFlywheelAndHood(() -> 30.0, () -> HOOD_MIN_ANGLE);
+    return setFlywheelAndHood(() -> -20.0, () -> HOOD_MIN_ANGLE);
   }
 
   public Command testShot() {
