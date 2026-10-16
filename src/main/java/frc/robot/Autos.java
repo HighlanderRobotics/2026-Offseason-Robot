@@ -221,7 +221,7 @@ public class Autos {
   public Command getRTPartnerSingleDipAuto() {
     return createAuto(
         "Partner Right Trench Single Dip Auto",
-        new Path[] {Path.RPartnerStartToFirstDip, Path.RDipToFirstShoot, Path.RPartnerTSecondDip});
+        new Path[] {Path.RPartnerStartToFirstDip, Path.RDipToFirstShoot});
   }
 
   public Command getLTPartnerSingleDipAuto() {
