@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -238,7 +239,28 @@ public class Robot extends LoggedRobot {
                             modifyJoystick(driver.getLeftX())
                                 * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
                             0.0)
-                        .times(-1)));
+                        ));
+
+    driver
+        .leftBumper()
+        .whileTrue(
+            swerve.alignToHeading(
+                () -> {
+                  if(swerve.getRotation().getRadians() >= Math.PI/2 && swerve.getRotation().getRadians() < 3*Math.PI/2){
+                    return Rotation2d.k180deg;
+                  } 
+                  else{
+                    return Rotation2d.kZero;
+                  }
+                },
+                () ->
+                    new ChassisSpeeds(
+                            modifyJoystick(driver.getLeftY())
+                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                            modifyJoystick(driver.getLeftX())
+                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                            0.0)
+                        ));
 
     // Run auto when auto starts. Matches Choreolib's defer impl
     RobotModeTriggers.autonomous()
