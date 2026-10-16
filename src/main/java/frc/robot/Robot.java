@@ -239,7 +239,28 @@ public class Robot extends LoggedRobot {
                             modifyJoystick(driver.getLeftX())
                                 * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
                             0.0)
-                        .times(-1)));
+                        ));
+
+    driver
+        .leftBumper()
+        .whileTrue(
+            swerve.alignToHeading(
+                () -> {
+                  if(swerve.getRotation().getRadians() >= Math.PI/2 && swerve.getRotation().getRadians() < 3*Math.PI/2){
+                    return Rotation2d.k180deg;
+                  } 
+                  else{
+                    return Rotation2d.kZero;
+                  }
+                },
+                () ->
+                    new ChassisSpeeds(
+                            modifyJoystick(driver.getLeftY())
+                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                            modifyJoystick(driver.getLeftX())
+                                * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                            0.0)
+                        ));
 
     driver.rightStick().and(driver.leftStick()).onTrue(Commands.runOnce(() -> swerve.headingReset(Rotation2d.kZero)));
 
