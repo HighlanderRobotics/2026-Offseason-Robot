@@ -14,6 +14,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 
 public class RollerIO {
   @AutoLog
@@ -25,7 +26,6 @@ public class RollerIO {
     public double statorCurrentAmps = 0.0;
     public double temperatureCelsius = 0.0;
     public boolean connected = false;
-    // TODO: get true values for velocity, applied votage, position rotations, supply current,
     // stator current, tempC
   }
 
@@ -91,6 +91,7 @@ public class RollerIO {
   }
 
   public void setRollerVoltage(double volts) {
+    Logger.recordOutput("Intake/Requested Voltage", volts);
     motor.setControl(voltageOut.withOutput(volts));
   }
 
@@ -101,5 +102,9 @@ public class RollerIO {
 
   public double getVelocitySetpoint() {
     return setpointvelocity;
+  }
+
+  public int getMotorId() {
+    return motor.getDeviceID();
   }
 }

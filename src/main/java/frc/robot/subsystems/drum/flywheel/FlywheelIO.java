@@ -44,10 +44,9 @@ public class FlywheelIO {
   private MotionMagicVelocityVoltage motionMagic =
       new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
 
-  private double velocitySetpointRotPerSec = 0.0;
+  private double velocitySetpointRotPerSec = Double.NaN;
 
   public FlywheelIO(CANBus canBus) {
-    // TODO: CORRECT ID
     leader = new TalonFX(DrumSubsystem.FLYWHEEL_LEADER_ID, canBus);
 
     leader.getConfigurator().apply(DrumSubsystem.getFlywheelConfig());
@@ -83,7 +82,6 @@ public class FlywheelIO {
     leader.setControl(voltageOut.withOutput(voltage));
   }
 
-  // TODO: ADD ACCEL CONTROL
   public void setVelocitySetpoint(double velocityRotPerSec) {
     velocitySetpointRotPerSec = velocityRotPerSec;
     leader.setControl(motionMagic.withVelocity(velocityRotPerSec));

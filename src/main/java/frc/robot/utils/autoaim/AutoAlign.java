@@ -5,6 +5,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
@@ -13,9 +14,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class AutoAlign {
   // public static final double MAX_ANGULAR_SPEED_RAD_PER_SEC = 8.989;
-  public final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = 90.090;
+  public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = 90.090;
   // public static final double MAX_TRANSLATIONAL_SPEED_METERS_PER_SEC = 3.511;
-  public final double MAX_TRANSLATIONAL_ACCELERATION_METERS_PER_SEC_SQ = 16.740;
+  public static final double MAX_TRANSLATIONAL_ACCELERATION_METERS_PER_SEC_SQ = 16.740;
 
   // Define constraints
   public final Constraints DEFAULT_TRANSLATIONAL_CONSTRAINTS =
@@ -156,5 +157,16 @@ public class AutoAlign {
             target.getRotation().getRadians(),
             current.getRotation().getRadians(),
             ROTATION_TOLERANCE_RADIANS);
+  }
+
+  public static Rotation2d getTargetHeading(Pose2d robotPose, Translation2d targetPosition) {
+    Translation2d robotPosition = robotPose.getTranslation();
+    Translation2d robotToTargetVec = targetPosition.minus(robotPosition);
+
+    Rotation2d targetRotation = robotToTargetVec.getAngle().plus(Rotation2d.k180deg);
+
+    Logger.recordOutput("AutoAim/Target rotation", targetRotation);
+
+    return targetRotation;
   }
 }

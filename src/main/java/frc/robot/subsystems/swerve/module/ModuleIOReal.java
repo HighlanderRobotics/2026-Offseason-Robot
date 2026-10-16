@@ -80,7 +80,8 @@ public class ModuleIOReal {
   private final VoltageOut turnVoltage = new VoltageOut(0.0).withEnableFOC(true);
   private final VelocityTorqueCurrentFOC driveVelocityControl =
       new VelocityTorqueCurrentFOC(0.0).withSlot(0);
-  private final MotionMagicVoltage turnPID = new MotionMagicVoltage(0.0);
+  private final MotionMagicVoltage turnPID =
+      new MotionMagicVoltage(0.0).withEnableFOC(true).withSlot(0);
 
   public ModuleIOReal(ModuleConstants moduleConstants, CANBus canbus) {
     this.constants = moduleConstants;

@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -30,15 +31,17 @@ import frc.robot.subsystems.drum.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.drum.hood.HoodIO;
 import frc.robot.subsystems.drum.hood.HoodIOInputsAutoLogged;
 import frc.robot.subsystems.drum.hood.HoodIOSim;
+import frc.robot.utils.LoggedTunableNumber;
 import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class DrumSubsystem extends SubsystemBase {
   public static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0;
-  public static final double FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC = 5.0;
+  public static final double FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC = 3.0;
   public static final int FLYWHEEL_LEADER_ID = 15;
   // Ratio to main drum
   public static final double FLYWHEEL_GEAR_RATIO = 24.0 / 18.0;
@@ -47,7 +50,7 @@ public class DrumSubsystem extends SubsystemBase {
   public static final Rotation2d HOOD_MIN_ANGLE = Rotation2d.fromDegrees(10);
   public static final Rotation2d HOOD_MAX_ANGLE = Rotation2d.fromDegrees(45);
 
-  public static final double HOOD_CURRENT_ZEROING_THRESHOLD_AMPS = 30.0; // TODO: Tune
+  public static final double HOOD_CURRENT_ZEROING_THRESHOLD_AMPS = 30.0;
 
   private FlywheelIO flywheelIO;
   private FlywheelIOInputsAutoLogged flywheelIOInputs = new FlywheelIOInputsAutoLogged();
@@ -68,19 +71,32 @@ public class DrumSubsystem extends SubsystemBase {
   private SysIdRoutine flywheelSysid =
       new SysIdRoutine(
           new Config(
-              null, null, null, (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state)),
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state.toString())),
           new Mechanism((voltage) -> flywheelIO.setVoltage(voltage.in(Volts)), null, this));
 
   // TODO: PROBABLY NEED TO REDUCE RAMP RATE ETC TO MAKE WORK
   private SysIdRoutine hoodSysid =
       new SysIdRoutine(
           new Config(
-              null, null, null, (state) -> Logger.recordOutput("Drum/Hood/SysID State", state)),
+              null,
+              null,
+              null,
+              (state) -> Logger.recordOutput("Drum/Hood/SysID State", state.toString())),
           new Mechanism((voltage) -> hoodIO.setVoltage(voltage.in(Volts)), null, this));
 
   // For current zeroing
   private LinearFilter currentFilter = LinearFilter.movingAverage(10);
   private double currentFilterValue = 0.0;
+
+  // For shot tuning
+  private LoggedTunableNumber flywheelVelTuner = new LoggedTunableNumber("Flywheel Vel RPS", 30.0);
+  private LoggedTunableNumber hoodAngleTuner = new LoggedTunableNumber("Hood Angle Deg", 10.0);
+
+  @AutoLogOutput(key = "Drum/Flywheel Fudge Factor")
+  private double flywheelFudgeFactor = 0.0;
 
   public DrumSubsystem(CANBus canBus) {
     if (Robot.ROBOT_MODE != RobotMode.SIM) {
@@ -88,7 +104,6 @@ public class DrumSubsystem extends SubsystemBase {
 
       hoodIO = new HoodIO(canBus);
 
-      // TODO: CORRECT VALUES
       followerIOs[0] =
           new FollowerIO(
               16, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Aligned, canBus, getFlywheelConfig());
@@ -156,6 +171,9 @@ public class DrumSubsystem extends SubsystemBase {
     hoodDisconnectAlert.set(!hoodIOInputs.connected);
     currentFilterValue = currentFilter.calculate(hoodIOInputs.statorCurrentAmps);
 
+    Logger.recordOutput("Drum/Hood/Setpoint", hoodIO.getAngleSetpoint());
+    Logger.recordOutput("Drum/Flywheel/Setpoint", flywheelIO.getSetpointRotPerSec());
+
     if (Robot.isSimulation())
       Logger.recordOutput("Drum/Hood/Current Filter Value", currentFilterValue);
   }
@@ -179,7 +197,11 @@ public class DrumSubsystem extends SubsystemBase {
 
   public Command rest() {
     // Maybe should keep spinning somewhat
-    return setFlywheelAndHood(() -> 0.0, () -> HOOD_MIN_ANGLE);
+    return this.run(
+        () -> {
+          hoodIO.setPositionSetpoint(HOOD_MIN_ANGLE);
+          flywheelIO.setVoltage(0.0);
+        });
   }
 
   public Command shoot(Supplier<ShotData> shotDataSupplier) {
@@ -187,20 +209,23 @@ public class DrumSubsystem extends SubsystemBase {
         () -> {
           ShotData shotData = shotDataSupplier.get();
           hoodIO.setPositionSetpoint(shotData.hoodAngle());
-          flywheelIO.setVelocitySetpoint(shotData.flywheelVelocityRotPerSec());
+          flywheelIO.setVelocitySetpoint(
+              shotData.flywheelVelocityRotPerSec() + flywheelFudgeFactor);
         });
   }
 
   public Command spit() {
     // Might need to tune this...
-    return setFlywheelAndHood(() -> 30.0, () -> HOOD_MIN_ANGLE);
+    return setFlywheelAndHood(() -> -20.0, () -> HOOD_MIN_ANGLE);
   }
 
-  // TODO: MORE COMMANDS WHEN SUPERSTRUCTURE IS INTEGRATED
+  public Command testShot() {
+    return setFlywheelAndHood(
+        flywheelVelTuner::get, () -> Rotation2d.fromDegrees(hoodAngleTuner.get()));
+  }
 
   // Current zeroing
   public Command runCurrentZeroing() {
-    // TODO: May need to tune voltages etc.
     return this.run(() -> hoodIO.setVoltage(-3.0))
         .until(() -> currentFilterValue > HOOD_CURRENT_ZEROING_THRESHOLD_AMPS)
         .andThen(
@@ -211,8 +236,26 @@ public class DrumSubsystem extends SubsystemBase {
   public Command runFlywheelSysid() {
     return Commands.sequence(
         flywheelSysid.quasistatic(Direction.kForward),
+        Commands.waitUntil(
+            () ->
+                MathUtil.isNear(
+                    0.0,
+                    flywheelIOInputs.velocityRotPerSec,
+                    1.0)), // Wait until we're nearly stopped
         flywheelSysid.quasistatic(Direction.kReverse),
+        Commands.waitUntil(
+            () ->
+                MathUtil.isNear(
+                    0.0,
+                    flywheelIOInputs.velocityRotPerSec,
+                    1.0)), // Wait until we're nearly stopped
         flywheelSysid.dynamic(Direction.kForward),
+        Commands.waitUntil(
+            () ->
+                MathUtil.isNear(
+                    0.0,
+                    flywheelIOInputs.velocityRotPerSec,
+                    1.0)), // Wait until we're nearly stopped
         flywheelSysid.dynamic(Direction.kReverse));
   }
 
@@ -244,31 +287,37 @@ public class DrumSubsystem extends SubsystemBase {
             HOOD_ANGLE_TOLERANCE_DEG);
   }
 
+  public void incrementFudgeFactor() {
+    flywheelFudgeFactor++;
+  }
+
+  public void decrementFudgeFactor() {
+    flywheelFudgeFactor--;
+  }
+
   // Configs
 
   public static TalonFXConfiguration getFlywheelConfig() {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
-    // TODO: VALUE FROM CAD
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    config.MotorOutput.NeutralMode =
-        NeutralModeValue.Brake; // Its possible that we should actually coast on this mech but idk
+    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     // TODO: BUDGET CURRENT
-    config.CurrentLimits.StatorCurrentLimit = 45.0;
-    config.CurrentLimits.StatorCurrentLimitEnable = false;
+    config.CurrentLimits.StatorCurrentLimit = 75.0;
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
     config.CurrentLimits.SupplyCurrentLimit = 40.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = false;
 
     config.Feedback.SensorToMechanismRatio = DrumSubsystem.FLYWHEEL_GEAR_RATIO;
 
-    config.MotionMagic.MotionMagicAcceleration = 10.0; // TODO: CALCULATE ACTUAL VALUE
+    config.MotionMagic.MotionMagicAcceleration = 80.0;
 
     // Slot 0 is motion magic velocity pidf
-    config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.0;
-    config.Slot0.kA = 0.0;
-    config.Slot0.kP = 0.0;
+    config.Slot0.kS = 0.31;
+    config.Slot0.kV = 0.17433;
+    config.Slot0.kA = 0.10015;
+    config.Slot0.kP = 1.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.0;
 
@@ -278,8 +327,7 @@ public class DrumSubsystem extends SubsystemBase {
   public static TalonFXConfiguration getHoodConfig() {
     TalonFXConfiguration config = new TalonFXConfiguration();
 
-    // TODO: VALUE FROM CAD
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     // TODO: BUDGET CURRENT
@@ -290,17 +338,18 @@ public class DrumSubsystem extends SubsystemBase {
 
     config.Feedback.SensorToMechanismRatio = DrumSubsystem.HOOD_GEAR_RATIO;
 
-    // TODO: CALCULATE ACTUAL VALUE
     config.MotionMagic.MotionMagicCruiseVelocity = 1.0;
     config.MotionMagic.MotionMagicAcceleration = 10.0;
 
     // Slot 0 is motion magic position pidf
-    config.Slot0.kS = 0.0;
-    config.Slot0.kV = 0.0;
+    config.Slot0.kS = 0.62;
+    config.Slot0.kV = 5.0;
+    config.Slot0.kG = 0.15;
     config.Slot0.kA = 0.0;
-    config.Slot0.kP = 0.0;
+    config.Slot0.kP = 350.0;
     config.Slot0.kI = 0.0;
-    config.Slot0.kD = 0.0;
+    config.Slot0.kD = 12.0;
+    config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
     return config;
   }

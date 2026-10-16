@@ -7,30 +7,48 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.CANcoderIO;
 import frc.robot.subsystems.intake.PivotIO;
+import frc.robot.subsystems.intake.PivotIOSim;
 import frc.robot.subsystems.intake.RollerIO;
+import frc.robot.subsystems.intake.RollerIOSim;
 import frc.robot.subsystems.intake.SlapdownSubsystem;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
+import frc.robot.utils.FieldUtils;
+import frc.robot.utils.autoaim.AutoAlign;
+import java.util.Optional;
+import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
   /** Set to true to use logged tuneable numbers */
-  public static final boolean TUNING_MODE = false;
+  public static final boolean TUNING_MODE = true;
 
   public enum RobotMode {
     REAL,
@@ -46,16 +64,31 @@ public class Robot extends LoggedRobot {
   private IndexerSubsystem indexer = new IndexerSubsystem(canBus);
   private DrumSubsystem drum = new DrumSubsystem(canBus);
   private SlapdownSubsystem intake =
-      new SlapdownSubsystem(
-          new PivotIO(0, SlapdownSubsystem.getPivotConfig(), canBus),
-          new CANcoderIO(0, SlapdownSubsystem.getCancoderConfig(), canBus),
-          new RollerIO(0, SlapdownSubsystem.getRollerConfig(), canBus));
+      Robot.isSimulation()
+          ? new SlapdownSubsystem(
+              new PivotIOSim(8, SlapdownSubsystem.getPivotConfig(), canBus),
+              new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
+              new RollerIOSim(9, SlapdownSubsystem.getRollerConfig(), canBus),
+              canBus)
+          : new SlapdownSubsystem(
+              new PivotIO(8, SlapdownSubsystem.getPivotConfig(), canBus),
+              new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
+              new RollerIO(9, SlapdownSubsystem.getRollerConfig(), canBus),
+              canBus);
 
   private CommandXboxControllerSubsystem driver = new CommandXboxControllerSubsystem(0);
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
 
+  // Auto stuff
+  private final Autos autos;
+  private Optional<Alliance> lastAlliance = Optional.empty();
+  @AutoLogOutput boolean haveAutosGenerated = false;
+  private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Autos");
+
   private Superstructure superstructure =
       new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
+
+  private boolean hoodZeroed = false;
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
@@ -106,6 +139,23 @@ public class Robot extends LoggedRobot {
     Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
     // be added.
 
+    PhoenixOdometryThread.getInstance().start();
+
+    SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
+
+    // swerve.setDefaultCommand(
+    //     swerve
+    //         .driveOpenLoopFieldRelative(
+    //             () ->
+    //                 new ChassisSpeeds(
+    //                         modifyJoystick(driver.getLeftY())
+    //                             * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+    //                         modifyJoystick(driver.getLeftX())
+    //                             * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+    //                         modifyJoystick(driver.getRightX())
+    //                             * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
+    //                     .times(-1))
+    //         .withName("Teleop drive"));
     swerve.setDefaultCommand(
         swerve
             .driveOpenLoopFieldRelative(
@@ -119,6 +169,42 @@ public class Robot extends LoggedRobot {
                                 * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
                         .times(-1))
             .withName("Teleop drive"));
+    // Auto things
+    autos = new Autos(swerve);
+    autoChooser.addDefaultOption("None", Commands.none());
+
+    // Run auto when auto starts. Matches Choreolib's defer impl
+    RobotModeTriggers.autonomous()
+        .whileTrue(Commands.defer(() -> autoChooser.get().asProxy(), Set.of()));
+
+    // Add autos on alliance change
+    new Trigger(
+            () -> {
+              var allianceChanged = !DriverStation.getAlliance().equals(lastAlliance);
+              lastAlliance = DriverStation.getAlliance();
+              return allianceChanged && DriverStation.getAlliance().isPresent();
+            })
+        .onTrue(Commands.runOnce(() -> addAutos()));
+    // Add autos when first connecting to DS
+    new Trigger(
+            () ->
+                DriverStation.isDSAttached()
+                    && DriverStation.getAlliance().isPresent()
+                    && !haveAutosGenerated)
+        .onTrue(Commands.print("connected"))
+        .onTrue(Commands.runOnce(() -> addAutos()).ignoringDisable(true));
+
+    SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
+
+    // log when commands get interrupted
+    CommandScheduler.getInstance()
+        .onCommandInterrupt(
+            (interrupted, interrupting) -> {
+              System.out.println("Interrupted: " + interrupted);
+              System.out.println(
+                  "Interrputing: "
+                      + (interrupting.isPresent() ? interrupting.get().getName() : "none"));
+            });
 
     indexer.setDefaultCommand(indexer.rest());
     intake.setDefaultCommand(intake.restExtended());
@@ -126,18 +212,114 @@ public class Robot extends LoggedRobot {
 
     drum.setDefaultCommand(drum.setFlywheelAndHoodVoltage(() -> 0.0, () -> 0.0));
 
-    driver.a().whileTrue(drum.setFlywheelAndHoodVoltage(() -> 10.0, () -> 10.0));
-    driver.b().whileTrue(drum.runCurrentZeroing());
+    driver.b().whileTrue(Commands.parallel(drum.runCurrentZeroing(), intake.runCurrentZeroing()));
+
+    operator.povRight().onTrue(Commands.runOnce(drum::incrementFudgeFactor));
+    operator.povLeft().onTrue(Commands.runOnce(drum::decrementFudgeFactor));
+
+    driver
+        .rightBumper()
+        .whileTrue(
+            swerve.alignToHeading(
+                () -> {
+                  if (superstructure.shouldFeed()) {
+                    Translation2d currentFeedPosition =
+                        FieldUtils.FeedTargets.getFeedTarget(superstructure.getFeedTarget())
+                            .getTranslation();
+                    return AutoAlign.getTargetHeading(swerve.getPose(), currentFeedPosition);
+                  } else {
+                    Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+                    return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                  }
+                },
+                () ->
+                    new ChassisSpeeds(
+                        modifyJoystick(driver.getLeftY())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                        modifyJoystick(driver.getLeftX())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                        0.0)));
+
+    driver
+        .leftBumper()
+        .whileTrue(
+            swerve.alignToHeading(
+                () -> {
+                  if (swerve.getRotation().getRadians() >= Math.PI / 2
+                      && swerve.getRotation().getRadians() < -(Math.PI / 2)) {
+                    return Rotation2d.k180deg;
+                  } else {
+                    return Rotation2d.kZero;
+                  }
+                },
+                () ->
+                    new ChassisSpeeds(
+                        modifyJoystick(driver.getLeftY())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                        modifyJoystick(driver.getLeftX())
+                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                        0.0)));
+
+    driver
+        .rightStick()
+        .and(driver.leftStick())
+        .onTrue(Commands.runOnce(() -> swerve.headingReset(Rotation2d.kZero)));
+
+    // Run auto when auto starts. Matches Choreolib's defer impl
+    RobotModeTriggers.autonomous()
+        .whileTrue(Commands.defer(() -> autoChooser.get().asProxy(), Set.of()));
+
+    // Add autos on alliance change
+    new Trigger(
+            () -> {
+              boolean allianceChanged = !DriverStation.getAlliance().equals(lastAlliance);
+              lastAlliance = DriverStation.getAlliance();
+              return allianceChanged && DriverStation.getAlliance().isPresent();
+            })
+        .onTrue(Commands.runOnce(() -> addAutos()));
+
+    // Hood zero on enable
+    RobotModeTriggers.disabled().negate().and(() -> !hoodZeroed).onTrue(drum.runCurrentZeroing());
   }
+
+  // private void addAutos() {
+  //   autoChooser.addDefaultOption("None", Commands.none());
+
+  //   // Sysids
+  //   autoChooser.addOption("Hood Sysid", drum.runHoodSysid());
+  //   ooser.addOption("Flywheel Sysid", drum.runFlywheelSysid());
+  //   autoChooser.addOption("Indexer Sysid", indexer.runIndexerSysid());
+  //   autoChooser.addOption("Kicker Sysid", indexer.runKickerSysid());
+  //   autoChooser.addOption("Intake Roller Sysid", intake.runRollerSysid());
+  //   autoChooser.addOption("Intake Pivot Sysid", intake.runPivotSysid());
+  //   autoChooser.addDefaultOption("Swerve turn sysid", swerve.runTurnSysid());
+  // }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    superstructure.simulationPeriodic(); // TODO: REMOVE
+    Logger.recordOutput("Distance to hub", FieldUtils.distanceToHub(swerve.getPose()));
+  }
+
+  private void addAutos() {
+    System.out.println("------- Regenerating Autos");
+    System.out.println(
+        "Regenerating Autos on " + DriverStation.getAlliance().map((a) -> a.toString()));
+
+    autoChooser.addOption("Single Dip Auto TEST", autos.getTesting());
+    autoChooser.addOption("Double Dip Auto Left Trench", autos.getLTDoubleDipAuto());
+    autoChooser.addOption("Double Dip Auto Right Trench", autos.getRTDoubleDipAuto());
+    autoChooser.addOption("Partner Single Dip Left Trench", autos.getLTPartnerSingleDipAuto());
+    autoChooser.addOption("Partner Single Dip Right Trench", autos.getRTPartnerSingleDipAuto());
+
+    haveAutosGenerated = true;
+    System.out.println("Done generating autos");
   }
 
   @Override
   public void simulationPeriodic() {
-    superstructure.simulationPeriodic();
+    // superstructure.simulationPeriodic();
   }
 
   // Use obstacle-free simulation arena
@@ -148,11 +330,17 @@ public class Robot extends LoggedRobot {
   @Override
   public void simulationInit() {
     // Reset odo pose to maple sim pose
-    swerve.resetMapleSimPose();
+    if (ROBOT_MODE == RobotMode.SIM) {
+      swerve.resetMapleSimPose();
+    }
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    Superstructure.matchStartTime = 0;
+
+    addAutos();
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -170,7 +358,9 @@ public class Robot extends LoggedRobot {
   public void autonomousExit() {}
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    Superstructure.matchStartTime = Timer.getFPGATimestamp();
+  }
 
   @Override
   public void teleopPeriodic() {}

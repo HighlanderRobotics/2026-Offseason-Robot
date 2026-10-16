@@ -73,6 +73,7 @@ public class SwerveSubsystem extends SubsystemBase {
   // decide which set of swerve constants to use based on robot edition
   // defaulting to comp is probably safer?
   public static final SwerveConstants SWERVE_CONSTANTS = new DumperSwerveConstants();
+  // changed to alpha swerve constants since johns is
 
   private final Module[] modules; // Front Left, Front Right, Back Left, Back Right
   private final GyroIO gyroIO;
@@ -363,6 +364,9 @@ public class SwerveSubsystem extends SubsystemBase {
       cameras[i].updateCamera(estimator);
       cameraPoses[i] = cameras[i].getPose();
     }
+
+    Logger.recordOutput("Vision/Camera Poses", cameraPoses);
+
     Pose3d[] arr = new Pose3d[cameras.length];
     for (int k = 0; k < cameras.length; k++) {
       if (Robot.ROBOT_MODE == RobotMode.SIM) {
@@ -373,7 +377,7 @@ public class SwerveSubsystem extends SubsystemBase {
         arr[k] = getPose3d().transformBy(cameras[k].getCameraConstants().robotToCamera());
       }
     }
-    if (RobotMode.SIM != null) {
+    if (RobotMode.REAL != Robot.ROBOT_MODE) {
       Logger.recordOutput("Vision/Camera Poses on Robot", arr);
     }
   }
@@ -572,7 +576,7 @@ public class SwerveSubsystem extends SubsystemBase {
    *     requested speeds to drive along a line
    * @return Command driving to the target
    */
-  private Command translateToPose(Supplier<Pose2d> target) {
+  public Command translateToPose(Supplier<Pose2d> target) {
     return translateToPose(target, () -> new ChassisSpeeds());
   }
 
@@ -599,6 +603,15 @@ public class SwerveSubsystem extends SubsystemBase {
                         target.get().getRotation().getRadians(),
                         getPose().getRotation().getRadians(),
                         headingToleranceRadians));
+  }
+
+  public Command translateToPoseWithTolerance(
+      Supplier<Pose2d> target, double xToleranceMeters, double yToleranceMeters) {
+    return translateToPose(target)
+        .until(
+            () ->
+                MathUtil.isNear(target.get().getX(), getPose().getX(), xToleranceMeters)
+                    && MathUtil.isNear(target.get().getY(), getPose().getY(), yToleranceMeters));
   }
 
   /**
@@ -697,6 +710,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public Pose3d getPose3d() {
     return new Pose3d(getPose());
+  }
+
+  public void headingReset(Rotation2d newHeading) {
+    estimator.resetRotation(newHeading);
   }
 
   /**

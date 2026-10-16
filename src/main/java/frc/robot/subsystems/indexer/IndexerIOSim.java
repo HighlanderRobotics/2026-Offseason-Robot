@@ -39,7 +39,8 @@ public class IndexerIOSim extends IndexerIO {
 
     physicsSimKicker =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(2), 0.0136, GEAR_RATIO),
+            LinearSystemId.createDCMotorSystem(
+                DCMotor.getKrakenX60Foc(2), 0.0136, KICKER_GEAR_RATIO),
             DCMotor.getKrakenX60Foc(2));
     kickerFxSimState = kickerLeaderMotor.getSimState();
     kickerFxSimState.setMotorType(MotorType.KrakenX60);

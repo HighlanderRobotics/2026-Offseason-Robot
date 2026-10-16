@@ -5,7 +5,7 @@
 | 0      | Front Left Drive       | X60             | X60-055         |
 | 1      | Front Left Turn        | X44             | X44-010         |
 | 2      | Front Right Drive      | X60             | X60-067         |
-| 3      | Front Right Turn       | X44             | X44-029         |
+| 3      | Front Right Turn       | X44             | ~~X44-029~~ X44-009         |
 | 4      | Back Left Drive        | X60             | X60-056         |
 | 5      | Back Left Turn         | X44             | X44-018         |
 | 6      | Back Right Drive       | X60             | X60-062         |
@@ -26,4 +26,4 @@
 | 1      | Front Right CANcoder   | CANcoder        | ???         |
 | 2      | Back Left CANcoder     | CANcoder        | ???         |
 | 3      | Back Right CANcoder    | CANcoder        | ???         |
-| 4      | Intake CANcoder        | WCP Throughbore | TODO         |
+| 4      | Intake CANcoder        | WCP Throughbore | THB-001         |

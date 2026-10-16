@@ -55,8 +55,8 @@ public class IndexerSubsystem extends SubsystemBase {
   public Command kick() {
     return this.run(
         () -> {
-          indexerIO.setIndexerVoltage(10);
-          indexerIO.setKickerVoltage(-7);
+          indexerIO.setIndexerVoltage(5.0);
+          indexerIO.setKickerVoltage(10.0);
         });
   }
 
@@ -64,8 +64,16 @@ public class IndexerSubsystem extends SubsystemBase {
   public Command index() {
     return this.run(
         () -> {
-          indexerIO.setIndexerVoltage(7);
-          indexerIO.setKickerVoltage(5.5);
+          indexerIO.setIndexerVoltage(3.0);
+          indexerIO.setKickerVoltage(-4.0);
+        });
+  }
+
+  public Command preshoot() {
+    return this.run(
+        () -> {
+          indexerIO.setIndexerVoltage(-3.0);
+          indexerIO.setKickerVoltage(-4.0);
         });
   }
 
@@ -73,8 +81,8 @@ public class IndexerSubsystem extends SubsystemBase {
   public Command reverse() {
     return this.run(
         () -> {
-          indexerIO.setIndexerVoltage(-5);
-          indexerIO.setKickerVoltage(-5);
+          indexerIO.setIndexerVoltage(-5.0);
+          indexerIO.setKickerVoltage(-5.0);
         });
   }
 
