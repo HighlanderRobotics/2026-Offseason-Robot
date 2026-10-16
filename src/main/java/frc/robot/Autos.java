@@ -4,7 +4,6 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -129,17 +128,17 @@ public class Autos {
                   return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
                 },
                 () -> new ChassisSpeeds())
-        // swerve
-        //     .translateToPose(
-        //         () -> {
-        //           Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-        //           Rotation2d targetRotation =
-        //               AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
-        //           return new Pose2d(
-        //               path.getTrajectory(routine).getFinalPose().get().getTranslation(),
-        //               targetRotation);
-        //         },
-        //         null)
+            // swerve
+            //     .translateToPose(
+            //         () -> {
+            //           Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+            //           Rotation2d targetRotation =
+            //               AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+            //           return new Pose2d(
+            //               path.getTrajectory(routine).getFinalPose().get().getTranslation(),
+            //               targetRotation);
+            //         },
+            //         null)
             // .alongWith(swerve.translateToPoseWithTolerance(poseSupplier, 0.2, 0.2))
             .withTimeout(7.0)
             .alongWith(startScoring()),
