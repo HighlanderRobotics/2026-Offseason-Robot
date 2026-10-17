@@ -142,6 +142,7 @@ public class Robot extends LoggedRobot {
     PhoenixOdometryThread.getInstance().start();
 
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
+    SmartDashboard.putData("Zero hood to bottom", drum.rezeroHoodToBottom().ignoringDisable(true));
 
     // swerve.setDefaultCommand(
     //     swerve
@@ -264,6 +265,8 @@ public class Robot extends LoggedRobot {
         .rightStick()
         .and(driver.leftStick())
         .onTrue(Commands.runOnce(() -> swerve.headingReset(Rotation2d.kZero)));
+
+    
 
     // Run auto when auto starts. Matches Choreolib's defer impl
     RobotModeTriggers.autonomous()
