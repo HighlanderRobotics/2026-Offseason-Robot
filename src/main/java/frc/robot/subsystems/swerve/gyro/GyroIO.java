@@ -13,6 +13,10 @@ public interface GyroIO {
     public Rotation2d pitch = new Rotation2d();
     public Rotation2d roll = new Rotation2d();
 
+    public double aXMetersPerSecondSq = 0.0;
+    public double aYMetersPerSecondSq = 0.0;
+    public double aZMetersPerSecondSq = 0.0;
+
     public boolean isConnected = false;
   }
 
