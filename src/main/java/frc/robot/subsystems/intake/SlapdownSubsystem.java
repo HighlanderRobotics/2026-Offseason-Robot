@@ -167,7 +167,8 @@ public class SlapdownSubsystem extends SubsystemBase {
   public Command restExtended() {
     return this.run(
         () -> {
-          pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION); // PIVOT_EXTENDED_POSITION);
+          pivotIO.setMotorPositionSetpoint(
+              PIVOT_EXTENDED_POSITION, -2.0); // PIVOT_EXTENDED_POSITION);
           rollerIO.setRollerVoltage(0.0);
         });
   }
