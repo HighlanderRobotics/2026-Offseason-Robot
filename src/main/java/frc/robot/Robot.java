@@ -266,8 +266,6 @@ public class Robot extends LoggedRobot {
         .and(driver.leftStick())
         .onTrue(Commands.runOnce(() -> swerve.headingReset(Rotation2d.kZero)));
 
-    
-
     // Run auto when auto starts. Matches Choreolib's defer impl
     RobotModeTriggers.autonomous()
         .whileTrue(Commands.defer(() -> autoChooser.get().asProxy(), Set.of()));
@@ -283,6 +281,12 @@ public class Robot extends LoggedRobot {
 
     // Hood zero on enable
     RobotModeTriggers.disabled().negate().and(() -> !hoodZeroed).onTrue(drum.runCurrentZeroing());
+  }
+
+  @Override
+  public void robotInit() {
+    drum.hoodZeroNotCmd();
+    hoodZeroed = true;
   }
 
   // private void addAutos() {
