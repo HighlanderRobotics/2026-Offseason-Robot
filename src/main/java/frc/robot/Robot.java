@@ -56,7 +56,7 @@ public class Robot extends LoggedRobot {
     REPLAY;
   }
 
-  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
+  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
 
   private CANBus canBus = new CANBus("*");
 
@@ -367,6 +367,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     Superstructure.matchStartTime = Timer.getFPGATimestamp();
+    superstructure.resetStateToIdle();
   }
 
   @Override
