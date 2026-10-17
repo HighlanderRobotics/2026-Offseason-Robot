@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Autos.Action;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.FieldUtils;
 import frc.robot.utils.FieldUtils.TrenchPoses;
@@ -140,7 +139,7 @@ public class Autos {
             //         },
             //         null)
             // .alongWith(swerve.translateToPoseWithTolerance(poseSupplier, 0.2, 0.2))
-            .withTimeout(7.0)
+            .withTimeout(4.5)
             .alongWith(startScoring()),
         stopScoring());
   }
