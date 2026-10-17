@@ -197,14 +197,14 @@ public class Robot extends LoggedRobot {
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
 
     // log when commands get interrupted
-    CommandScheduler.getInstance()
-        .onCommandInterrupt(
-            (interrupted, interrupting) -> {
-              System.out.println("Interrupted: " + interrupted);
-              System.out.println(
-                  "Interrputing: "
-                      + (interrupting.isPresent() ? interrupting.get().getName() : "none"));
-            });
+    // CommandScheduler.getInstance()
+    //     .onCommandInterrupt(
+    //         (interrupted, interrupting) -> {
+    //           System.out.println("Interrupted: " + interrupted);
+    //           System.out.println(
+    //               "Interrputing: "
+    //                   + (interrupting.isPresent() ? interrupting.get().getName() : "none"));
+    //         });
 
     indexer.setDefaultCommand(indexer.rest());
     intake.setDefaultCommand(intake.restExtended());
