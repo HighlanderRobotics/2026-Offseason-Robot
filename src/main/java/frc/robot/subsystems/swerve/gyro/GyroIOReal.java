@@ -1,5 +1,7 @@
 package frc.robot.subsystems.swerve.gyro;
 
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -14,9 +16,6 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread.Registration;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread.SignalType;
-
-import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
-
 import java.util.Optional;
 
 public class GyroIOReal implements GyroIO {
