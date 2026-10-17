@@ -48,7 +48,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
   /** Set to true to use logged tuneable numbers */
-  public static final boolean TUNING_MODE = true;
+  public static final boolean TUNING_MODE = false;
 
   public enum RobotMode {
     REAL,
