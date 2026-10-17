@@ -4,6 +4,7 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -120,24 +121,23 @@ public class Autos {
     return Commands.sequence(
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()),
         stopIntaking(),
+        // swerve
+        //     .alignToHeading(
+        //         () -> {
+        //           Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+        //           return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+        //         },
+        //         () -> new ChassisSpeeds())
         swerve
-            .alignToHeading(
+            .translateToPose(
                 () -> {
+                  Pose2d finalPose = path.getTrajectory(routine).getFinalPose().get();
                   Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-                  return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                  Rotation2d targetRotation =
+                      AutoAlign.getTargetHeading(finalPose, currentHubPosition);
+                  return new Pose2d(finalPose.getTranslation(), targetRotation);
                 },
                 () -> new ChassisSpeeds())
-            // swerve
-            //     .translateToPose(
-            //         () -> {
-            //           Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-            //           Rotation2d targetRotation =
-            //               AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
-            //           return new Pose2d(
-            //               path.getTrajectory(routine).getFinalPose().get().getTranslation(),
-            //               targetRotation);
-            //         },
-            //         null)
             // .alongWith(swerve.translateToPoseWithTolerance(poseSupplier, 0.2, 0.2))
             .withTimeout(4.5)
             .alongWith(startScoring()),
