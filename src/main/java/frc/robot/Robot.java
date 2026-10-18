@@ -56,7 +56,7 @@ public class Robot extends LoggedRobot {
     REPLAY;
   }
 
-  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
+  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
 
   private CANBus canBus = new CANBus("*");
 
