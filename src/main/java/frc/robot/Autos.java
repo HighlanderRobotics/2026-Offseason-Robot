@@ -51,6 +51,7 @@ public class Autos {
     RTSecondDip("RTSecondDip", Action.INTAKE),
     RPartnerStartToFirstDip("PartnerRStartTrenchToFirstDip", Action.INTAKE),
     RPartnerTSecondDip("PartnerRTSecondDip", Action.INTAKE),
+    LStartToFirstDipSLOW("LTStartToFirstDipSLOW", Action.INTAKE),
     // shoot
     LDipToFirstShoot("LTDipToFirstShootBump", Action.DELAYED_SCORE),
     RDipToFirstShoot("RTDipToFirstShootBump", Action.DELAYED_SCORE),
@@ -238,5 +239,13 @@ public class Autos {
     return createAuto(
         "Partner Left Trench Single Dip Auto",
         new Path[] {Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot});
+  }
+
+  public Command getLTDoubleDipSLOWAuto() {
+    return createAuto(
+        "Left Trench Double Dip Auto Slowed",
+        new Path[] {
+          Path.LStartToFirstDipSLOW, Path.LDipToFirstShoot, Path.LSecondDip, Path.LTReturnShot
+        });
   }
 }

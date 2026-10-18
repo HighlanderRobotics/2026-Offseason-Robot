@@ -56,7 +56,8 @@ public class Robot extends LoggedRobot {
     REPLAY;
   }
 
-  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
+  // TODO: switch back to RobotMode.REPLAY
+  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
 
   private CANBus canBus = new CANBus("*");
 
@@ -316,6 +317,7 @@ public class Robot extends LoggedRobot {
 
     autoChooser.addOption("Single Dip Auto TEST", autos.getTesting());
     autoChooser.addOption("Double Dip Auto Left Trench", autos.getLTDoubleDipAuto());
+    autoChooser.addOption("Double Dip Auto Left SLOWED", autos.getLTDoubleDipSLOWAuto());
     autoChooser.addOption("Double Dip Auto Right Trench", autos.getRTDoubleDipAuto());
     autoChooser.addOption("Partner Single Dip Left Trench", autos.getLTPartnerSingleDipAuto());
     autoChooser.addOption("Partner Single Dip Right Trench", autos.getRTPartnerSingleDipAuto());
