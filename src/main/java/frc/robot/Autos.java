@@ -44,6 +44,7 @@ public class Autos {
   public enum Path {
     // intake
     LStartToFirstDip("LTStartToFirstDip", Action.INTAKE),
+    LStartToFirstDipSLOW("LTStartToFirstDipSLOW", Action.INTAKE),
     LSecondDip("LTSecondDip", Action.INTAKE),
     LPartnerStartToFirstDip("PartnerLStartTrenchToFirstDip", Action.INTAKE),
     LPartnerSecondDip("PartnerLTSecondDip", Action.INTAKE),
@@ -217,6 +218,14 @@ public class Autos {
         "Left Trench Double Dip Auto",
         new Path[] {
           Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot, Path.LSecondDip, Path.LTReturnShot
+        });
+  }
+
+  public Command getLDoubleDipAutoSLOW() {
+    return createAuto(
+        "Left Trench Double Dip Auto Slowed",
+        new Path[] {
+          Path.LStartToFirstDipSLOW, Path.LDipToFirstShoot, Path.LSecondDip, Path.LTReturnShot
         });
   }
 

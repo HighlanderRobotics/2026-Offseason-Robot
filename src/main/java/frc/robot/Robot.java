@@ -315,8 +315,10 @@ public class Robot extends LoggedRobot {
         "Regenerating Autos on " + DriverStation.getAlliance().map((a) -> a.toString()));
 
     autoChooser.addOption("Single Dip Auto TEST", autos.getTesting());
+
     autoChooser.addOption("Double Dip Auto Left Trench", autos.getLTDoubleDipAuto());
     autoChooser.addOption("Double Dip Auto Right Trench", autos.getRTDoubleDipAuto());
+    autoChooser.addOption("Double Dip Auto Left SLOWED", autos.getLDoubleDipAutoSLOW());
     autoChooser.addOption("Partner Single Dip Left Trench", autos.getLTPartnerSingleDipAuto());
     autoChooser.addOption("Partner Single Dip Right Trench", autos.getRTPartnerSingleDipAuto());
 
