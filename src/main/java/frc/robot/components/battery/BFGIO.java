@@ -1,6 +1,7 @@
 package frc.robot.components.battery;
 
 import com.playingwithfusion.BattFuelGauge;
+import com.playingwithfusion.BattFuelGauge.BatteryManufacturer;
 import org.littletonrobotics.junction.AutoLog;
 
 public class BFGIO {
@@ -15,7 +16,7 @@ public class BFGIO {
 
   }
 
-  BattFuelGauge bfg;
+  private BattFuelGauge bfg;
 
   public BFGIO(int id) {
     this.bfg = new BattFuelGauge(id);
@@ -32,5 +33,17 @@ public class BFGIO {
   public void saveLog() {
     // Use default logfile naming
     bfg.saveLog("");
+  }
+
+  public String getName() {
+    return bfg.getNickname();
+  }
+
+  public long getSerialNumber() {
+    return bfg.getSerialNumber();
+  }
+
+  public BatteryManufacturer getManufacturer() {
+    return bfg.getManufacturer();
   }
 }
