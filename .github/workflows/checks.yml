@@ -77,7 +77,7 @@ jobs:
       cancel-in-progress: true
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: kevinclark/hindsight@571297901ec19a60b3fe3eced06063c9002e1d78 # main 2026-10-22
+    - uses: kevinclark/hindsight@984403f0aeb032fc0df73e5c3f280adc006790f7 # main 2026-10-22
       with:
         fail-on: none
         comment: true
