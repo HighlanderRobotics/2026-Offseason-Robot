@@ -221,7 +221,7 @@ public class Camera {
   // trust the hub tags more than the other tags on the field
   public Matrix<N3, N1> sussifier(Matrix<N3, N1> deviations, Optional<EstimatedRobotPose> estPose) {
     if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
-      deviations.times(
+      deviations = deviations.times(
           estPose.get().targetsUsed.stream()
                   .anyMatch(
                       t ->
@@ -235,7 +235,7 @@ public class Camera {
               : 1);
 
     } else {
-      deviations.times(
+      deviations = deviations.times(
           estPose.get().targetsUsed.stream()
                   .anyMatch(
                       t ->
@@ -248,7 +248,7 @@ public class Camera {
               ? 0.5
               : 1);
     }
-    deviations.times(DriverStation.isAutonomous() ? 2.0 : 1.0);
+    deviations = deviations.times(DriverStation.isAutonomous() ? 2.0 : 1.0);
     // TODO add states
 
     return deviations;
