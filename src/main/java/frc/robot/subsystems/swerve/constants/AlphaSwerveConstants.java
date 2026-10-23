@@ -194,8 +194,8 @@ public class AlphaSwerveConstants extends SwerveConstants {
     turnConfig.Slot0.kS = 0.27;
     turnConfig.Slot0.kP = 20.0;
     turnConfig.Slot0.kD = 0.68275;
-    turnConfig.MotionMagic.MotionMagicCruiseVelocity = (5500 / 60) / getTurnGearRatio();
-    turnConfig.MotionMagic.MotionMagicAcceleration = (5500 / 60) / (getTurnGearRatio() * 0.005);
+    turnConfig.MotionMagic.MotionMagicCruiseVelocity = (5500.0 / 60.0) / getTurnGearRatio();
+    turnConfig.MotionMagic.MotionMagicAcceleration = (5500.0 / 60.0) / (getTurnGearRatio() * 0.005);
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
 
     return turnConfig;
