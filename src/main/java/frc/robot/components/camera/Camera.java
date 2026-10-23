@@ -221,32 +221,34 @@ public class Camera {
   // trust the hub tags more than the other tags on the field
   public Matrix<N3, N1> sussifier(Matrix<N3, N1> deviations, Optional<EstimatedRobotPose> estPose) {
     if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue) {
-      deviations = deviations.times(
-          estPose.get().targetsUsed.stream()
-                  .anyMatch(
-                      t ->
-                          t.getFiducialId() == 25
-                              || t.getFiducialId() == 26
-                              || t.getFiducialId() == 18
-                              || t.getFiducialId() == 27
-                              || t.getFiducialId() == 21
-                              || t.getFiducialId() == 24)
-              ? 0.5
-              : 1);
+      deviations =
+          deviations.times(
+              estPose.get().targetsUsed.stream()
+                      .anyMatch(
+                          t ->
+                              t.getFiducialId() == 25
+                                  || t.getFiducialId() == 26
+                                  || t.getFiducialId() == 18
+                                  || t.getFiducialId() == 27
+                                  || t.getFiducialId() == 21
+                                  || t.getFiducialId() == 24)
+                  ? 0.5
+                  : 1);
 
     } else {
-      deviations = deviations.times(
-          estPose.get().targetsUsed.stream()
-                  .anyMatch(
-                      t ->
-                          t.getFiducialId() == 5
-                              || t.getFiducialId() == 8
-                              || t.getFiducialId() == 9
-                              || t.getFiducialId() == 10
-                              || t.getFiducialId() == 11
-                              || t.getFiducialId() == 2)
-              ? 0.5
-              : 1);
+      deviations =
+          deviations.times(
+              estPose.get().targetsUsed.stream()
+                      .anyMatch(
+                          t ->
+                              t.getFiducialId() == 5
+                                  || t.getFiducialId() == 8
+                                  || t.getFiducialId() == 9
+                                  || t.getFiducialId() == 10
+                                  || t.getFiducialId() == 11
+                                  || t.getFiducialId() == 2)
+                  ? 0.5
+                  : 1);
     }
     deviations = deviations.times(DriverStation.isAutonomous() ? 2.0 : 1.0);
     // TODO add states

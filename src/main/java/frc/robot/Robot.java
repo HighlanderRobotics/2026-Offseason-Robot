@@ -281,7 +281,17 @@ public class Robot extends LoggedRobot {
         .onTrue(Commands.runOnce(() -> addAutos()));
 
     // Hood zero on enable
-    RobotModeTriggers.disabled().negate().and(() -> !hoodZeroed).onTrue(drum.runCurrentZeroing());
+    RobotModeTriggers.disabled()
+        .negate()
+        .and(() -> !hoodZeroed)
+        .onTrue(
+            drum.runCurrentZeroing()
+                .finallyDo(
+                    (interrupted) -> {
+                      if (!interrupted) {
+                        hoodZeroed = true;
+                      }
+                    }));
   }
 
   @Override
