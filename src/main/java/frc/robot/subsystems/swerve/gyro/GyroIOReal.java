@@ -1,5 +1,7 @@
 package frc.robot.subsystems.swerve.gyro;
 
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -10,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread.Registration;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread.SignalType;
@@ -22,6 +25,9 @@ public class GyroIOReal implements GyroIO {
   private final StatusSignal<Angle> yaw;
   private final StatusSignal<Angle> pitch;
   private final StatusSignal<Angle> roll;
+  private final StatusSignal<LinearAcceleration> aX;
+  private final StatusSignal<LinearAcceleration> aY;
+  private final StatusSignal<LinearAcceleration> aZ;
   private final StatusSignal<AngularVelocity> yawVelocity;
 
   public GyroIOReal(int id, Pigeon2Configuration config, CANBus canbus) {
@@ -30,9 +36,12 @@ public class GyroIOReal implements GyroIO {
     yaw = pigeon.getYaw();
     pitch = pigeon.getPitch();
     roll = pigeon.getRoll();
+    aX = pigeon.getAccelerationX();
+    aY = pigeon.getAccelerationY();
+    aZ = pigeon.getAccelerationZ();
     yawVelocity = pigeon.getAngularVelocityZWorld();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, pitch, roll, yawVelocity);
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0, pitch, roll, yawVelocity, aX, aY, aZ);
     yaw.setUpdateFrequency(PhoenixOdometryThread.ODOMETRY_FREQUENCY_HZ);
     PhoenixOdometryThread.getInstance()
         .registerSignals(
@@ -45,12 +54,15 @@ public class GyroIOReal implements GyroIO {
 
   @Override
   public void updateInputs(GyroIOInputs inputs) {
-    BaseStatusSignal.refreshAll(yaw, pitch, roll, yawVelocity);
+    BaseStatusSignal.refreshAll(yaw, pitch, roll, aX, aY, aZ, yawVelocity);
 
     inputs.isConnected = BaseStatusSignal.isAllGood(yaw, pitch, roll, yawVelocity);
     inputs.yaw = new Rotation2d(yaw.getValue());
     inputs.pitch = new Rotation2d(pitch.getValue());
     inputs.roll = new Rotation2d(roll.getValue());
+    inputs.aXMetersPerSecondSq = aX.getValue().in(MetersPerSecondPerSecond);
+    inputs.aYMetersPerSecondSq = aY.getValue().in(MetersPerSecondPerSecond);
+    inputs.aZMetersPerSecondSq = aZ.getValue().in(MetersPerSecondPerSecond);
     inputs.yawVelocityRadPerSec = yawVelocity.getValue().in(Units.RadiansPerSecond);
   }
 

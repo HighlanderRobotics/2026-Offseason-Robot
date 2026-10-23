@@ -232,6 +232,14 @@ public class DrumSubsystem extends SubsystemBase {
             this.runOnce(hoodIO::rezeroMotorToBottom).alongWith(Commands.print("Rezeroed hood")));
   }
 
+  public Command rezeroHoodToBottom() {
+    return this.runOnce(hoodIO::rezeroMotorToBottom).ignoringDisable(true);
+  }
+
+  public void hoodZeroNotCmd() {
+    hoodIO.rezeroMotorToBottom();
+  }
+
   // Sysids
   public Command runFlywheelSysid() {
     return Commands.sequence(

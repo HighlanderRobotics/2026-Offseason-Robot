@@ -47,8 +47,8 @@ public class IndexerIO {
   }
 
   // Set gear ratios
-  public static final double GEAR_RATIO = 50 / 12;
-  public static final double KICKER_GEAR_RATIO = 30.0 / 12;
+  public static final double GEAR_RATIO = 50.0 / 12.0;
+  public static final double KICKER_GEAR_RATIO = 30.0 / 12.0;
 
   protected final TalonFX indexerMotor;
   protected final TalonFX kickerLeaderMotor;
@@ -195,7 +195,7 @@ public class IndexerIO {
     // Limits for current
     config.CurrentLimits.StatorCurrentLimit = 60.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 40.0;
+    config.CurrentLimits.SupplyCurrentLimit = 30.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     return config;

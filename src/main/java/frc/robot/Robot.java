@@ -49,7 +49,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
   /** Set to true to use logged tuneable numbers */
-  public static final boolean TUNING_MODE = true;
+  public static final boolean TUNING_MODE = false;
 
   public enum RobotMode {
     REAL,
@@ -57,7 +57,8 @@ public class Robot extends LoggedRobot {
     REPLAY;
   }
 
-  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
+  // public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
+  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
 
   private CANBus canBus = new CANBus("*");
 
@@ -150,6 +151,7 @@ public class Robot extends LoggedRobot {
     PhoenixOdometryThread.getInstance().start();
 
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
+    SmartDashboard.putData("Zero hood to bottom", drum.rezeroHoodToBottom().ignoringDisable(true));
 
     // swerve.setDefaultCommand(
     //     swerve
@@ -205,14 +207,14 @@ public class Robot extends LoggedRobot {
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
 
     // log when commands get interrupted
-    CommandScheduler.getInstance()
-        .onCommandInterrupt(
-            (interrupted, interrupting) -> {
-              System.out.println("Interrupted: " + interrupted);
-              System.out.println(
-                  "Interrputing: "
-                      + (interrupting.isPresent() ? interrupting.get().getName() : "none"));
-            });
+    // CommandScheduler.getInstance()
+    //     .onCommandInterrupt(
+    //         (interrupted, interrupting) -> {
+    //           System.out.println("Interrupted: " + interrupted);
+    //           System.out.println(
+    //               "Interrputing: "
+    //                   + (interrupting.isPresent() ? interrupting.get().getName() : "none"));
+    //         });
 
     indexer.setDefaultCommand(indexer.rest());
     intake.setDefaultCommand(intake.restExtended());
@@ -293,6 +295,12 @@ public class Robot extends LoggedRobot {
     bfg.saveLog();
   }
 
+  @Override
+  public void robotInit() {
+    drum.hoodZeroNotCmd();
+    hoodZeroed = true;
+  }
+
   // private void addAutos() {
   //   autoChooser.addDefaultOption("None", Commands.none());
 
@@ -319,8 +327,10 @@ public class Robot extends LoggedRobot {
         "Regenerating Autos on " + DriverStation.getAlliance().map((a) -> a.toString()));
 
     autoChooser.addOption("Single Dip Auto TEST", autos.getTesting());
+
     autoChooser.addOption("Double Dip Auto Left Trench", autos.getLTDoubleDipAuto());
     autoChooser.addOption("Double Dip Auto Right Trench", autos.getRTDoubleDipAuto());
+    autoChooser.addOption("Double Dip Auto Left SLOWED", autos.getLDoubleDipAutoSLOW());
     autoChooser.addOption("Partner Single Dip Left Trench", autos.getLTPartnerSingleDipAuto());
     autoChooser.addOption("Partner Single Dip Right Trench", autos.getRTPartnerSingleDipAuto());
 
@@ -371,6 +381,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     Superstructure.matchStartTime = Timer.getFPGATimestamp();
+    superstructure.resetStateToIdle();
   }
 
   @Override

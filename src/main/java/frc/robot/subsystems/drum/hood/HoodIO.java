@@ -96,6 +96,7 @@ public class HoodIO {
   }
 
   public void rezeroMotorToBottom() {
+    System.out.println("Hood zeroed! - Hood IO");
     rezeroMotor(DrumSubsystem.HOOD_MIN_ANGLE);
   }
 

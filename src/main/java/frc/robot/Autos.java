@@ -4,6 +4,7 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -11,7 +12,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Autos.Action;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.FieldUtils;
 import frc.robot.utils.FieldUtils.TrenchPoses;
@@ -44,6 +44,7 @@ public class Autos {
   public enum Path {
     // intake
     LStartToFirstDip("LTStartToFirstDip", Action.INTAKE),
+    LStartToFirstDipSLOW("LTStartToFirstDipSLOW", Action.INTAKE),
     LSecondDip("LTSecondDip", Action.INTAKE),
     LPartnerStartToFirstDip("PartnerLStartTrenchToFirstDip", Action.INTAKE),
     LPartnerSecondDip("PartnerLTSecondDip", Action.INTAKE),
@@ -121,26 +122,25 @@ public class Autos {
     return Commands.sequence(
         path.getTrajectory(routine).cmd().until(path.getTrajectory(routine).done()),
         stopIntaking(),
+        // swerve
+        //     .alignToHeading(
+        //         () -> {
+        //           Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+        //           return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+        //         },
+        //         () -> new ChassisSpeeds())
         swerve
-            .alignToHeading(
+            .translateToPose(
                 () -> {
+                  Pose2d finalPose = path.getTrajectory(routine).getFinalPose().get();
                   Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-                  return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                  Rotation2d targetRotation =
+                      AutoAlign.getTargetHeading(finalPose, currentHubPosition);
+                  return new Pose2d(finalPose.getTranslation(), targetRotation);
                 },
                 () -> new ChassisSpeeds())
-            // swerve
-            //     .translateToPose(
-            //         () -> {
-            //           Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-            //           Rotation2d targetRotation =
-            //               AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
-            //           return new Pose2d(
-            //               path.getTrajectory(routine).getFinalPose().get().getTranslation(),
-            //               targetRotation);
-            //         },
-            //         null)
             // .alongWith(swerve.translateToPoseWithTolerance(poseSupplier, 0.2, 0.2))
-            .withTimeout(7.0)
+            .withTimeout(4.0)
             .alongWith(startScoring()),
         stopScoring());
   }
@@ -218,6 +218,14 @@ public class Autos {
         "Left Trench Double Dip Auto",
         new Path[] {
           Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot, Path.LSecondDip, Path.LTReturnShot
+        });
+  }
+
+  public Command getLDoubleDipAutoSLOW() {
+    return createAuto(
+        "Left Trench Double Dip Auto Slowed",
+        new Path[] {
+          Path.LStartToFirstDipSLOW, Path.LDipToFirstShoot, Path.LSecondDip, Path.LTReturnShot
         });
   }
 

@@ -14,6 +14,8 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -56,6 +58,13 @@ public class SlapdownSubsystem extends SubsystemBase {
 
   private Trigger atExtensionTrigger = new Trigger(this::atExtension).debounce(0.01);
   private LinearFilter currentFilter = LinearFilter.movingAverage(5);
+
+  private Alert pivotDisconnectAlert = new Alert("Intake pivot disconnected!", AlertType.kError);
+  private Alert rollerLeaderDisconnected =
+      new Alert("Intake leader disconnected!", AlertType.kError);
+  private Alert rollerFollowerDisconnected =
+      new Alert("Intake follower disconnected", AlertType.kError);
+  private Alert cancoderDisconnected = new Alert("Intake CANcoder disconnected!", AlertType.kError);
 
   @AutoLogOutput(key = "Intake/Pivot/Current Filter Value")
   private double currentFilterValue = 0.0;
@@ -115,16 +124,26 @@ public class SlapdownSubsystem extends SubsystemBase {
     pivotIO.updateInputs(pivotIOInputs);
     Logger.processInputs("Intake/Pivot", pivotIOInputs);
 
+    pivotDisconnectAlert.set(!pivotIOInputs.connected);
+
     cancoderIO.updateInputs(cancoderIOInputs);
     Logger.processInputs("Intake/CANcoder", cancoderIOInputs);
+
+    cancoderDisconnected.set(!cancoderIOInputs.connected);
 
     rollerIO.updateInputs(rollerIOInputs);
     Logger.processInputs("Intake/Roller Leader", rollerIOInputs);
 
+    rollerLeaderDisconnected.set(!rollerIOInputs.connected);
+
     followerIO.updateInputs(followerIOInputs);
     Logger.processInputs("Intake/Roller Follower", followerIOInputs);
 
+    rollerFollowerDisconnected.set(!followerIOInputs.connected);
+
     Logger.recordOutput("Intake/Pivot/Setpoint", pivotIO.getSetpoint());
+
+    pivotDisconnectAlert.set(!pivotIOInputs.connected);
 
     currentFilterValue = currentFilter.calculate(pivotIOInputs.statorCurrentAmps);
   }
@@ -167,7 +186,8 @@ public class SlapdownSubsystem extends SubsystemBase {
   public Command restExtended() {
     return this.run(
         () -> {
-          pivotIO.setMotorPositionSetpoint(PIVOT_EXTENDED_POSITION); // PIVOT_EXTENDED_POSITION);
+          pivotIO.setMotorPositionSetpoint(
+              PIVOT_EXTENDED_POSITION, -2.0); // PIVOT_EXTENDED_POSITION);
           rollerIO.setRollerVoltage(0.0);
         });
   }
