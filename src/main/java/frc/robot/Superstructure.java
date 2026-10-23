@@ -374,4 +374,9 @@ public class Superstructure {
   public FeedTarget getFeedTarget() {
     return feedTarget;
   }
+
+  // For use in teleop state reset
+  public void resetStateToIdle() {
+    state = SuperState.IDLE;
+  }
 }
