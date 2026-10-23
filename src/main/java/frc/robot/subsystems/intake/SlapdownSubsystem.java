@@ -202,8 +202,7 @@ public class SlapdownSubsystem extends SubsystemBase {
 
   public Command runCurrentZeroing() {
     return Commands.sequence(
-        this.run(() -> pivotIO.setMotorVoltage(0.0)), // TODO: set motor voltage
-        Commands.waitUntil(() -> currentFilterValue > CURRENT_ZEROING_THRESHOLD),
+        this.run(() -> pivotIO.setMotorVoltage(0.0)).until(() -> currentFilterValue > CURRENT_ZEROING_THRESHOLD),
         this.runOnce(() -> pivotIO.resetEncoder(PIVOT_MIN_POSITION)),
         Commands.print("Intake pivot zeroed"));
   }
