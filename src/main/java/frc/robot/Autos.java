@@ -43,7 +43,6 @@ public class Autos {
   // testing please organize later :)
   public enum Path {
     // intake
-    LStartToFirstDip("LTStartToFirstDip", Action.INTAKE),
     LStartToFirstDipSLOW("LTStartToFirstDipSLOW", Action.INTAKE),
     LSecondDip("LTSecondDip", Action.INTAKE),
     LPartnerStartToFirstDip("LStartTrenchToFirstDip", Action.INTAKE),
@@ -212,7 +211,8 @@ public class Autos {
   }
 
   public Command getTesting() {
-    return createAuto("Single dip auto", new Path[] {Path.LStartToFirstDip, Path.LDipToFirstShoot});
+    return createAuto(
+        "Single dip auto", new Path[] {Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot});
   }
 
   public Command getLTDoubleDipAuto() {
