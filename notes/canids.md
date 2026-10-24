@@ -13,7 +13,7 @@
 | 8      | Intake Pivot           | X44             | X44-002         |
 | 9      | Intake Roller Leader   | X60             | X60-022         |
 | 10     | Intake Roller Follower | X60             | X60-036         |
-| 11     | Indexer Roller         | X60             | X60-016         |
+| 11     | Indexer Roller         | X60             | X60-047         |
 | 12     | Kicker Leader          | X60             | X60-021         |
 | 13     | Kicker Follower        | X60             | X60-034         |
 | 14     | Hood                   | X44             | X44-003         |

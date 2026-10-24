@@ -142,7 +142,7 @@ public class Autos {
                 },
                 () -> new ChassisSpeeds())
             // .alongWith(swerve.translateToPoseWithTolerance(poseSupplier, 0.2, 0.2))
-            .withTimeout(4.5)
+            .withTimeout(4.0)
             .alongWith(startScoring()),
         stopScoring());
   }

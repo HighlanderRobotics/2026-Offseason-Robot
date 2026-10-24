@@ -62,3 +62,22 @@ jobs:
     # Runs a single command using the runners shell
     - name: Run formatting check
       run: ./gradlew spotlessCheck
+
+  # Foresight's code check (Hindsight): reports likely bugs (integer division, a value never set, a CAN ID used twice…)
+  # as one comment on the PR when the PR adds or fixes one, kept up to date on each push. Report only: it never fails
+  # the run. Pinned to one Hindsight commit, so a new rule can't turn this red until we choose to move the pin.
+  code-check:
+    name: Code check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write   # to post and edit its one comment
+    concurrency:             # two quick pushes would otherwise race and post two comments
+      group: code-check-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    - uses: kevinclark/hindsight@984403f0aeb032fc0df73e5c3f280adc006790f7 # main 2026-10-22
+      with:
+        fail-on: none
+        comment: true
