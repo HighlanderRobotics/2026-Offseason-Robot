@@ -256,7 +256,7 @@ public class Robot extends LoggedRobot {
             swerve.alignToHeading(
                 () -> {
                   if (swerve.getRotation().getRadians() >= Math.PI / 2
-                      && swerve.getRotation().getRadians() < -(Math.PI / 2)) {
+                      || swerve.getRotation().getRadians() < -(Math.PI / 2)) {
                     return Rotation2d.k180deg;
                   } else {
                     return Rotation2d.kZero;
@@ -289,7 +289,17 @@ public class Robot extends LoggedRobot {
         .onTrue(Commands.runOnce(() -> addAutos()));
 
     // Hood zero on enable
-    RobotModeTriggers.disabled().negate().and(() -> !hoodZeroed).onTrue(drum.runCurrentZeroing());
+    RobotModeTriggers.disabled()
+        .negate()
+        .and(() -> !hoodZeroed)
+        .onTrue(
+            drum.runCurrentZeroing()
+                .finallyDo(
+                    (interrupted) -> {
+                      if (!interrupted) {
+                        hoodZeroed = true;
+                      }
+                    }));
 
     // Save log on code startup
     bfg.saveLog();
