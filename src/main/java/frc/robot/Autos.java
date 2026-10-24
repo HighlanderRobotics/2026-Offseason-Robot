@@ -43,7 +43,7 @@ public class Autos {
   // testing please organize later :)
   public enum Path {
     // intake
-    LStartToFirstDipSLOW("LTStartToFirstDipSLOW", Action.INTAKE),
+    LStartToFirstDipSLOW("LStartTrenchToFirstDipSLOW", Action.INTAKE),
     LSecondDip("LTSecondDip", Action.INTAKE),
     LPartnerStartToFirstDip("LStartTrenchToFirstDip", Action.INTAKE),
     LPartnerSecondDip("PartnerLTSecondDip", Action.INTAKE),
