@@ -364,7 +364,9 @@ public class Robot extends LoggedRobot {
   public void disabledPeriodic() {}
 
   @Override
-  public void disabledExit() {}
+  public void disabledExit() {
+    superstructure.resetStateToIdle();
+  }
 
   @Override
   public void autonomousInit() {}
@@ -378,7 +380,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     Superstructure.matchStartTime = Timer.getFPGATimestamp();
-    superstructure.resetStateToIdle();
   }
 
   @Override
