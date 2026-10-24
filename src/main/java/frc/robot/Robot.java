@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.components.battery.BFGSubsystem;
+import frc.robot.components.battery.BatterySubsystem;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.CANcoderIO;
@@ -90,7 +90,7 @@ public class Robot extends LoggedRobot {
   private Superstructure superstructure =
       new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
 
-  private BFGSubsystem bfg = new BFGSubsystem(0); // TODO: I DON'T REMEMBER HOW THESE IDS WORK
+  private BatterySubsystem bfg = new BatterySubsystem(0); // TODO: I DON'T REMEMBER HOW THESE IDS WORK
 
   private boolean hoodZeroed = false;
 

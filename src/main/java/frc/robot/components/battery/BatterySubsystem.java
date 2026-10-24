@@ -4,12 +4,12 @@ import com.playingwithfusion.BattFuelGauge.BatteryManufacturer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-public class BFGSubsystem extends SubsystemBase {
+public class BatterySubsystem extends SubsystemBase {
 
   BFGIO io;
   BFGIOInputsAutoLogged bfgInputs = new BFGIOInputsAutoLogged();
 
-  public BFGSubsystem(int id) {
+  public BatterySubsystem(int id) {
     this.io = new BFGIO(id);
   }
 
