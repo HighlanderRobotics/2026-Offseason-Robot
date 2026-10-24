@@ -105,12 +105,12 @@
    },
    "RSecondDipEnd":{
     "x":{
-     "exp":"6.6 m",
-     "val":6.6
+     "exp":"6.93 m",
+     "val":6.93
     },
     "y":{
-     "exp":"3.555 m",
-     "val":3.555
+     "exp":"3.44 m",
+     "val":3.44
     },
     "heading":{
      "exp":"1.14 rad",
