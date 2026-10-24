@@ -280,8 +280,8 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.Slot0.kG = 0.5;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     config.Slot0.GravityArmPositionOffset = 0.0; // should it be 0.25?
-    config.Slot0.kP = 10.0; // 3; //
-    config.Slot0.kD = 0.05;
+    config.Slot0.kP = 250.0; // 3; //
+    config.Slot0.kD = 0.3;
 
     config.CurrentLimits.StatorCurrentLimit = 50.0;
 
