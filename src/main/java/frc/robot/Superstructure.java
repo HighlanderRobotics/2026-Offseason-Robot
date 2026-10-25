@@ -12,9 +12,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.SlapdownSubsystem;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.FieldUtils;
 import frc.robot.utils.FieldUtils.TrenchPoses;
+import frc.robot.utils.autoaim.AutoAim;
 import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
 import frc.robot.utils.autoaim.ShotTrees;
 import java.text.DecimalFormat;
@@ -113,6 +115,7 @@ public class Superstructure {
   private Trigger defenseReq = new Trigger(() -> defense);
   private Trigger spitReq;
 
+  private final SwerveSubsystem swerve;
   private final IndexerSubsystem indexer;
   private final DrumSubsystem drum;
   private final SlapdownSubsystem intake;
@@ -122,10 +125,12 @@ public class Superstructure {
   public Superstructure(
       CommandXboxControllerSubsystem driver,
       CommandXboxControllerSubsystem operator,
+      SwerveSubsystem swerve,
       IndexerSubsystem indexer,
       DrumSubsystem drum,
       SlapdownSubsystem intake,
       Supplier<Pose2d> robotPoseSupplier) {
+    this.swerve = swerve;
     this.indexer = indexer;
     this.drum = drum;
     this.intake = intake;
@@ -230,27 +235,27 @@ public class Superstructure {
         drum.rest());
 
     SuperState.SPIN_UP_SCORE.bindCommands(
-        indexer.preshoot(), intake.restExtended(), drum.shoot(this::getHubShotData));
+        indexer.preshoot(), intake.restExtended(), drum.shoot(this::getSotmHubShotData));
 
     SuperState.SPIN_UP_SCORE_FLOW.bindCommands(
-        indexer.preshoot(), intake.intake(), drum.shoot(this::getHubShotData));
+        indexer.preshoot(), intake.intake(), drum.shoot(this::getSotmHubShotData));
 
     SuperState.SCORE.bindCommands(
-        indexer.kick(), intake.agitate(), drum.shoot(this::getHubShotData));
+        indexer.kick(), intake.agitate(), drum.shoot(this::getSotmHubShotData));
 
     SuperState.SCORE_FLOW.bindCommands(
-        indexer.kick(), intake.intake(), drum.shoot(this::getHubShotData));
+        indexer.kick(), intake.intake(), drum.shoot(this::getSotmHubShotData));
 
     SuperState.SPIN_UP_FEED.bindCommands(
-        indexer.preshoot(), intake.restExtended(), drum.shoot(this::getFeedShotData));
+        indexer.preshoot(), intake.restExtended(), drum.shoot(this::getSotmFeedShotData));
     SuperState.SPIN_UP_FEED_FLOW.bindCommands(
-        indexer.preshoot(), intake.intake(), drum.shoot(this::getFeedShotData));
+        indexer.preshoot(), intake.intake(), drum.shoot(this::getSotmFeedShotData));
 
     SuperState.FEED.bindCommands(
-        indexer.kick(), intake.agitate(), drum.shoot(this::getFeedShotData));
+        indexer.kick(), intake.agitate(), drum.shoot(this::getSotmFeedShotData));
 
     SuperState.FEED_FLOW.bindCommands(
-        indexer.kick(), intake.intake(), drum.shoot(this::getFeedShotData));
+        indexer.kick(), intake.intake(), drum.shoot(this::getSotmFeedShotData));
 
     SuperState.DEFENSE.bindCommands(indexer.rest(), intake.restRetracted(), drum.rest());
 
@@ -269,9 +274,29 @@ public class Superstructure {
     return ShotTrees.HUB_SHOT_TREE.calculateShot(robotPoseSupplier.get());
   }
 
+  private ShotData getSotmHubShotData() {
+    return AutoAim.calculateShot(
+            robotPoseSupplier.get(),
+            swerve.getVelocityRobotRelative(),
+            FieldUtils.getCurrentHubTranslation(),
+            ShotTrees.HUB_SHOT_TREE)
+        .shotData();
+  }
+
   private ShotData getFeedShotData() {
     Translation2d feedTargetPos = FieldUtils.FeedTargets.getFeedTarget(feedTarget).getTranslation();
     return ShotTrees.FEED_SHOT_TREE.calculateShot(robotPoseSupplier.get(), feedTargetPos);
+  }
+
+  private ShotData getSotmFeedShotData() {
+    Translation2d feedTargetPos = FieldUtils.FeedTargets.getFeedTarget(feedTarget).getTranslation();
+    // return ShotTrees.FEED_SHOT_TREE.calculateShot(robotPoseSupplier.get(), feedTargetPos);
+    return AutoAim.calculateShot(
+            robotPoseSupplier.get(),
+            swerve.getVelocityRobotRelative(),
+            feedTargetPos,
+            ShotTrees.HUB_SHOT_TREE)
+        .shotData();
   }
 
   private Alliance getStartingAlliance() {

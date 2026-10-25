@@ -33,7 +33,8 @@ import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
 import frc.robot.utils.FieldUtils;
-import frc.robot.utils.autoaim.AutoAlign;
+import frc.robot.utils.autoaim.AutoAim;
+import frc.robot.utils.autoaim.ShotTrees;
 import java.util.Optional;
 import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
@@ -87,7 +88,7 @@ public class Robot extends LoggedRobot {
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Autos");
 
   private Superstructure superstructure =
-      new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
+      new Superstructure(driver, operator, swerve, indexer, drum, intake, swerve::getPose);
 
   private boolean hoodZeroed = false;
 
@@ -228,10 +229,22 @@ public class Robot extends LoggedRobot {
                     Translation2d currentFeedPosition =
                         FieldUtils.FeedTargets.getFeedTarget(superstructure.getFeedTarget())
                             .getTranslation();
-                    return AutoAlign.getTargetHeading(swerve.getPose(), currentFeedPosition);
+                    // return AutoAlign.getTargetHeading(swerve.getPose(), currentFeedPosition);
+                    return AutoAim.calculateShot(
+                            swerve.getPose(),
+                            swerve.getVelocityRobotRelative(),
+                            currentFeedPosition,
+                            ShotTrees.FEED_SHOT_TREE)
+                        .targetHeading();
                   } else {
-                    Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-                    return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                    // Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+                    // return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                    return AutoAim.calculateShot(
+                            swerve.getPose(),
+                            swerve.getVelocityRobotRelative(),
+                            FieldUtils.getCurrentHubTranslation(),
+                            ShotTrees.HUB_SHOT_TREE)
+                        .targetHeading();
                   }
                 },
                 () ->
