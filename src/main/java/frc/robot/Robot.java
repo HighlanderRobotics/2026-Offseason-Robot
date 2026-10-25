@@ -90,7 +90,7 @@ public class Robot extends LoggedRobot {
   private Superstructure superstructure =
       new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
 
-  private BatterySubsystem bfg = new BatterySubsystem(0); // TODO: I DON'T REMEMBER HOW THESE IDS WORK
+  private BatterySubsystem bfg = new BatterySubsystem(0); // TODO: MAYBE TRY TO SNIFF FOR THESE
 
   private boolean hoodZeroed = false;
 
