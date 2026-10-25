@@ -26,7 +26,7 @@ public class ModuleIOSim extends ModuleIOReal {
         new MaplePhoenixUtil.TalonFXMotorControllerWithRemoteCancoderSim(
             turnTalon,
             SwerveSubsystem.SWERVE_CONSTANTS.getTurnMotorType(),
-            SwerveSubsystem.SWERVE_CONSTANTS.getTurnMotorInverted(),
+            false,
             cancoder,
             false,
             Angle.ofBaseUnits(constants.cancoderOffset().getRadians(), Radian)));

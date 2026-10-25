@@ -56,9 +56,9 @@ public class Robot extends LoggedRobot {
     REPLAY;
   }
 
-  // public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
-  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
-
+  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
+  // public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
+  // TODO: switch back to replay before comp
   private CANBus canBus = new CANBus("*");
 
   private SwerveSubsystem swerve = new SwerveSubsystem(canBus);
