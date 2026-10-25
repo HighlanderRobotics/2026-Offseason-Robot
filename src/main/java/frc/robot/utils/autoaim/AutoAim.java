@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.Logger;
 /**
  * calculates a dumper shot while the robot is moving
  *
- * robot's current speeds are used to project its pose forward by the shot's time of flight. Then
+ * <p>robot's current speeds are used to project its pose forward by the shot's time of flight. Then
  * shot table is used at the projected distance, and the returned heading points the dumper at the
  * target from that projected position.
  */
