@@ -14,6 +14,7 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -52,6 +53,7 @@ import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread.Samples;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread.SignalID;
 import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread.SignalType;
+import frc.robot.utils.FieldUtils;
 import frc.robot.utils.Tracer;
 import frc.robot.utils.autoaim.AutoAlign;
 import java.util.Arrays;
@@ -508,6 +510,32 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
+   * Sets the wheels to an X pattern (all pointing towards the center of the robot)
+   *
+   * @return a command setting the wheels to an X pattern
+   */
+  public Command doXLock() {
+    return this.runOnce(
+        () -> {
+          final Translation2d[] modulePositions = SWERVE_CONSTANTS.getModuleTranslations();
+          final SwerveModuleState[] setpoints = new SwerveModuleState[modules.length];
+
+          for (int i = 0; i < modules.length; i++) {
+            // get the angle to the center of the robot from the module position
+            Rotation2d angle = modulePositions[i].getAngle();
+            setpoints[i] = new SwerveModuleState(0.0, angle);
+
+            modules[i].stop();
+            modules[i].setTurnSetpoint(angle);
+          }
+
+          Logger.recordOutput("Swerve/Target Speeds", new ChassisSpeeds());
+          Logger.recordOutput("SwerveStates/Setpoints", setpoints);
+          Logger.recordOutput("SwerveStates/SetpointsOptimized", setpoints);
+        });
+  }
+
+  /**
    * Autoaligns to a target pose given constraints
    *
    * @param target the target pose
@@ -641,6 +669,20 @@ public class SwerveSubsystem extends SubsystemBase {
                           Logger.recordOutput("AutoAlign/Target Heading", target.get());
                           Logger.recordOutput("AutoAlign/Speeds Modifier", speedsModifier.get());
                         })));
+  }
+
+  /**
+   * check if the robot is aligned to the hub within the autoalign rotation tolerance
+   *
+   * @return is the robot aligned?
+   */
+  public boolean isAlignedToHub() {
+    Pose2d pose = getPose();
+    Rotation2d targetHeading =
+        AutoAlign.getTargetHeading(pose, FieldUtils.getCurrentHubTranslation());
+
+    return Math.abs(targetHeading.minus(pose.getRotation()).getRadians())
+        <= autoAlign.ROTATION_TOLERANCE_RADIANS;
   }
 
   //   @AutoLogOutput(key = "Swerve/Near Trench")
