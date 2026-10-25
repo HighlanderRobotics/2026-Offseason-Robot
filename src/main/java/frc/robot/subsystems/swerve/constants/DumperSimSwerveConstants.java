@@ -254,6 +254,6 @@ public class DumperSimSwerveConstants extends SwerveConstants {
 
   @Override
   public boolean getTurnMotorInverted() {
-    return true;
+    return false;
   }
 }
