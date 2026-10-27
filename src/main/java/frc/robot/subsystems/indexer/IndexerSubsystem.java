@@ -47,6 +47,7 @@ public class IndexerSubsystem implements Subsystem {
     kickerLeaderDisconnectedAlert.set(!indexerInputs.kickerLeaderConnected);
     kickerFollowerDisconnectedAlert.set(!indexerInputs.kickerFollowerConnected);
 
+    // Still not sure the giant switch statement is the best solution to this
     switch (state) {
       case IDLE:
       case DEFENSE:
@@ -76,6 +77,7 @@ public class IndexerSubsystem implements Subsystem {
         break;
 
       default:
+        // Should never hit. Verified exhaustivity in a unit test
         throw new UnsupportedOperationException(
             "Indexer doesn't have an action bound to " + state.toString());
     }
@@ -94,17 +96,17 @@ public class IndexerSubsystem implements Subsystem {
     indexerIO.setKickerVoltage(-4.0);
   }
 
-  public void preshoot() {
+  private void preshoot() {
     indexerIO.setIndexerVoltage(-3.0);
     indexerIO.setKickerVoltage(-4.0);
   }
 
-  public void kick() {
+  private void kick() {
     indexerIO.setIndexerVoltage(5.0);
     indexerIO.setKickerVoltage(10.0);
   }
 
-  public void reverse() {
+  private void reverse() {
     indexerIO.setIndexerVoltage(-5.0);
     indexerIO.setKickerVoltage(-5.0);
   }
