@@ -222,39 +222,28 @@ public class Superstructure {
   }
 
   private void bindCommands() {
-    SuperState.IDLE.bindCommands(indexer.rest(), intake.restExtended(), drum.rest());
+    SuperState.IDLE.bindCommands(intake.restExtended(), drum.rest());
 
-    SuperState.INTAKE.bindCommands(
-        indexer.index(), // Should we index?
-        intake.intake(),
-        drum.rest());
+    SuperState.INTAKE.bindCommands(intake.intake(), drum.rest());
 
-    SuperState.SPIN_UP_SCORE.bindCommands(
-        indexer.preshoot(), intake.restExtended(), drum.shoot(this::getHubShotData));
+    SuperState.SPIN_UP_SCORE.bindCommands(intake.restExtended(), drum.shoot(this::getHubShotData));
 
-    SuperState.SPIN_UP_SCORE_FLOW.bindCommands(
-        indexer.preshoot(), intake.intake(), drum.shoot(this::getHubShotData));
+    SuperState.SPIN_UP_SCORE_FLOW.bindCommands(intake.intake(), drum.shoot(this::getHubShotData));
 
-    SuperState.SCORE.bindCommands(
-        indexer.kick(), intake.agitate(), drum.shoot(this::getHubShotData));
+    SuperState.SCORE.bindCommands(intake.agitate(), drum.shoot(this::getHubShotData));
 
-    SuperState.SCORE_FLOW.bindCommands(
-        indexer.kick(), intake.intake(), drum.shoot(this::getHubShotData));
+    SuperState.SCORE_FLOW.bindCommands(intake.intake(), drum.shoot(this::getHubShotData));
 
-    SuperState.SPIN_UP_FEED.bindCommands(
-        indexer.preshoot(), intake.restExtended(), drum.shoot(this::getFeedShotData));
-    SuperState.SPIN_UP_FEED_FLOW.bindCommands(
-        indexer.preshoot(), intake.intake(), drum.shoot(this::getFeedShotData));
+    SuperState.SPIN_UP_FEED.bindCommands(intake.restExtended(), drum.shoot(this::getFeedShotData));
+    SuperState.SPIN_UP_FEED_FLOW.bindCommands(intake.intake(), drum.shoot(this::getFeedShotData));
 
-    SuperState.FEED.bindCommands(
-        indexer.kick(), intake.agitate(), drum.shoot(this::getFeedShotData));
+    SuperState.FEED.bindCommands(intake.agitate(), drum.shoot(this::getFeedShotData));
 
-    SuperState.FEED_FLOW.bindCommands(
-        indexer.kick(), intake.intake(), drum.shoot(this::getFeedShotData));
+    SuperState.FEED_FLOW.bindCommands(intake.intake(), drum.shoot(this::getFeedShotData));
 
-    SuperState.DEFENSE.bindCommands(indexer.rest(), intake.restRetracted(), drum.rest());
+    SuperState.DEFENSE.bindCommands(intake.restRetracted(), drum.rest());
 
-    SuperState.SPIT.bindCommands(indexer.reverse(), intake.outtake(), drum.spit());
+    SuperState.SPIT.bindCommands(intake.outtake(), drum.spit());
   }
 
   public static SuperState getState() {

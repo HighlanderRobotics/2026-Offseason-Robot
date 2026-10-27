@@ -206,7 +206,6 @@ public class Robot extends LoggedRobot {
                       + (interrupting.isPresent() ? interrupting.get().getName() : "none"));
             });
 
-    indexer.setDefaultCommand(indexer.rest());
     intake.setDefaultCommand(intake.restExtended());
     drum.setDefaultCommand(drum.rest());
 

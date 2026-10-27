@@ -1,20 +1,16 @@
 package frc.robot.subsystems.indexer;
 
-import static edu.wpi.first.units.Units.Volts;
-
 import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.*;
 import frc.robot.Robot;
 import frc.robot.Robot.RobotMode;
+import frc.robot.superstructure.subsystem.Subsystem;
+import frc.robot.superstructure.util.RobotSnapshot;
+import frc.robot.superstructure.util.SuperState;
 import org.littletonrobotics.junction.Logger;
 
-public class IndexerSubsystem extends SubsystemBase {
+public class IndexerSubsystem implements Subsystem {
   private IndexerIO indexerIO;
   private IndexerIOInputsAutoLogged indexerInputs = new IndexerIOInputsAutoLogged();
 
@@ -25,24 +21,6 @@ public class IndexerSubsystem extends SubsystemBase {
   private final Alert kickerFollowerDisconnectedAlert =
       new Alert("Disconnected kicker follower!", AlertType.kError);
 
-  private SysIdRoutine indexerSysid =
-      new SysIdRoutine(
-          new Config(
-              null,
-              null,
-              null,
-              (state) -> Logger.recordOutput("Indexer/SysID State", state.toString())),
-          new Mechanism((volts) -> indexerIO.setIndexerVoltage(volts.in(Volts)), null, this));
-
-  private SysIdRoutine kickerSysid =
-      new SysIdRoutine(
-          new Config(
-              null,
-              null,
-              null,
-              (state) -> Logger.recordOutput("Kicker/SysID State", state.toString())),
-          new Mechanism((volts) -> indexerIO.setKickerVoltage(volts.in(Volts)), null, this));
-
   public IndexerSubsystem(CANBus canbus) {
     if (Robot.ROBOT_MODE == RobotMode.SIM) {
       this.indexerIO = new IndexerIOSim(canbus);
@@ -51,72 +29,83 @@ public class IndexerSubsystem extends SubsystemBase {
     }
   }
 
-  // Kick ball out of indexer
-  public Command kick() {
-    return this.run(
-        () -> {
-          indexerIO.setIndexerVoltage(5.0);
-          indexerIO.setKickerVoltage(10.0);
-        });
-  }
+  // public void periodic() {
+  //   indexerIO.updateInputs(indexerInputs);
+  //   Logger.processInputs("Indexer", indexerInputs);
 
-  // Rotate indexer
-  public Command index() {
-    return this.run(
-        () -> {
-          indexerIO.setIndexerVoltage(3.0);
-          indexerIO.setKickerVoltage(-4.0);
-        });
-  }
+  //   indexerDisconnectedAlert.set(!indexerInputs.indexerConnected);
+  //   kickerLeaderDisconnectedAlert.set(!indexerInputs.kickerLeaderConnected);
+  //   kickerFollowerDisconnectedAlert.set(!indexerInputs.kickerFollowerConnected);
+  // }
 
-  public Command preshoot() {
-    return this.run(
-        () -> {
-          indexerIO.setIndexerVoltage(-3.0);
-          indexerIO.setKickerVoltage(-4.0);
-        });
-  }
-
-  // Sends balls backwards if gets stuck
-  public Command reverse() {
-    return this.run(
-        () -> {
-          indexerIO.setIndexerVoltage(-5.0);
-          indexerIO.setKickerVoltage(-5.0);
-        });
-  }
-
-  // Rest
-  public Command rest() {
-    return this.run(
-        () -> {
-          indexerIO.setIndexerVoltage(0);
-          indexerIO.setKickerVoltage(0);
-        });
-  }
-
-  public Command runIndexerSysid() {
-    return Commands.sequence(
-        indexerSysid.quasistatic(Direction.kForward),
-        indexerSysid.quasistatic(Direction.kReverse),
-        indexerSysid.dynamic(Direction.kForward),
-        indexerSysid.dynamic(Direction.kReverse));
-  }
-
-  public Command runKickerSysid() {
-    return Commands.sequence(
-        kickerSysid.quasistatic(Direction.kForward),
-        kickerSysid.quasistatic(Direction.kReverse),
-        kickerSysid.dynamic(Direction.kForward),
-        kickerSysid.dynamic(Direction.kReverse));
-  }
-
-  public void periodic() {
+  @Override
+  public void periodic(SuperState state, RobotSnapshot robotSnapshot) {
     indexerIO.updateInputs(indexerInputs);
     Logger.processInputs("Indexer", indexerInputs);
 
     indexerDisconnectedAlert.set(!indexerInputs.indexerConnected);
     kickerLeaderDisconnectedAlert.set(!indexerInputs.kickerLeaderConnected);
     kickerFollowerDisconnectedAlert.set(!indexerInputs.kickerFollowerConnected);
+
+    switch (state) {
+      case IDLE:
+      case DEFENSE:
+        rest();
+        break;
+
+      case INTAKE:
+        index();
+        break;
+
+      case SPIN_UP_FEED:
+      case SPIN_UP_FEED_FLOW:
+      case SPIN_UP_SCORE:
+      case SPIN_UP_SCORE_FLOW:
+        preshoot();
+        break;
+
+      case SCORE:
+      case SCORE_FLOW:
+      case FEED:
+      case FEED_FLOW:
+        kick();
+        break;
+
+      case SPIT:
+        reverse();
+        break;
+
+      default:
+        throw new UnsupportedOperationException(
+            "Indexer doesn't have an action bound to " + state.toString());
+    }
+  }
+
+  @Override
+  public void simulationPeriodic(SuperState state, RobotSnapshot robotSnapshot) {}
+
+  private void rest() {
+    indexerIO.setIndexerVoltage(0.0);
+    indexerIO.setKickerVoltage(0.0);
+  }
+
+  private void index() {
+    indexerIO.setIndexerVoltage(3.0);
+    indexerIO.setKickerVoltage(-4.0);
+  }
+
+  public void preshoot() {
+    indexerIO.setIndexerVoltage(-3.0);
+    indexerIO.setKickerVoltage(-4.0);
+  }
+
+  public void kick() {
+    indexerIO.setIndexerVoltage(5.0);
+    indexerIO.setKickerVoltage(10.0);
+  }
+
+  public void reverse() {
+    indexerIO.setIndexerVoltage(-5.0);
+    indexerIO.setKickerVoltage(-5.0);
   }
 }
