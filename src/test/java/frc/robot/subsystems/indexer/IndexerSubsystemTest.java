@@ -18,7 +18,7 @@ class IndexerSubsystemTest {
   @Test
   void periodicStateCheckIsExhaustive() {
     for (SuperState state : SuperState.values()) {
-      indexer.periodic(state, new RobotSnapshot(false, false));
+      indexer.periodic(state, new RobotSnapshot());
     }
   }
 }
