@@ -29,15 +29,6 @@ public class IndexerSubsystem implements Subsystem {
     }
   }
 
-  // public void periodic() {
-  //   indexerIO.updateInputs(indexerInputs);
-  //   Logger.processInputs("Indexer", indexerInputs);
-
-  //   indexerDisconnectedAlert.set(!indexerInputs.indexerConnected);
-  //   kickerLeaderDisconnectedAlert.set(!indexerInputs.kickerLeaderConnected);
-  //   kickerFollowerDisconnectedAlert.set(!indexerInputs.kickerFollowerConnected);
-  // }
-
   @Override
   public void periodic(SuperState state, RobotSnapshot robotSnapshot) {
     indexerIO.updateInputs(indexerInputs);
