@@ -12,6 +12,7 @@ import frc.robot.superstructure.util.TransitionCondition;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 /** Holds the state machine graph and manages all transitions between states */
 public class Superstructure {
@@ -19,6 +20,7 @@ public class Superstructure {
   // TODO: SHOULD THIS JS BE A VALUE GRAPH?
   private final ImmutableNetwork<SuperState, TransitionCondition> stateGraph;
 
+  @AutoLogOutput(key = "Superstructure/State")
   private SuperState currentState = SuperState.IDLE;
 
   private Set<Subsystem> subsystems;
