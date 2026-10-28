@@ -515,23 +515,23 @@ public class SwerveSubsystem extends SubsystemBase {
    * @return a command setting the wheels to an X pattern
    */
   public Command doXLock() {
-    return this.runOnce(
+    return this.run(
         () -> {
           final Translation2d[] modulePositions = SWERVE_CONSTANTS.getModuleTranslations();
           final SwerveModuleState[] setpoints = new SwerveModuleState[modules.length];
+          final SwerveModuleState[] setpointsOptimized = new SwerveModuleState[modules.length];
 
           for (int i = 0; i < modules.length; i++) {
             // get the angle to the center of the robot from the module position
             Rotation2d angle = modulePositions[i].getAngle();
             setpoints[i] = new SwerveModuleState(0.0, angle);
 
-            modules[i].stop();
-            modules[i].setTurnSetpoint(angle);
+            setpointsOptimized[i] = modules[i].runClosedLoop(setpoints[i]);
           }
 
           Logger.recordOutput("Swerve/Target Speeds", new ChassisSpeeds());
           Logger.recordOutput("SwerveStates/Setpoints", setpoints);
-          Logger.recordOutput("SwerveStates/SetpointsOptimized", setpoints);
+          Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointsOptimized);
         });
   }
 

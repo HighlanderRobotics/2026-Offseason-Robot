@@ -210,7 +210,7 @@ public class Robot extends LoggedRobot {
             .or(SuperState.SCORE.getTrigger())
             .or(SuperState.SCORE_FLOW.getTrigger());
 
-    Trigger noDriverInputTrigger =
+    Trigger hasDriverInputTrigger =
         new Trigger(
             () ->
                 modifyJoystick(driver.getLeftY()) != 0.0
@@ -220,10 +220,10 @@ public class Robot extends LoggedRobot {
     Trigger shouldXLockTrigger =
         RobotModeTriggers.teleop()
             .and(scoringOrPrepingTrigger)
-            .and(noDriverInputTrigger.negate())
+            .and(hasDriverInputTrigger.negate())
             .and(driver.rightBumper().negate().or(swerve::isAlignedToHub));
 
-    shouldXLockTrigger.whileTrue(swerve.doXLock().repeatedly());
+    shouldXLockTrigger.whileTrue(swerve.doXLock());
 
     // log when commands get interrupted
     // CommandScheduler.getInstance()
