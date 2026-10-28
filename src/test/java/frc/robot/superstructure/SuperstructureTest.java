@@ -46,4 +46,51 @@ class SuperstructureTest {
     // Should be in IDLE now
     assertEquals(SuperState.IDLE, superstructure.getState());
   }
+
+  @Test
+  void spinUpScoreToIdleWhenNothingPressed() {
+    superstructure.setStateForTesting(SuperState.SPIN_UP_SCORE);
+
+    // Verify initial condition
+    assertEquals(SuperState.SPIN_UP_SCORE, superstructure.getState());
+
+    RobotSnapshot nothingPressed = new RobotSnapshot();
+
+    superstructure.periodic(nothingPressed);
+
+    // Should be in IDLE now
+    assertEquals(SuperState.IDLE, superstructure.getState());
+  }
+
+  @Test
+  void spinUpScoreToIdleWhenNothingPressedWithShooterReady() {
+    superstructure.setStateForTesting(SuperState.SPIN_UP_SCORE);
+
+    // Verify initial condition
+    assertEquals(SuperState.SPIN_UP_SCORE, superstructure.getState());
+
+    RobotSnapshot drumReady =
+        new RobotSnapshot(false, false, false, false, false, true, false, false, Pose2d.kZero);
+
+    superstructure.periodic(drumReady);
+
+    // Should be in IDLE now
+    assertEquals(SuperState.IDLE, superstructure.getState());
+  }
+
+  @Test
+  void idleToSpinUpScoreOnRightTrigger() {
+    // Verify initial condition
+    assertEquals(SuperState.IDLE, superstructure.getState());
+
+    RobotSnapshot rightTriggerPressed =
+        new RobotSnapshot(false, true, false, false, false, false, false, false, Pose2d.kZero);
+
+    // Handle transition
+    superstructure.periodic(rightTriggerPressed);
+
+    // Should be intaking now
+    assertEquals(SuperState.SPIN_UP_SCORE, superstructure.getState());
+  }
+
 }
