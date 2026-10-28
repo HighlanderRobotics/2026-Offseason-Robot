@@ -1,7 +1,5 @@
 package frc.robot.subsystems.drum;
 
-import static edu.wpi.first.units.Units.Volts;
-
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -13,13 +11,6 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Robot;
 import frc.robot.Robot.RobotMode;
 import frc.robot.components.follower.FollowerIO;
@@ -31,15 +22,18 @@ import frc.robot.subsystems.drum.flywheel.FlywheelIOSim;
 import frc.robot.subsystems.drum.hood.HoodIO;
 import frc.robot.subsystems.drum.hood.HoodIOInputsAutoLogged;
 import frc.robot.subsystems.drum.hood.HoodIOSim;
+import frc.robot.superstructure.subsystem.Subsystem;
+import frc.robot.superstructure.util.RobotSnapshot;
+import frc.robot.superstructure.util.SuperState;
+import frc.robot.utils.FieldUtils;
 import frc.robot.utils.LoggedTunableNumber;
 import frc.robot.utils.autoaim.InterpolatingShotTree.ShotData;
+import frc.robot.utils.autoaim.ShotTrees;
 import java.util.Arrays;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class DrumSubsystem extends SubsystemBase {
+public class DrumSubsystem implements Subsystem {
   public static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0;
   public static final double FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC = 3.0;
   public static final int FLYWHEEL_LEADER_ID = 15;
@@ -67,25 +61,6 @@ public class DrumSubsystem extends SubsystemBase {
   // True if any are disconnected (maybe I should add one for each but seems excessive)
   private Alert flywheelFollowerDisconnectAlert =
       new Alert("Flywheel Follower Disconnected", AlertType.kError);
-
-  private SysIdRoutine flywheelSysid =
-      new SysIdRoutine(
-          new Config(
-              null,
-              null,
-              null,
-              (state) -> Logger.recordOutput("Drum/Flywheel/SysID State", state.toString())),
-          new Mechanism((voltage) -> flywheelIO.setVoltage(voltage.in(Volts)), null, this));
-
-  // TODO: PROBABLY NEED TO REDUCE RAMP RATE ETC TO MAKE WORK
-  private SysIdRoutine hoodSysid =
-      new SysIdRoutine(
-          new Config(
-              null,
-              null,
-              null,
-              (state) -> Logger.recordOutput("Drum/Hood/SysID State", state.toString())),
-          new Mechanism((voltage) -> hoodIO.setVoltage(voltage.in(Volts)), null, this));
 
   // For current zeroing
   private LinearFilter currentFilter = LinearFilter.movingAverage(10);
@@ -151,7 +126,7 @@ public class DrumSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  public void periodic(SuperState state, RobotSnapshot snapshot) {
     flywheelIO.updateInputs(flywheelIOInputs);
     Logger.processInputs("Drum/Flywheel/Leader", flywheelIOInputs);
     flywheelLeaderDisconnectAlert.set(!flywheelIOInputs.connected);
@@ -176,104 +151,82 @@ public class DrumSubsystem extends SubsystemBase {
 
     if (Robot.isSimulation())
       Logger.recordOutput("Drum/Hood/Current Filter Value", currentFilterValue);
+
+    switch (state) {
+      case IDLE:
+      case INTAKE:
+      case DEFENSE:
+        rest();
+        break;
+
+      case SPIN_UP_SCORE:
+      case SCORE:
+      case SPIN_UP_SCORE_FLOW:
+      case SCORE_FLOW:
+        shoot(ShotTrees.HUB_SHOT_TREE.calculateShot(snapshot.robotPose()));
+        break;
+
+      case SPIN_UP_FEED:
+      case FEED:
+      case SPIN_UP_FEED_FLOW:
+      case FEED_FLOW:
+        // TODO: SWITCH SIDES
+        shoot(
+            ShotTrees.FEED_SHOT_TREE.calculateShot(
+                snapshot.robotPose(), FieldUtils.FeedTargets.getFeedTarget(true).getTranslation()));
+        break;
+
+      case SPIT:
+        spit();
+        break;
+
+      default:
+        throw new UnsupportedOperationException("Drum does not have an action bound to " + state);
+    }
   }
 
-  public Command setFlywheelAndHood(
-      DoubleSupplier flywheelVelRotPerSec, Supplier<Rotation2d> hoodAngle) {
-    return this.run(
-        () -> {
-          hoodIO.setPositionSetpoint(hoodAngle.get());
-          flywheelIO.setVelocitySetpoint(flywheelVelRotPerSec.getAsDouble());
-        });
+  @Override
+  public void simulationPeriodic(SuperState state, RobotSnapshot robotSnapshot) {}
+
+  public void setFlywheelAndHood(Double flywheelVelRotPerSec, Rotation2d hoodAngle) {
+    hoodIO.setPositionSetpoint(hoodAngle);
+    flywheelIO.setVelocitySetpoint(flywheelVelRotPerSec);
   }
 
-  public Command setFlywheelAndHoodVoltage(DoubleSupplier flywheel, DoubleSupplier hood) {
-    return this.run(
-        () -> {
-          hoodIO.setVoltage(hood.getAsDouble());
-          flywheelIO.setVoltage(flywheel.getAsDouble());
-        });
+  public void setFlywheelAndHoodVoltage(double flywheel, double hood) {
+    hoodIO.setVoltage(hood);
+    flywheelIO.setVoltage(flywheel);
   }
 
-  public Command rest() {
+  public void rest() {
     // Maybe should keep spinning somewhat
-    return this.run(
-        () -> {
-          hoodIO.setPositionSetpoint(HOOD_MIN_ANGLE);
-          flywheelIO.setVoltage(0.0);
-        });
+    hoodIO.setPositionSetpoint(HOOD_MIN_ANGLE);
+    flywheelIO.setVoltage(0.0);
   }
 
-  public Command shoot(Supplier<ShotData> shotDataSupplier) {
-    return this.run(
-        () -> {
-          ShotData shotData = shotDataSupplier.get();
-          hoodIO.setPositionSetpoint(shotData.hoodAngle());
-          flywheelIO.setVelocitySetpoint(
-              shotData.flywheelVelocityRotPerSec() + flywheelFudgeFactor);
-        });
+  public void shoot(ShotData shotData) {
+    hoodIO.setPositionSetpoint(shotData.hoodAngle());
+    flywheelIO.setVelocitySetpoint(shotData.flywheelVelocityRotPerSec() + flywheelFudgeFactor);
   }
 
-  public Command spit() {
+  public void spit() {
     // Might need to tune this...
-    return setFlywheelAndHood(() -> -20.0, () -> HOOD_MIN_ANGLE);
+    setFlywheelAndHood(-20.0, HOOD_MIN_ANGLE);
   }
 
-  public Command testShot() {
-    return setFlywheelAndHood(
-        flywheelVelTuner::get, () -> Rotation2d.fromDegrees(hoodAngleTuner.get()));
+  public void testShot() {
+    setFlywheelAndHood(flywheelVelTuner.get(), Rotation2d.fromDegrees(hoodAngleTuner.get()));
   }
 
+  // TODO:
   // Current zeroing
-  public Command runCurrentZeroing() {
-    return this.run(() -> hoodIO.setVoltage(-3.0))
-        .until(() -> currentFilterValue > HOOD_CURRENT_ZEROING_THRESHOLD_AMPS)
-        .andThen(
-            this.runOnce(hoodIO::rezeroMotorToBottom).alongWith(Commands.print("Rezeroed hood")));
-  }
-
-  // Sysids
-  public Command runFlywheelSysid() {
-    return Commands.sequence(
-        flywheelSysid.quasistatic(Direction.kForward),
-        Commands.waitUntil(
-            () ->
-                MathUtil.isNear(
-                    0.0,
-                    flywheelIOInputs.velocityRotPerSec,
-                    1.0)), // Wait until we're nearly stopped
-        flywheelSysid.quasistatic(Direction.kReverse),
-        Commands.waitUntil(
-            () ->
-                MathUtil.isNear(
-                    0.0,
-                    flywheelIOInputs.velocityRotPerSec,
-                    1.0)), // Wait until we're nearly stopped
-        flywheelSysid.dynamic(Direction.kForward),
-        Commands.waitUntil(
-            () ->
-                MathUtil.isNear(
-                    0.0,
-                    flywheelIOInputs.velocityRotPerSec,
-                    1.0)), // Wait until we're nearly stopped
-        flywheelSysid.dynamic(Direction.kReverse));
-  }
-
-  public Command runHoodSysid() {
-    return Commands.sequence(
-        hoodSysid
-            .quasistatic(Direction.kForward)
-            .until(() -> hoodIOInputs.position.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
-        hoodSysid
-            .quasistatic(Direction.kReverse)
-            .until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)),
-        hoodSysid
-            .dynamic(Direction.kForward)
-            .until(() -> hoodIOInputs.position.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
-        hoodSysid
-            .dynamic(Direction.kReverse)
-            .until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)));
-  }
+  // public Command runCurrentZeroing() {
+  //   return this.run(() -> hoodIO.setVoltage(-3.0))
+  //       .until(() -> currentFilterValue > HOOD_CURRENT_ZEROING_THRESHOLD_AMPS)
+  //       .andThen(
+  //           this.runOnce(hoodIO::rezeroMotorToBottom).alongWith(Commands.print("Rezeroed
+  // hood")));
+  // }
 
   public boolean readyToShoot() {
     // TODO: TUNE tolerances

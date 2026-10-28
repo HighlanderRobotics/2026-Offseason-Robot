@@ -2,6 +2,7 @@ package frc.robot.superstructure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.superstructure.util.RobotSnapshot;
 import frc.robot.superstructure.util.SuperState;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +23,7 @@ class SuperstructureTest {
     assertEquals(SuperState.IDLE, superstructure.getState());
 
     RobotSnapshot leftTriggerPressed =
-        new RobotSnapshot(true, false, false, false, false, false, false, false);
+        new RobotSnapshot(true, false, false, false, false, false, false, false, Pose2d.kZero);
 
     // Handle transition
     superstructure.periodic(leftTriggerPressed);

@@ -9,7 +9,6 @@ import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
@@ -67,7 +66,7 @@ public class Robot extends LoggedRobot {
   private CommandXboxControllerSubsystem operator = new CommandXboxControllerSubsystem(1);
 
   private frc.robot.superstructure.Superstructure superstructure =
-      new frc.robot.superstructure.Superstructure(indexer);
+      new frc.robot.superstructure.Superstructure(indexer, drum);
 
   private boolean hoodZeroed = false;
 
@@ -179,7 +178,6 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void disabledInit() {
-    Superstructure.matchStartTime = 0;
 
     // addAutos();
   }
@@ -200,9 +198,7 @@ public class Robot extends LoggedRobot {
   public void autonomousExit() {}
 
   @Override
-  public void teleopInit() {
-    Superstructure.matchStartTime = Timer.getFPGATimestamp();
-  }
+  public void teleopInit() {}
 
   @Override
   public void teleopPeriodic() {}
@@ -234,9 +230,9 @@ public class Robot extends LoggedRobot {
         false, // TODO
         false, // TODO
         false, // TODO
-        false, // TODO
+        drum.readyToShoot(),
         driver.a().getAsBoolean(),
-        false // TODO
-        );
+        false, // TODO
+        swerve.getPose());
   }
 }

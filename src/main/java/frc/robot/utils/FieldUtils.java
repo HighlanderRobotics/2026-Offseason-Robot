@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.Superstructure.FeedTarget;
 import java.util.Arrays;
 import java.util.List;
 
@@ -64,8 +63,8 @@ public class FieldUtils {
       return targetPose.getTranslation();
     }
 
-    public static FeedTargets getFeedTarget(FeedTarget target) {
-      if (target == FeedTarget.LEFT) {
+    public static FeedTargets getFeedTarget(boolean leftTarget) {
+      if (leftTarget) {
         return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue
             ? BLUE_BACK_LEFT
             : RED_BACK_LEFT;
