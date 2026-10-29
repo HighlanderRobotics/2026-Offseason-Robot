@@ -92,6 +92,9 @@ public class Robot extends LoggedRobot {
 
   private boolean hoodZeroed = false;
 
+  @AutoLogOutput(key = "Swerve/Should X Lock")
+  private final Trigger shouldXLockTrigger;
+
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
     SignalLogger.enableAutoLogging(false);
@@ -217,7 +220,7 @@ public class Robot extends LoggedRobot {
                     || modifyJoystick(driver.getLeftX()) != 0.0
                     || modifyJoystick(driver.getRightX()) != 0.0);
 
-    Trigger shouldXLockTrigger =
+    shouldXLockTrigger =
         RobotModeTriggers.teleop()
             .and(scoringOrPrepingTrigger)
             .and(hasDriverInputTrigger.negate())
