@@ -34,7 +34,8 @@ import org.littletonrobotics.junction.Logger;
 public class SlapdownSubsystem extends SubsystemBase {
   public static final Rotation2d PIVOT_MIN_POSITION = Rotation2d.fromDegrees(0.0);
   public static final Rotation2d PIVOT_MAX_POSITION = Rotation2d.fromDegrees(130.0);
-  public static final Rotation2d PIVOT_EXTENDED_POSITION = PIVOT_MIN_POSITION;
+  public static final Rotation2d PIVOT_EXTENDED_POSITION =
+      PIVOT_MIN_POSITION.plus(Rotation2d.fromDegrees(3.0));
   public static final Rotation2d PIVOT_RETRACTED_POSITION = PIVOT_MAX_POSITION;
   public static final double CURRENT_ZEROING_THRESHOLD = 20.0;
   public static final double ROLLER_GEAR_RATIO = 36.0 / 12.0;
