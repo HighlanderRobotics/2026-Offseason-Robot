@@ -295,6 +295,13 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.MotionMagic.MotionMagicCruiseVelocity = 0.5;
     config.MotionMagic.MotionMagicAcceleration = 5.0;
 
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = PIVOT_MAX_POSITION.getRotations();
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    // 0 is a little above the bumper
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+        PIVOT_MIN_POSITION.minus(Rotation2d.fromDegrees(15.0)).getRotations();
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
     return config;
   }
 
