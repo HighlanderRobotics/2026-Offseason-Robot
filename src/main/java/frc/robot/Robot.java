@@ -396,8 +396,8 @@ public class Robot extends LoggedRobot {
     autoChooser.addOption("Double Dip Auto Left Trench", autos.getLTDoubleDipAuto());
     autoChooser.addOption("Double Dip Auto Right Trench", autos.getRTDoubleDipAuto());
     autoChooser.addOption("Double Dip Auto Left SLOWED", autos.getLDoubleDipAutoSLOW());
-    autoChooser.addOption("Partner Single Dip Left Trench", autos.getLTPartnerSingleDipAuto());
-    autoChooser.addOption("Partner Single Dip Right Trench", autos.getRTPartnerSingleDipAuto());
+    autoChooser.addOption("Single Dip Left Trench", autos.getLTSingleDipAuto());
+    autoChooser.addOption("Single Dip Right Trench", autos.getRTSingleDipAuto());
 
     haveAutosGenerated = true;
     System.out.println("Done generating autos");
@@ -424,7 +424,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledInit() {
     Superstructure.matchStartTime = 0;
-
     addAutos();
   }
 
@@ -432,7 +431,9 @@ public class Robot extends LoggedRobot {
   public void disabledPeriodic() {}
 
   @Override
-  public void disabledExit() {}
+  public void disabledExit() {
+    superstructure.resetStateToIdle();
+  }
 
   @Override
   public void autonomousInit() {}
@@ -446,7 +447,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     Superstructure.matchStartTime = Timer.getFPGATimestamp();
-    superstructure.resetStateToIdle();
   }
 
   @Override

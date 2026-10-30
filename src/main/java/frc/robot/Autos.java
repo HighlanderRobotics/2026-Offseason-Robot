@@ -43,19 +43,20 @@ public class Autos {
   // testing please organize later :)
   public enum Path {
     // intake
-    LStartToFirstDip("LTStartToFirstDip", Action.INTAKE),
-    LStartToFirstDipSLOW("LTStartToFirstDipSLOW", Action.INTAKE),
+    LStartToFirstDipSLOW("LStartTrenchToFirstDipSLOW", Action.INTAKE),
     LSecondDip("LTSecondDip", Action.INTAKE),
-    LPartnerStartToFirstDip("PartnerLStartTrenchToFirstDip", Action.INTAKE),
+    LPartnerStartToFirstDip("LStartTrenchToFirstDip", Action.INTAKE),
     LPartnerSecondDip("PartnerLTSecondDip", Action.INTAKE),
     RStartToFirstDip("RTStartToFirstDip", Action.INTAKE),
     RTSecondDip("RTSecondDip", Action.INTAKE),
-    RPartnerStartToFirstDip("PartnerRStartTrenchToFirstDip", Action.INTAKE),
+    RPartnerStartToFirstDip("RStartTrenchToFirstDip", Action.INTAKE),
     RPartnerTSecondDip("PartnerRTSecondDip", Action.INTAKE),
+
     // shoot
     LDipToFirstShoot("LTDipToFirstShootBump", Action.DELAYED_SCORE),
     RDipToFirstShoot("RTDipToFirstShootBump", Action.DELAYED_SCORE),
-    LTReturnShot("LTReturnShot", Action.DELAYED_SCORE);
+    LTReturnShot("LTReturnShot", Action.DELAYED_SCORE),
+    RTReturnShot("RTReturnShot", Action.DELAYED_SCORE);
     private final String name;
     private final Action action;
 
@@ -141,7 +142,7 @@ public class Autos {
                 () -> new ChassisSpeeds())
             // .alongWith(swerve.translateToPoseWithTolerance(poseSupplier, 0.2, 0.2))
             .withTimeout(4.0)
-            .alongWith(startScoring()),
+            .alongWith(Commands.sequence(Commands.waitSeconds(0.25), startScoring())),
         stopScoring());
   }
 
@@ -210,7 +211,8 @@ public class Autos {
   }
 
   public Command getTesting() {
-    return createAuto("Single dip auto", new Path[] {Path.LStartToFirstDip, Path.LDipToFirstShoot});
+    return createAuto(
+        "Single dip auto", new Path[] {Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot});
   }
 
   public Command getLTDoubleDipAuto() {
@@ -233,17 +235,17 @@ public class Autos {
     return createAuto(
         "Right Trench Double Dip Auto",
         new Path[] {
-          Path.RStartToFirstDip, Path.RDipToFirstShoot, Path.RTSecondDip, Path.RDipToFirstShoot
+          Path.RStartToFirstDip, Path.RDipToFirstShoot, Path.RTSecondDip, Path.RTReturnShot
         });
   }
 
-  public Command getRTPartnerSingleDipAuto() {
+  public Command getRTSingleDipAuto() {
     return createAuto(
         "Partner Right Trench Single Dip Auto",
         new Path[] {Path.RPartnerStartToFirstDip, Path.RDipToFirstShoot});
   }
 
-  public Command getLTPartnerSingleDipAuto() {
+  public Command getLTSingleDipAuto() {
     return createAuto(
         "Partner Left Trench Single Dip Auto",
         new Path[] {Path.LPartnerStartToFirstDip, Path.LDipToFirstShoot});
