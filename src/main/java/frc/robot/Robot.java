@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -92,6 +93,9 @@ public class Robot extends LoggedRobot {
 
   private boolean hoodZeroed = false;
 
+  private final SlewRateLimiter xAccelLimiter = new SlewRateLimiter(1);
+  private final SlewRateLimiter yAccelLimiter = new SlewRateLimiter(1);
+
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
     SignalLogger.enableAutoLogging(false);
@@ -175,6 +179,7 @@ public class Robot extends LoggedRobot {
     // Auto things
     autos = new Autos(swerve);
     autoChooser.addDefaultOption("None", Commands.none());
+    
 
     // Run auto when auto starts. Matches Choreolib's defer impl
     RobotModeTriggers.autonomous()
@@ -196,6 +201,22 @@ public class Robot extends LoggedRobot {
                     && !haveAutosGenerated)
         .onTrue(Commands.print("connected"))
         .onTrue(Commands.runOnce(() -> addAutos()).ignoringDisable(true));
+        //TODO may not use
+    new Trigger(() -> Superstructure.getState().isAScoreState())
+        .and(() -> isTeleop())
+        .whileTrue(
+            swerve
+                .driveOpenLoopFieldRelative(
+                    () ->
+                        new ChassisSpeeds(
+                                yAccelLimiter.calculate(modifyJoystick(driver.getLeftY()))
+                                    * (SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed()),
+                                xAccelLimiter.calculate(modifyJoystick(driver.getLeftX()))
+                                    * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                                modifyJoystick(driver.getRightX())
+                                    * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
+                            .times(-1))
+                .withName("default"));
 
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
 

@@ -59,6 +59,13 @@ public class Superstructure {
           || this.equals(SPIN_UP_FEED_FLOW)
           || this.equals(SPIN_UP_SCORE_FLOW);
     }
+
+    public boolean isAScoreState() {
+      return this == SCORE
+          || this == SPIN_UP_SCORE
+          || this == SPIN_UP_SCORE_FLOW
+          || this == SCORE_FLOW;
+    }
   }
 
   public enum FeedTarget {

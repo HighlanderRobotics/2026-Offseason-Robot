@@ -613,9 +613,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 MathUtil.isNear(target.get().getX(), getPose().getX(), xToleranceMeters)
                     && MathUtil.isNear(target.get().getY(), getPose().getY(), yToleranceMeters));
   }
-
-  // TODO: note/check i think this is right i wasnt sure if it let you drive while lockign aheadin
-  // gbut ig thast the speed modifer
+  
   /**
    * Autoaligns to a target heading
    *
