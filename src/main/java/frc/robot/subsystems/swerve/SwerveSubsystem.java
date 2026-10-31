@@ -641,7 +641,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 MathUtil.isNear(target.get().getX(), getPose().getX(), xToleranceMeters)
                     && MathUtil.isNear(target.get().getY(), getPose().getY(), yToleranceMeters));
   }
-  
+
   /**
    * Autoaligns to a target heading
    *

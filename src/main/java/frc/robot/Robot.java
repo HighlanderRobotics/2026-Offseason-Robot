@@ -183,7 +183,6 @@ public class Robot extends LoggedRobot {
     // Auto things
     autos = new Autos(swerve);
     autoChooser.addDefaultOption("None", Commands.none());
-    
 
     // Run auto when auto starts. Matches Choreolib's defer impl
     RobotModeTriggers.autonomous()
@@ -205,22 +204,22 @@ public class Robot extends LoggedRobot {
                     && !haveAutosGenerated)
         .onTrue(Commands.print("connected"))
         .onTrue(Commands.runOnce(() -> addAutos()).ignoringDisable(true));
-        //TODO may not use
-    new Trigger(() -> Superstructure.getState().isAScoreState())
-        .and(() -> isTeleop())
-        .whileTrue(
-            swerve
-                .driveOpenLoopFieldRelative(
-                    () ->
-                        new ChassisSpeeds(
-                                yAccelLimiter.calculate(modifyJoystick(driver.getLeftY()))
-                                    * (SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed()),
-                                xAccelLimiter.calculate(modifyJoystick(driver.getLeftX()))
-                                    * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                                modifyJoystick(driver.getRightX())
-                                    * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
-                            .times(-1))
-                .withName("default"));
+    // TODO may not use
+    // new Trigger(() -> Superstructure.getState().isAScoreState())
+    //     .and(() -> isTeleop())
+    //     .whileTrue(
+    //         swerve
+    //             .driveOpenLoopFieldRelative(
+    //                 () ->
+    //                     new ChassisSpeeds(
+    //                             yAccelLimiter.calculate(modifyJoystick(driver.getLeftY()))
+    //                                 * (SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed()),
+    //                             xAccelLimiter.calculate(modifyJoystick(driver.getLeftX()))
+    //                                 * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+    //                             modifyJoystick(driver.getRightX())
+    //                                 * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
+    //                         .times(-1))
+    //             .withName("default"));
 
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
 
@@ -285,7 +284,7 @@ public class Robot extends LoggedRobot {
                     // return AutoAlign.getTargetHeading(swerve.getPose(), currentFeedPosition);
                     return AutoAim.calculateShot(
                             swerve.getPose(),
-                            swerve.getVelocityRobotRelative(),
+                            swerve.getVelocityFieldRelative(),
                             currentFeedPosition,
                             ShotTrees.FEED_SHOT_TREE)
                         .targetHeading();
@@ -294,7 +293,7 @@ public class Robot extends LoggedRobot {
                     // return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
                     return AutoAim.calculateShot(
                             swerve.getPose(),
-                            swerve.getVelocityRobotRelative(),
+                            swerve.getVelocityFieldRelative(),
                             FieldUtils.getCurrentHubTranslation(),
                             ShotTrees.HUB_SHOT_TREE)
                         .targetHeading();

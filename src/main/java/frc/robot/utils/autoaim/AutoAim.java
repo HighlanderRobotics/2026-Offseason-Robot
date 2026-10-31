@@ -43,10 +43,10 @@ public final class AutoAim {
    */
   public static ShotSolution calculateShot(
       Pose2d robotPose,
-      ChassisSpeeds robotRelativeSpeeds,
+      ChassisSpeeds fieldRelativeSpeeds,
       Translation2d target,
       InterpolatingShotTree shotTree) {
-    if (robotPose == null || robotRelativeSpeeds == null || target == null || shotTree == null) {
+    if (robotPose == null || fieldRelativeSpeeds == null || target == null || shotTree == null) {
       throw new IllegalArgumentException("Pose, speeds, target, and shot tree can't be empty");
     }
 
@@ -59,7 +59,7 @@ public final class AutoAim {
     // during flight repeat until the distance/time estimate settles.
     for (int i = 0; i < MAX_ITERATIONS; i++) {
       timeOfFlightSeconds = shotData.timeOfFlightSecs();
-      projectedPose = projectPose(robotPose, robotRelativeSpeeds, timeOfFlightSeconds);
+      projectedPose = projectPose(robotPose, fieldRelativeSpeeds, timeOfFlightSeconds);
 
       double updatedDistanceMeters = target.getDistance(projectedPose.getTranslation());
       ShotData updatedShotData = shotTree.get(updatedDistanceMeters);
@@ -69,7 +69,7 @@ public final class AutoAim {
       shotData = updatedShotData;
       if (distanceChangeMeters <= DISTANCE_CONVERGENCE_METERS) {
         timeOfFlightSeconds = shotData.timeOfFlightSecs();
-        projectedPose = projectPose(robotPose, robotRelativeSpeeds, timeOfFlightSeconds);
+        projectedPose = projectPose(robotPose, fieldRelativeSpeeds, timeOfFlightSeconds);
         distanceMeters = target.getDistance(projectedPose.getTranslation());
         shotData = shotTree.get(distanceMeters);
         break;
@@ -77,7 +77,7 @@ public final class AutoAim {
     }
 
     Translation2d projectedRobotToTarget = target.minus(projectedPose.getTranslation());
-    Rotation2d targetHeading = projectedRobotToTarget.getAngle();
+    Rotation2d targetHeading = projectedRobotToTarget.getAngle().plus(Rotation2d);
 
     Logger.recordOutput("AutoAimOnMove/ProjectedRobotPose", projectedPose);
     Logger.recordOutput("AutoAimOnMove/ProjectedDistanceMeters", distanceMeters);

@@ -284,7 +284,7 @@ public class Superstructure {
   private ShotData getSotmHubShotData() {
     return AutoAim.calculateShot(
             robotPoseSupplier.get(),
-            swerve.getVelocityRobotRelative(),
+            swerve.getVelocityFieldRelative(),
             FieldUtils.getCurrentHubTranslation(),
             ShotTrees.HUB_SHOT_TREE)
         .shotData();
@@ -300,7 +300,7 @@ public class Superstructure {
     // return ShotTrees.FEED_SHOT_TREE.calculateShot(robotPoseSupplier.get(), feedTargetPos);
     return AutoAim.calculateShot(
             robotPoseSupplier.get(),
-            swerve.getVelocityRobotRelative(),
+            swerve.getVelocityFieldRelative(),
             feedTargetPos,
             ShotTrees.HUB_SHOT_TREE)
         .shotData();
