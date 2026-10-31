@@ -299,7 +299,7 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
     // 0 is a little above the bumper
     config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-        PIVOT_MIN_POSITION.minus(Rotation2d.fromDegrees(15.0)).getRotations();
+        PIVOT_MIN_POSITION.minus(Rotation2d.fromDegrees(1.0)).getRotations();
     config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     return config;
