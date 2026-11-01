@@ -97,8 +97,11 @@ public class Robot extends LoggedRobot {
   private final SlewRateLimiter xAccelLimiter = new SlewRateLimiter(1);
   private final SlewRateLimiter yAccelLimiter = new SlewRateLimiter(1);
 
-  @AutoLogOutput(key = "Swerve/Should X Lock")
-  private final Trigger shouldXLockTrigger;
+  // @AutoLogOutput(key = "Swerve/Should X Lock")
+  // private final Trigger shouldXLockTrigger;
+
+  @AutoLogOutput(key = "Swerve/Should autoalgin")
+  private final Trigger autoAlignTrigger;
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
@@ -241,13 +244,13 @@ public class Robot extends LoggedRobot {
                     || modifyJoystick(driver.getLeftX()) != 0.0
                     || modifyJoystick(driver.getRightX()) != 0.0);
 
-    shouldXLockTrigger =
-        RobotModeTriggers.teleop()
-            .and(scoringOrPrepingTrigger)
-            .and(hasDriverInputTrigger.negate())
-            .and(driver.rightBumper().negate().or(swerve::isAlignedToHub));
+    // shouldXLockTrigger =
+    //     RobotModeTriggers.teleop()
+    //         .and(scoringOrPrepingTrigger)
+    //         .and(hasDriverInputTrigger.negate())
+    //         .and(driver.rightBumper().negate().or(swerve::isAlignedToHub));
 
-    shouldXLockTrigger.whileTrue(swerve.doXLock());
+    // shouldXLockTrigger.whileTrue(swerve.doXLock());
 
     // log when commands get interrupted
     // CommandScheduler.getInstance()
@@ -270,42 +273,44 @@ public class Robot extends LoggedRobot {
     operator.povRight().onTrue(Commands.runOnce(drum::incrementFudgeFactor));
     operator.povLeft().onTrue(Commands.runOnce(drum::decrementFudgeFactor));
 
-    driver
-        .rightBumper()
-        // don't try to autoaim if we should xlock (which is only true when we are already aligned)
-        .and(shouldXLockTrigger.negate())
-        .whileTrue(
-            swerve.alignToHeading(
-                () -> {
-                  if (superstructure.shouldFeed()) {
-                    Translation2d currentFeedPosition =
-                        FieldUtils.FeedTargets.getFeedTarget(superstructure.getFeedTarget())
-                            .getTranslation();
-                    // return AutoAlign.getTargetHeading(swerve.getPose(), currentFeedPosition);
-                    return AutoAim.calculateShot(
-                            swerve.getPose(),
-                            swerve.getVelocityFieldRelative(),
-                            currentFeedPosition,
-                            ShotTrees.FEED_SHOT_TREE)
-                        .targetHeading();
-                  } else {
-                    // Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-                    // return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
-                    return AutoAim.calculateShot(
-                            swerve.getPose(),
-                            swerve.getVelocityFieldRelative(),
-                            FieldUtils.getCurrentHubTranslation(),
-                            ShotTrees.HUB_SHOT_TREE)
-                        .targetHeading();
-                  }
-                },
-                () ->
-                    new ChassisSpeeds(
-                        modifyJoystick(driver.getLeftY())
-                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                        modifyJoystick(driver.getLeftX())
-                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                        0.0)));
+    autoAlignTrigger = driver.rightBumper();
+
+    // driver
+    //     .rightBumper()
+    // don't try to autoaim if we should xlock (which is only true when we are already aligned)
+    //  .and(shouldXLockTrigger.negate())
+    autoAlignTrigger.whileTrue(
+        swerve.alignToHeading(
+            () -> {
+              if (superstructure.shouldFeed()) {
+                Translation2d currentFeedPosition =
+                    FieldUtils.FeedTargets.getFeedTarget(superstructure.getFeedTarget())
+                        .getTranslation();
+                // return AutoAlign.getTargetHeading(swerve.getPose(), currentFeedPosition);
+                return AutoAim.calculateShot(
+                        swerve.getPose(),
+                        swerve.getVelocityFieldRelative(),
+                        currentFeedPosition,
+                        ShotTrees.FEED_SHOT_TREE)
+                    .targetHeading();
+              } else {
+                // Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+                // return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                return AutoAim.calculateShot(
+                        swerve.getPose(),
+                        swerve.getVelocityFieldRelative(),
+                        FieldUtils.getCurrentHubTranslation(),
+                        ShotTrees.HUB_SHOT_TREE)
+                    .targetHeading();
+              }
+            },
+            () ->
+                new ChassisSpeeds(
+                    modifyJoystick(driver.getLeftY())
+                        * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                    modifyJoystick(driver.getLeftX())
+                        * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                    0.0)));
 
     driver
         .leftBumper()

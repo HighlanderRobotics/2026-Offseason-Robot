@@ -77,7 +77,7 @@ public final class AutoAim {
     }
 
     Translation2d projectedRobotToTarget = target.minus(projectedPose.getTranslation());
-    Rotation2d targetHeading = projectedRobotToTarget.getAngle().plus(Rotation2d);
+    Rotation2d targetHeading = projectedRobotToTarget.getAngle().plus(Rotation2d.k180deg);
 
     Logger.recordOutput("AutoAimOnMove/ProjectedRobotPose", projectedPose);
     Logger.recordOutput("AutoAimOnMove/ProjectedDistanceMeters", distanceMeters);
