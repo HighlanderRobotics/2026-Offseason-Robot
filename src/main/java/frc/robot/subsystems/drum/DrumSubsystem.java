@@ -359,6 +359,11 @@ public class DrumSubsystem extends SubsystemBase {
     config.Slot0.kD = 12.0;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = HOOD_MAX_ANGLE.getRotations();
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = HOOD_MIN_ANGLE.getRotations();
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
     return config;
   }
 }
