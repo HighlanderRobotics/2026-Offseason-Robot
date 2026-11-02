@@ -34,7 +34,8 @@ import org.littletonrobotics.junction.Logger;
 public class SlapdownSubsystem extends SubsystemBase {
   public static final Rotation2d PIVOT_MIN_POSITION = Rotation2d.fromDegrees(0.0);
   public static final Rotation2d PIVOT_MAX_POSITION = Rotation2d.fromDegrees(130.0);
-  public static final Rotation2d PIVOT_EXTENDED_POSITION = PIVOT_MIN_POSITION;
+  public static final Rotation2d PIVOT_EXTENDED_POSITION =
+      PIVOT_MIN_POSITION.plus(Rotation2d.fromDegrees(3.0));
   public static final Rotation2d PIVOT_RETRACTED_POSITION = PIVOT_MAX_POSITION;
   public static final double CURRENT_ZEROING_THRESHOLD = 20.0;
   public static final double ROLLER_GEAR_RATIO = 36.0 / 12.0;
@@ -280,8 +281,8 @@ public class SlapdownSubsystem extends SubsystemBase {
     config.Slot0.kG = 0.5;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     config.Slot0.GravityArmPositionOffset = 0.0; // should it be 0.25?
-    config.Slot0.kP = 10.0; // 3; //
-    config.Slot0.kD = 0.05;
+    config.Slot0.kP = 250.0; // 3; //
+    config.Slot0.kD = 0.3;
 
     config.CurrentLimits.StatorCurrentLimit = 50.0;
 
@@ -326,7 +327,7 @@ public class SlapdownSubsystem extends SubsystemBase {
     CANcoderConfiguration config = new CANcoderConfiguration();
 
     config.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
-    config.MagnetSensor.MagnetOffset = -0.4106;
+    config.MagnetSensor.MagnetOffset = -0.173096;
     config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.9;
 
     return config;

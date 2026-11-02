@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -34,7 +35,8 @@ import frc.robot.subsystems.swerve.odometry.PhoenixOdometryThread;
 import frc.robot.utils.CommandXboxControllerSubsystem;
 import frc.robot.utils.EvergreenArena;
 import frc.robot.utils.FieldUtils;
-import frc.robot.utils.autoaim.AutoAlign;
+import frc.robot.utils.autoaim.AutoAim;
+import frc.robot.utils.autoaim.ShotTrees;
 import java.util.Optional;
 import java.util.Set;
 import org.ironmaple.simulation.SimulatedArena;
@@ -59,7 +61,7 @@ public class Robot extends LoggedRobot {
 
   public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
   // public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
-
+  // TODO: switch back to replay before comp
   private CANBus canBus = new CANBus("*");
 
   private SwerveSubsystem swerve = new SwerveSubsystem(canBus);
@@ -88,12 +90,18 @@ public class Robot extends LoggedRobot {
   private final LoggedDashboardChooser<Command> autoChooser = new LoggedDashboardChooser<>("Autos");
 
   private Superstructure superstructure =
-      new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
+      new Superstructure(driver, operator, swerve, indexer, drum, intake, swerve::getPose);
 
   private boolean hoodZeroed = false;
 
-  @AutoLogOutput(key = "Swerve/Should X Lock")
-  private final Trigger shouldXLockTrigger;
+  private final SlewRateLimiter xAccelLimiter = new SlewRateLimiter(1);
+  private final SlewRateLimiter yAccelLimiter = new SlewRateLimiter(1);
+
+  // @AutoLogOutput(key = "Swerve/Should X Lock")
+  // private final Trigger shouldXLockTrigger;
+
+  @AutoLogOutput(key = "Swerve/Should autoalgin")
+  private final Trigger autoAlignTrigger;
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
@@ -199,6 +207,22 @@ public class Robot extends LoggedRobot {
                     && !haveAutosGenerated)
         .onTrue(Commands.print("connected"))
         .onTrue(Commands.runOnce(() -> addAutos()).ignoringDisable(true));
+    // TODO may not use
+    // new Trigger(() -> Superstructure.getState().isAScoreState())
+    //     .and(() -> isTeleop())
+    //     .whileTrue(
+    //         swerve
+    //             .driveOpenLoopFieldRelative(
+    //                 () ->
+    //                     new ChassisSpeeds(
+    //                             yAccelLimiter.calculate(modifyJoystick(driver.getLeftY()))
+    //                                 * (SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed()),
+    //                             xAccelLimiter.calculate(modifyJoystick(driver.getLeftX()))
+    //                                 * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+    //                             modifyJoystick(driver.getRightX())
+    //                                 * SwerveSubsystem.SWERVE_CONSTANTS.getMaxAngularSpeed())
+    //                         .times(-1))
+    //             .withName("default"));
 
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
 
@@ -220,13 +244,13 @@ public class Robot extends LoggedRobot {
                     || modifyJoystick(driver.getLeftX()) != 0.0
                     || modifyJoystick(driver.getRightX()) != 0.0);
 
-    shouldXLockTrigger =
-        RobotModeTriggers.teleop()
-            .and(scoringOrPrepingTrigger)
-            .and(hasDriverInputTrigger.negate())
-            .and(driver.rightBumper().negate().or(swerve::isAlignedToHub));
+    // shouldXLockTrigger =
+    //     RobotModeTriggers.teleop()
+    //         .and(scoringOrPrepingTrigger)
+    //         .and(hasDriverInputTrigger.negate())
+    //         .and(driver.rightBumper().negate().or(swerve::isAlignedToHub));
 
-    shouldXLockTrigger.whileTrue(swerve.doXLock());
+    // shouldXLockTrigger.whileTrue(swerve.doXLock());
 
     // log when commands get interrupted
     // CommandScheduler.getInstance()
@@ -249,30 +273,44 @@ public class Robot extends LoggedRobot {
     operator.povRight().onTrue(Commands.runOnce(drum::incrementFudgeFactor));
     operator.povLeft().onTrue(Commands.runOnce(drum::decrementFudgeFactor));
 
-    driver
-        .rightBumper()
-        // don't try to autoaim if we should xlock (which is only true when we are already aligned)
-        .and(shouldXLockTrigger.negate())
-        .whileTrue(
-            swerve.alignToHeading(
-                () -> {
-                  if (superstructure.shouldFeed()) {
-                    Translation2d currentFeedPosition =
-                        FieldUtils.FeedTargets.getFeedTarget(superstructure.getFeedTarget())
-                            .getTranslation();
-                    return AutoAlign.getTargetHeading(swerve.getPose(), currentFeedPosition);
-                  } else {
-                    Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
-                    return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
-                  }
-                },
-                () ->
-                    new ChassisSpeeds(
-                        modifyJoystick(driver.getLeftY())
-                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                        modifyJoystick(driver.getLeftX())
-                            * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
-                        0.0)));
+    autoAlignTrigger = driver.rightBumper();
+
+    // driver
+    //     .rightBumper()
+    // don't try to autoaim if we should xlock (which is only true when we are already aligned)
+    //  .and(shouldXLockTrigger.negate())
+    autoAlignTrigger.whileTrue(
+        swerve.alignToHeading(
+            () -> {
+              if (superstructure.shouldFeed()) {
+                Translation2d currentFeedPosition =
+                    FieldUtils.FeedTargets.getFeedTarget(superstructure.getFeedTarget())
+                        .getTranslation();
+                // return AutoAlign.getTargetHeading(swerve.getPose(), currentFeedPosition);
+                return AutoAim.calculateShot(
+                        swerve.getPose(),
+                        swerve.getVelocityRobotRelative(),
+                        currentFeedPosition,
+                        ShotTrees.FEED_SHOT_TREE)
+                    .targetHeading();
+              } else {
+                // Translation2d currentHubPosition = FieldUtils.getCurrentHubTranslation();
+                // return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
+                return AutoAim.calculateShot(
+                        swerve.getPose(),
+                        swerve.getVelocityRobotRelative(),
+                        FieldUtils.getCurrentHubTranslation(),
+                        ShotTrees.HUB_SHOT_TREE)
+                    .targetHeading();
+              }
+            },
+            () ->
+                new ChassisSpeeds(
+                    modifyJoystick(driver.getLeftY())
+                        * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                    modifyJoystick(driver.getLeftX())
+                        * SwerveSubsystem.SWERVE_CONSTANTS.getMaxLinearSpeed(),
+                    0.0)));
 
     driver
         .leftBumper()
@@ -362,8 +400,8 @@ public class Robot extends LoggedRobot {
     autoChooser.addOption("Double Dip Auto Left Trench", autos.getLTDoubleDipAuto());
     autoChooser.addOption("Double Dip Auto Right Trench", autos.getRTDoubleDipAuto());
     autoChooser.addOption("Double Dip Auto Left SLOWED", autos.getLDoubleDipAutoSLOW());
-    autoChooser.addOption("Partner Single Dip Left Trench", autos.getLTPartnerSingleDipAuto());
-    autoChooser.addOption("Partner Single Dip Right Trench", autos.getRTPartnerSingleDipAuto());
+    autoChooser.addOption("Single Dip Left Trench", autos.getLTSingleDipAuto());
+    autoChooser.addOption("Single Dip Right Trench", autos.getRTSingleDipAuto());
 
     haveAutosGenerated = true;
     System.out.println("Done generating autos");
@@ -390,7 +428,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledInit() {
     Superstructure.matchStartTime = 0;
-
     addAutos();
   }
 
@@ -398,7 +435,9 @@ public class Robot extends LoggedRobot {
   public void disabledPeriodic() {}
 
   @Override
-  public void disabledExit() {}
+  public void disabledExit() {
+    superstructure.resetStateToIdle();
+  }
 
   @Override
   public void autonomousInit() {}
@@ -412,7 +451,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     Superstructure.matchStartTime = Timer.getFPGATimestamp();
-    superstructure.resetStateToIdle();
   }
 
   @Override
