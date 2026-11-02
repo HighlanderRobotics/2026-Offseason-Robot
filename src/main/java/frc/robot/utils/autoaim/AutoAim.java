@@ -31,7 +31,14 @@ public final class AutoAim {
         new Twist2d(
             robotRelativeSpeeds.vxMetersPerSecond * timeSeconds,
             robotRelativeSpeeds.vyMetersPerSecond * timeSeconds,
-            robotRelativeSpeeds.omegaRadiansPerSecond * timeSeconds));
+            0));
+    // TODO: TEST
+    // Angular velocity is omitted because assuming constant heading relative to hub
+    // not sure about this simplification but we only need to predict where the robot will be when
+    // the ball leaves the shooter and then calculate the heading needed to shoot toward the target.
+    // then we activly heading align, so we dont necessarily need to predict the robot's heading at
+    // that future moment. looks smoother in sim
+    // robotRelativeSpeeds.omegaRadiansPerSecond * timeSeconds));
   }
 
   /**
@@ -43,10 +50,10 @@ public final class AutoAim {
    */
   public static ShotSolution calculateShot(
       Pose2d robotPose,
-      ChassisSpeeds fieldRelativeSpeeds,
+      ChassisSpeeds robotRelativeSpeeds,
       Translation2d target,
       InterpolatingShotTree shotTree) {
-    if (robotPose == null || fieldRelativeSpeeds == null || target == null || shotTree == null) {
+    if (robotPose == null || robotRelativeSpeeds == null || target == null || shotTree == null) {
       throw new IllegalArgumentException("Pose, speeds, target, and shot tree can't be empty");
     }
 
@@ -59,7 +66,7 @@ public final class AutoAim {
     // during flight repeat until the distance/time estimate settles.
     for (int i = 0; i < MAX_ITERATIONS; i++) {
       timeOfFlightSeconds = shotData.timeOfFlightSecs();
-      projectedPose = projectPose(robotPose, fieldRelativeSpeeds, timeOfFlightSeconds);
+      projectedPose = projectPose(robotPose, robotRelativeSpeeds, timeOfFlightSeconds);
 
       double updatedDistanceMeters = target.getDistance(projectedPose.getTranslation());
       ShotData updatedShotData = shotTree.get(updatedDistanceMeters);
@@ -69,7 +76,7 @@ public final class AutoAim {
       shotData = updatedShotData;
       if (distanceChangeMeters <= DISTANCE_CONVERGENCE_METERS) {
         timeOfFlightSeconds = shotData.timeOfFlightSecs();
-        projectedPose = projectPose(robotPose, fieldRelativeSpeeds, timeOfFlightSeconds);
+        projectedPose = projectPose(robotPose, robotRelativeSpeeds, timeOfFlightSeconds);
         distanceMeters = target.getDistance(projectedPose.getTranslation());
         shotData = shotTree.get(distanceMeters);
         break;

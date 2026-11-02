@@ -61,7 +61,7 @@ public class Robot extends LoggedRobot {
 
   public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
   // public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
-
+  // TODO: switch back to replay before comp
   private CANBus canBus = new CANBus("*");
 
   private SwerveSubsystem swerve = new SwerveSubsystem(canBus);
@@ -289,7 +289,7 @@ public class Robot extends LoggedRobot {
                 // return AutoAlign.getTargetHeading(swerve.getPose(), currentFeedPosition);
                 return AutoAim.calculateShot(
                         swerve.getPose(),
-                        swerve.getVelocityFieldRelative(),
+                        swerve.getVelocityRobotRelative(),
                         currentFeedPosition,
                         ShotTrees.FEED_SHOT_TREE)
                     .targetHeading();
@@ -298,7 +298,7 @@ public class Robot extends LoggedRobot {
                 // return AutoAlign.getTargetHeading(swerve.getPose(), currentHubPosition);
                 return AutoAim.calculateShot(
                         swerve.getPose(),
-                        swerve.getVelocityFieldRelative(),
+                        swerve.getVelocityRobotRelative(),
                         FieldUtils.getCurrentHubTranslation(),
                         ShotTrees.HUB_SHOT_TREE)
                     .targetHeading();
