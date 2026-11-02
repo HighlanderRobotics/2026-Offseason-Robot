@@ -7,9 +7,10 @@ public class ShotTrees {
   public static final InterpolatingShotTree HUB_SHOT_TREE = new InterpolatingShotTree();
 
   static {
-    HUB_SHOT_TREE.put(1.87, new ShotData(Rotation2d.fromDegrees(10), 40.0 - 4, 0.87));
-    HUB_SHOT_TREE.put(2.38, new ShotData(Rotation2d.fromDegrees(13), 42.0 - 4, 0.87));
-    HUB_SHOT_TREE.put(2.62, new ShotData(Rotation2d.fromDegrees(16), 42.0 - 4, 0.75));
+    HUB_SHOT_TREE.put(1.87, new ShotData(Rotation2d.fromDegrees(10), 40.0 - 1, 0.87));
+    HUB_SHOT_TREE.put(2.38, new ShotData(Rotation2d.fromDegrees(13), 42.0 - 1, 0.87));
+    HUB_SHOT_TREE.put(2.62, new ShotData(Rotation2d.fromDegrees(16), 42.0 - 1, 0.75));
+    HUB_SHOT_TREE.put(3.00, new ShotData(Rotation2d.fromDegrees(18), 46.0 - 4, 0.0));
     HUB_SHOT_TREE.put(3.39, new ShotData(Rotation2d.fromDegrees(18), 46.0 - 4, 0.81));
     HUB_SHOT_TREE.put(3.67, new ShotData(Rotation2d.fromDegrees(22), 46.0 - 4, 1.1));
     HUB_SHOT_TREE.put(3.86, new ShotData(Rotation2d.fromDegrees(24), 48.0 - 4, 1.18));
