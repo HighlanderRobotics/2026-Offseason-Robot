@@ -365,6 +365,8 @@ public class Robot extends LoggedRobot {
     autoChooser.addOption("Single Dip Left Trench", autos.getLTSingleDipAuto());
     autoChooser.addOption("Single Dip Right Trench", autos.getRTSingleDipAuto());
 
+    autoChooser.addOption("Flywheel sysid", drum.runFlywheelSysid());
+
     haveAutosGenerated = true;
     System.out.println("Done generating autos");
   }
