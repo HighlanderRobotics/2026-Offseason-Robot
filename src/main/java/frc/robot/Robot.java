@@ -70,7 +70,8 @@ public class Robot extends LoggedRobot {
           ? new SlapdownSubsystem(
               new PivotIOSim(8, SlapdownSubsystem.getPivotConfig(), canBus),
               new CANcoderIO(4, SlapdownSubsystem.getCancoderConfig(), canBus),
-              new RollerIOSim(9, SlapdownSubsystem.getRollerConfig(), canBus),
+              new RollerIOSim(
+                  9, SlapdownSubsystem.getRollerConfig(), canBus, swerve.getSwerveDriveSimConfig()),
               canBus)
           : new SlapdownSubsystem(
               new PivotIO(8, SlapdownSubsystem.getPivotConfig(), canBus),

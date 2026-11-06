@@ -1,5 +1,6 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.CANBus;
@@ -12,6 +13,8 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import org.ironmaple.simulation.IntakeSimulation;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 
 public class RollerIOSim extends RollerIO {
   private final DCMotorSim rollerSim;
@@ -20,7 +23,10 @@ public class RollerIOSim extends RollerIO {
   // TODO: Find last loop time
   Notifier notifier;
 
-  public RollerIOSim(int motorID, TalonFXConfiguration config, CANBus canbus) {
+  private final IntakeSimulation rollerIntakeSimulation;
+
+  public RollerIOSim(
+      int motorID, TalonFXConfiguration config, CANBus canbus, SwerveDriveSimulation driveTrain) {
 
     super(motorID, config, canbus);
     rollerSim =
@@ -30,6 +36,15 @@ public class RollerIOSim extends RollerIO {
             DCMotor.getKrakenX60Foc(2));
     talonSim = motor.getSimState();
     talonSim.setMotorType(MotorType.KrakenX60);
+
+    rollerIntakeSimulation =
+        IntakeSimulation.OverTheBumperIntake(
+            "Fuel",
+            driveTrain,
+            Inches.of(26.806),
+            Inches.of(8.938),
+            IntakeSimulation.IntakeSide.FRONT,
+            4);
 
     notifier =
         new Notifier(
@@ -49,5 +64,15 @@ public class RollerIOSim extends RollerIO {
                       * SlapdownSubsystem.ROLLER_GEAR_RATIO);
             });
     notifier.startPeriodic(0.002);
+  }
+
+  @Override
+  public void setRollerVoltage(double volts) {
+    super.setRollerVoltage(volts);
+    if (volts > 0) {
+      rollerIntakeSimulation.startIntake();
+    } else {
+      rollerIntakeSimulation.stopIntake();
+    }
   }
 }

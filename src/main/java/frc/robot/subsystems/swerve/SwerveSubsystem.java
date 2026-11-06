@@ -250,6 +250,10 @@ public class SwerveSubsystem extends SubsystemBase {
             new Mechanism((voltage) -> modules[0].setTurnVoltage(voltage.in(Volts)), null, this));
   }
 
+  public SwerveDriveSimulation getSwerveDriveSimConfig() {
+    return swerveSimulation;
+  }
+
   @Override
   public void periodic() {
     Tracer.trace(
