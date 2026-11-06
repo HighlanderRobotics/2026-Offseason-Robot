@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Superstructure.SuperState;
 import frc.robot.components.battery.BatterySubsystem;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
@@ -57,8 +58,8 @@ public class Robot extends LoggedRobot {
     REPLAY;
   }
 
-  // public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
-  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
+  public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.SIM;
+  // public static final RobotMode ROBOT_MODE = Robot.isReal() ? RobotMode.REAL : RobotMode.REPLAY;
 
   private CANBus canBus = new CANBus("*");
 
@@ -93,6 +94,9 @@ public class Robot extends LoggedRobot {
   private BatterySubsystem bfg = new BatterySubsystem(0); // TODO: MAYBE TRY TO SNIFF FOR THESE
 
   private boolean hoodZeroed = false;
+
+  @AutoLogOutput(key = "Swerve/Should X Lock")
+  private final Trigger shouldXLockTrigger;
 
   public Robot() {
     DriverStation.silenceJoystickConnectionWarning(false);
@@ -206,6 +210,32 @@ public class Robot extends LoggedRobot {
 
     SmartDashboard.putData("Add autos", Commands.runOnce(this::addAutos).ignoringDisable(true));
 
+    // the wheel locking thing when shooting
+    // lock when SCORING & SPIN_UP_SCORE, and has no driver input,
+    // and (not requested to autoaim or autoaim is aligned)
+
+    Trigger scoringOrPrepingTrigger =
+        SuperState.SPIN_UP_SCORE
+            .getTrigger()
+            .or(SuperState.SPIN_UP_SCORE_FLOW.getTrigger())
+            .or(SuperState.SCORE.getTrigger())
+            .or(SuperState.SCORE_FLOW.getTrigger());
+
+    Trigger hasDriverInputTrigger =
+        new Trigger(
+            () ->
+                modifyJoystick(driver.getLeftY()) != 0.0
+                    || modifyJoystick(driver.getLeftX()) != 0.0
+                    || modifyJoystick(driver.getRightX()) != 0.0);
+
+    shouldXLockTrigger =
+        RobotModeTriggers.teleop()
+            .and(scoringOrPrepingTrigger)
+            .and(hasDriverInputTrigger.negate())
+            .and(driver.rightBumper().negate().or(swerve::isAlignedToHub));
+
+    shouldXLockTrigger.whileTrue(swerve.doXLock());
+
     // log when commands get interrupted
     // CommandScheduler.getInstance()
     //     .onCommandInterrupt(
@@ -229,6 +259,8 @@ public class Robot extends LoggedRobot {
 
     driver
         .rightBumper()
+        // don't try to autoaim if we should xlock (which is only true when we are already aligned)
+        .and(shouldXLockTrigger.negate())
         .whileTrue(
             swerve.alignToHeading(
                 () -> {
@@ -341,8 +373,10 @@ public class Robot extends LoggedRobot {
     autoChooser.addOption("Double Dip Auto Left Trench", autos.getLTDoubleDipAuto());
     autoChooser.addOption("Double Dip Auto Right Trench", autos.getRTDoubleDipAuto());
     autoChooser.addOption("Double Dip Auto Left SLOWED", autos.getLDoubleDipAutoSLOW());
-    autoChooser.addOption("Partner Single Dip Left Trench", autos.getLTPartnerSingleDipAuto());
-    autoChooser.addOption("Partner Single Dip Right Trench", autos.getRTPartnerSingleDipAuto());
+    autoChooser.addOption("Single Dip Left Trench", autos.getLTSingleDipAuto());
+    autoChooser.addOption("Single Dip Right Trench", autos.getRTSingleDipAuto());
+
+    autoChooser.addOption("Flywheel sysid", drum.runFlywheelSysid());
 
     haveAutosGenerated = true;
     System.out.println("Done generating autos");
@@ -369,7 +403,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void disabledInit() {
     Superstructure.matchStartTime = 0;
-
     addAutos();
   }
 
@@ -377,7 +410,9 @@ public class Robot extends LoggedRobot {
   public void disabledPeriodic() {}
 
   @Override
-  public void disabledExit() {}
+  public void disabledExit() {
+    superstructure.resetStateToIdle();
+  }
 
   @Override
   public void autonomousInit() {}
@@ -391,7 +426,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     Superstructure.matchStartTime = Timer.getFPGATimestamp();
-    superstructure.resetStateToIdle();
   }
 
   @Override
