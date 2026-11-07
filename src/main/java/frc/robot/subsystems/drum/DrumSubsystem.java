@@ -314,8 +314,8 @@ public class DrumSubsystem extends SubsystemBase {
     // TODO: BUDGET CURRENT
     config.CurrentLimits.StatorCurrentLimit = 75.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 40.0;
-    config.CurrentLimits.SupplyCurrentLimitEnable = false;
+    config.CurrentLimits.SupplyCurrentLimit = 55.0;
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.Feedback.SensorToMechanismRatio = DrumSubsystem.FLYWHEEL_GEAR_RATIO;
 
