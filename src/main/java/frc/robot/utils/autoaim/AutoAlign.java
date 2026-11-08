@@ -165,6 +165,16 @@ public class AutoAlign {
 
     Rotation2d targetRotation = robotToTargetVec.getAngle().plus(Rotation2d.k180deg);
 
+    // TODO: THIS SUCKS REMOVE AFTER COMP
+    boolean shouldAngleOffset =
+        robotPose.getTranslation().getDistance(new Translation2d(13.817, 0.86)) <= 2.05;
+
+    Logger.recordOutput("Offsetting Angle?", shouldAngleOffset);
+
+    if (shouldAngleOffset) {
+      targetRotation = targetRotation.plus(Rotation2d.fromDegrees(-10.0));
+    }
+
     Logger.recordOutput("AutoAim/Target rotation", targetRotation);
 
     return targetRotation;
