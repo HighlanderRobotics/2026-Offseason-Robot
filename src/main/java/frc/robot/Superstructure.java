@@ -2,6 +2,8 @@ package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -359,11 +361,27 @@ public class Superstructure {
     double y = robotPoseSupplier.get().getY();
 
     boolean inXTol =
-        MathUtil.isNear(TrenchPoses.BLUE_RIGHT.getPose().getX(), x, 2)
-            || MathUtil.isNear(TrenchPoses.RED_RIGHT.getPose().getX(), x, 2);
+        MathUtil.isNear(TrenchPoses.BLUE_RIGHT.getPose().getX(), x, 1)
+            || MathUtil.isNear(TrenchPoses.RED_RIGHT.getPose().getX(), x, 1);
     boolean inYTol =
-        MathUtil.isNear(TrenchPoses.BLUE_RIGHT.getPose().getY(), y, 0.515)
-            || MathUtil.isNear(TrenchPoses.RED_RIGHT.getPose().getY(), y, 0.515);
+        MathUtil.isNear(TrenchPoses.BLUE_RIGHT.getPose().getY(), y, 0.315)
+            || MathUtil.isNear(TrenchPoses.RED_RIGHT.getPose().getY(), y, 0.315);
+
+    // Pose2d[] corners = {
+    //   FieldUtils.TrenchPoses.BLUE_LEFT
+    //       .getPose()
+    //       .plus(new Transform2d(new Translation2d(1, 0.315), new Rotation2d())),
+    //   FieldUtils.TrenchPoses.BLUE_LEFT
+    //       .getPose()
+    //       .plus(new Transform2d(new Translation2d(-1, 0.315), new Rotation2d())),
+    //   FieldUtils.TrenchPoses.BLUE_LEFT
+    //       .getPose()
+    //       .plus(new Transform2d(new Translation2d(-1, -0.315), new Rotation2d())),
+    //   FieldUtils.TrenchPoses.BLUE_LEFT
+    //       .getPose()
+    //       .plus(new Transform2d(new Translation2d(1, -0.315), new Rotation2d()))
+    // };
+    // Logger.recordOutput("Trench Corners", corners);
     return inXTol && inYTol;
   }
 
