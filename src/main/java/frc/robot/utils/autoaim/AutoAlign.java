@@ -172,7 +172,7 @@ public class AutoAlign {
     Logger.recordOutput("Offsetting Angle?", shouldAngleOffset);
 
     if (shouldAngleOffset) {
-      targetRotation = targetRotation.plus(Rotation2d.fromDegrees(-10.0));
+      targetRotation = targetRotation.plus(Rotation2d.fromDegrees(-7.5));
     }
 
     Logger.recordOutput("AutoAim/Target rotation", targetRotation);
