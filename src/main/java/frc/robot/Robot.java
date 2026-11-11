@@ -91,7 +91,7 @@ public class Robot extends LoggedRobot {
   private Superstructure superstructure =
       new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
 
-  private BatterySubsystem bfg = new BatterySubsystem(0); // TODO: MAYBE TRY TO SNIFF FOR THESE
+  private BatterySubsystem bfg = new BatterySubsystem(0); // It looks like id=0 is a wildcard for any attached BFG
 
   private boolean hoodZeroed = false;
 
