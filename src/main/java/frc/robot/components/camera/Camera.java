@@ -250,6 +250,18 @@ public class Camera {
                   ? 0.5
                   : 1);
     }
+    // Trust outpost tags less
+    deviations =
+        deviations.times(
+            estPose.get().targetsUsed.stream()
+                    .anyMatch(
+                        t ->
+                            t.getFiducialId() == 29
+                                || t.getFiducialId() == 30
+                                || t.getFiducialId() == 13
+                                || t.getFiducialId() == 14)
+                ? 3.0
+                : 1.0);
     deviations = deviations.times(DriverStation.isAutonomous() ? 2.0 : 1.0);
     // TODO add states
 

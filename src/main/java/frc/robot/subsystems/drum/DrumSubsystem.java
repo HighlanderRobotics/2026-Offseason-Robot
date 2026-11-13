@@ -46,7 +46,7 @@ public class DrumSubsystem extends SubsystemBase {
   public static final double FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC = 3.0;
   public static final int FLYWHEEL_LEADER_ID = 15;
   // Ratio to main drum
-  public static final double FLYWHEEL_GEAR_RATIO = 24.0 / 18.0;
+  public static final double FLYWHEEL_GEAR_RATIO = 26.0 / 18.0;
   // May have to adjust 10/20 to account for the hood not moving a whole rotation
   public static final double HOOD_GEAR_RATIO = (45.0 / 16.0) * (165.0 / 10.0);
   public static final Rotation2d HOOD_MIN_ANGLE = Rotation2d.fromDegrees(10);
@@ -320,12 +320,12 @@ public class DrumSubsystem extends SubsystemBase {
 
     config.Feedback.SensorToMechanismRatio = DrumSubsystem.FLYWHEEL_GEAR_RATIO;
 
-    config.MotionMagic.MotionMagicAcceleration = 80.0;
+    config.MotionMagic.MotionMagicAcceleration = 45.0;
 
     // Slot 0 is motion magic velocity pidf
     config.Slot0.kS = 0.31;
-    config.Slot0.kV = 0.17433;
-    config.Slot0.kA = 0.10015;
+    config.Slot0.kV = 0.17986;
+    config.Slot0.kA = 0.084443;
     config.Slot0.kP = 1.0;
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 0.0;
@@ -359,6 +359,11 @@ public class DrumSubsystem extends SubsystemBase {
     config.Slot0.kI = 0.0;
     config.Slot0.kD = 12.0;
     config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = HOOD_MAX_ANGLE.getRotations();
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = HOOD_MIN_ANGLE.getRotations();
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     return config;
   }
