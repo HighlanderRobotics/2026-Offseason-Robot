@@ -38,6 +38,8 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 public class DrumSubsystem extends SubsystemBase {
   public static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0;
@@ -55,7 +57,7 @@ public class DrumSubsystem extends SubsystemBase {
   private FlywheelIO flywheelIO;
   private FlywheelIOInputsAutoLogged flywheelIOInputs = new FlywheelIOInputsAutoLogged();
 
-  private FollowerIO[] followerIOs = new FollowerIO[3];
+  private Follower[] followerTalons = new Follower[3];
   private FollowerIOInputsAutoLogged[] followerIOInputs = new FollowerIOInputsAutoLogged[3];
 
   private HoodIO hoodIO;
@@ -97,22 +99,20 @@ public class DrumSubsystem extends SubsystemBase {
 
   @AutoLogOutput(key = "Drum/Flywheel Fudge Factor")
   private double flywheelFudgeFactor = 0.0;
+  private Follower followerReq;
 
   public DrumSubsystem(CANBus canBus) {
     if (Robot.ROBOT_MODE != RobotMode.SIM) {
       flywheelIO = new FlywheelIO(canBus);
 
       hoodIO = new HoodIO(canBus);
-
-      followerIOs[0] =
-          new FollowerIO(
-              16, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Aligned, canBus, getFlywheelConfig());
-      followerIOs[1] =
-          new FollowerIO(
-              17, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
-      followerIOs[2] =
-          new FollowerIO(
-              18, FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed, canBus, getFlywheelConfig());
+      followerTalons[1] =
+          new Follower(
+              FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed);
+      followerTalons[2] =
+          new Follower(
+              FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed);
+              followerTalons[0]
     } else {
       flywheelIO = new FlywheelIOSim(canBus);
       hoodIO = new HoodIOSim(canBus);
@@ -284,6 +284,7 @@ public class DrumSubsystem extends SubsystemBase {
   }
 
   public boolean readyToShoot() {
+    // TODO: TUNE tolerances
     return MathUtil.isNear(
             flywheelIO.getSetpointRotPerSec(),
             flywheelIOInputs.velocityRotPerSec,
