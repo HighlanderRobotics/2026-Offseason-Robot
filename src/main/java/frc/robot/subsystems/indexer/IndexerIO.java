@@ -5,7 +5,14 @@
 package frc.robot.subsystems.indexer;
 
 import org.littletonrobotics.junction.AutoLog;
+
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 
 /** Things to log
 temp
@@ -42,6 +49,43 @@ public class IndexerIO {
         public double kickerFollowerSupplyAmps = 0.0;
         public double kickerFollowerTempatureCelcius = 0.0;
         public boolean kickerFollowerConnected = false;
+
+        // gear ratios
+        public static final double INDEXER_GEAR_RATIO = 50.0/12.0;
+        public static final double KICKER_GEAR_RATIO = 30.0/12.0;
+
+        // make motors
+        protected final TalonFX indexerMotor;
+        protected final TalonFX kickerLeaderMotor;
+        protected final TalonFX kickerFollowerMotor;
+
+        // indexer status signals
+        private final StatusSignal<AngularVelocity> indexerAngularVelocityRotsPerSec;
+        private final StatusSignal<Angle> indexerPosition;
+        private final StatusSignal<Current> indexerStatorCurrent;
+        private final StatusSignal<Current> indexerSupplyCurrent;
+        private final StatusSignal<Voltage> indexerVoltage;
+        private final StatusSignal<Temperature> indexerTempature;
+
+        // kicker leader status signals
+        private final StatusSignal<AngularVelocity> kickerLeaderAngularVelocityRotsPerSec;
+        private final StatusSignal<Angle> kickerLeaderPosition;
+        private final StatusSignal<Current> kickerLeaderStatorCurrent;
+        private final StatusSignal<Current> kickerLeaderSupplyCurrent;
+        private final StatusSignal<Voltage> kickerLeaderVoltage;
+        private final StatusSignal<Temperature> kickerLeaderTempature;
+
+        // kicker follower status signals
+        private final StatusSignal<AngularVelocity> kickerFollowerAngularVelocityRotsPerSec;
+        private final StatusSignal<Angle> kickerFollowerPosition;
+        private final StatusSignal<Current> kickerFollowerStatorCurrent;
+        private final StatusSignal<Current> kickerFollowerSupplyCurrent;
+        private final StatusSignal<Voltage> kickerFollowerVoltage;
+        private final StatusSignal<Temperature> kickerFollowerTempature;
+
+        // voltage outs
+        private VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC((true));
+        private VelocityVoltage velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
     }
 }
  
