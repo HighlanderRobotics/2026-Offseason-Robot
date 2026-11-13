@@ -104,7 +104,8 @@ public class DrumSubsystem extends SubsystemBase {
   public DrumSubsystem(CANBus canBus) {
     if (Robot.ROBOT_MODE != RobotMode.SIM) {
       flywheelIO = new FlywheelIO(canBus);
-
+      //TODO: refactor to use follower motors in FlywheelIO instead of creating them here
+      // and fix the sim, also check if FlywheelIO will work autologged.
       hoodIO = new HoodIO(canBus);
       followerTalons[1] =
           new Follower(
