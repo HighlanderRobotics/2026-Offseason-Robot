@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.Rotation;
 import static edu.wpi.first.units.Units.Second;
 
+import java.io.ObjectInputFilter.Status;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -22,12 +24,11 @@ public class FlywheelIO {
   @AutoLog
   public static class FlywheelIOInputs {
     public boolean connected = false;
-    public double velocityRotPerSec = 0.0;
+    public double angularVelocityRotsPerSec = 0.0;
     public double voltage = 0.0;
     public double statorCurrentAmps = 0.0;
     public double supplyCurrentAmps = 0.0;
-    public double tempC = 0.0;
-    // For sysid
+    public double tempCelsius = 0.0;
     public double flywheelPositionRotations = 0.0;
   }
 
@@ -38,17 +39,16 @@ public class FlywheelIO {
   private StatusSignal<Current> statorCurrent;
   private StatusSignal<Current> supplyCurrent;
   private StatusSignal<Temperature> temp;
-  private StatusSignal<Angle> flywheelPosition;
+  private StatusSignal<Angle> flywheelPos;
 
   private VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC(true);
-  private MotionMagicVelocityVoltage motionMagic =
-      new MotionMagicVelocityVoltage(0.0).withEnableFOC(true);
-
+  private MotionMagicVelocityVoltage motionMagic = 
+    new MotionMagicVelocityVoltage(0.0).withEnableFOC(true); 
+  
   private double velocitySetpointRotPerSec = Double.NaN;
 
-  public FlywheelIO(CANBus canBus) {
-    leader = new TalonFX(DrumSubsystem.FLYWHEEL_LEADER_ID, canBus);
-
+  public FlywheelIO(CANBus canbus) {
+    leader = new TalonFX(DrumSubsystem.FLYWHEEL_LEADER_ID,canbus);
     leader.getConfigurator().apply(DrumSubsystem.getFlywheelConfig());
 
     velocity = leader.getVelocity();
@@ -56,32 +56,30 @@ public class FlywheelIO {
     statorCurrent = leader.getStatorCurrent();
     supplyCurrent = leader.getSupplyCurrent();
     temp = leader.getDeviceTemp();
-    flywheelPosition = leader.getPosition();
+    flywheelPos = leader.getPosition();
 
-    // TODO: MAYBE INCREASE FREQUENCY FOR VOLTAGE
-    BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPosition);
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0, 
+      velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPos);
     leader.optimizeBusUtilization();
   }
-
   public void updateInputs(FlywheelIOInputs inputs) {
     BaseStatusSignal.refreshAll(
-        velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPosition);
-    inputs.connected =
-        BaseStatusSignal.isAllGood(
-            velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPosition);
-    inputs.flywheelPositionRotations = flywheelPosition.getValue().in(Rotation);
-    inputs.velocityRotPerSec = velocity.getValue().in(Rotation.per(Second));
+      velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPos
+    );
+    inputs.connected = BaseStatusSignal.isAllGood(
+      velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPos);
+    inputs.flywheelPositionRotations = flywheelPos.getValue().in(Rotation);
+    inputs.angularVelocityRotsPerSec = velocity.getValue().in(Rotation.per(Second));
     inputs.voltage = voltage.getValueAsDouble();
     inputs.statorCurrentAmps = statorCurrent.getValueAsDouble();
     inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
-    inputs.tempC = temp.getValue().in(Celsius);
+    inputs.tempCelsius = temp.getValue().in(Celsius);
   }
-
-  public void setVoltage(double voltage) {
-    leader.setControl(voltageOut.withOutput(voltage));
+  public void setVoltage(double volts) {
+    voltageOut = voltageOut.withOutput(volts);
+    leader.setControl(voltageOut);
   }
-
+  
   public void setVelocitySetpoint(double velocityRotPerSec) {
     velocitySetpointRotPerSec = velocityRotPerSec;
     leader.setControl(motionMagic.withVelocity(velocityRotPerSec));

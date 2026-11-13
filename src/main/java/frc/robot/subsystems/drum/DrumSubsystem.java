@@ -284,7 +284,6 @@ public class DrumSubsystem extends SubsystemBase {
   }
 
   public boolean readyToShoot() {
-    // TODO: TUNE tolerances
     return MathUtil.isNear(
             flywheelIO.getSetpointRotPerSec(),
             flywheelIOInputs.velocityRotPerSec,
