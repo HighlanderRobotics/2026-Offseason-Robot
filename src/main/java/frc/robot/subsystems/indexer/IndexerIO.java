@@ -6,6 +6,7 @@ package frc.robot.subsystems.indexer;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -150,6 +151,56 @@ public class IndexerIO {
         
         kickerFollowerMotor = new TalonFX(12, canBus);
         kickerFollowerMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
+
+        // get data from motor
+
+        indexerAngularVelocityRotsPerSec = indexerMotor.getVelocity();
+        indexerPosition = indexerMotor.getPosition();
+        indexerStatorCurrent = indexerMotor.getStatorCurrent();
+        indexerSupplyCurrent = indexerMotor.getSupplyCurrent();
+        indexerVoltage = indexerMotor.getMotorVoltage();
+        indexerTempature = indexerMotor.getDeviceTemp();
+
+        // im copy pasting because im not doing this 2 more times
+
+        kickerLeaderAngularVelocityRotsPerSec = kickerLeaderMotor.getVelocity();
+        kickerLeaderPosition = kickerLeaderMotor.getPosition();
+        kickerLeaderStatorCurrent = kickerLeaderMotor.getStatorCurrent();
+        kickerLeaderSupplyCurrent = kickerLeaderMotor.getSupplyCurrent();
+        kickerLeaderVoltage = kickerLeaderMotor.getMotorVoltage();
+        kickerLeaderTempature = kickerLeaderMotor.getDeviceTemp();
+
+        kickerFollowerAngularVelocityRotsPerSec = kickerFollowerMotor.getVelocity();
+        kickerFollowerPosition = kickerFollowerMotor.getPosition();
+        kickerFollowerStatorCurrent = kickerFollowerMotor.getStatorCurrent();
+        kickerFollowerSupplyCurrent = kickerFollowerMotor.getSupplyCurrent();
+        kickerFollowerVoltage = kickerFollowerMotor.getMotorVoltage();
+        kickerFollowerTempature = kickerFollowerMotor.getDeviceTemp();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50.0,
+            indexerAngularVelocityRotsPerSec,
+            indexerPosition,
+            indexerStatorCurrent,
+            indexerSupplyCurrent,
+            indexerVoltage,
+            indexerTempature,
+            kickerLeaderAngularVelocityRotsPerSec,
+            kickerLeaderPosition,
+            kickerLeaderStatorCurrent,
+            kickerLeaderSupplyCurrent,
+            kickerLeaderVoltage,
+            kickerLeaderTempature,
+            kickerFollowerAngularVelocityRotsPerSec,
+            kickerFollowerPosition,
+            kickerFollowerStatorCurrent,
+            kickerFollowerSupplyCurrent,
+            kickerFollowerVoltage,
+            kickerFollowerTempature
+        );
+        indexerMotor.optimizeBusUtilization();
+        kickerLeaderMotor.optimizeBusUtilization();
+        kickerFollowerMotor.optimizeBusUtilization();
     }
 }
  
