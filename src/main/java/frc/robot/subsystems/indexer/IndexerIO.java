@@ -6,10 +6,14 @@ package frc.robot.subsystems.indexer;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
@@ -49,43 +53,103 @@ public class IndexerIO {
         public double kickerFollowerSupplyAmps = 0.0;
         public double kickerFollowerTempatureCelcius = 0.0;
         public boolean kickerFollowerConnected = false;
+    }
+    // gear ratios
+    public static final double INDEXER_GEAR_RATIO = 50.0/12.0;
+    public static final double KICKER_GEAR_RATIO = 30.0/12.0;
 
-        // gear ratios
-        public static final double INDEXER_GEAR_RATIO = 50.0/12.0;
-        public static final double KICKER_GEAR_RATIO = 30.0/12.0;
+    // make motors
+    protected final TalonFX indexerMotor;
+    protected final TalonFX kickerLeaderMotor;
+    protected final TalonFX kickerFollowerMotor;
 
-        // make motors
-        protected final TalonFX indexerMotor;
-        protected final TalonFX kickerLeaderMotor;
-        protected final TalonFX kickerFollowerMotor;
+    // indexer status signals
+    private final StatusSignal<AngularVelocity> indexerAngularVelocityRotsPerSec;
+    private final StatusSignal<Angle> indexerPosition;
+    private final StatusSignal<Current> indexerStatorCurrent;
+    private final StatusSignal<Current> indexerSupplyCurrent;
+    private final StatusSignal<Voltage> indexerVoltage;
+    private final StatusSignal<Temperature> indexerTempature;
 
-        // indexer status signals
-        private final StatusSignal<AngularVelocity> indexerAngularVelocityRotsPerSec;
-        private final StatusSignal<Angle> indexerPosition;
-        private final StatusSignal<Current> indexerStatorCurrent;
-        private final StatusSignal<Current> indexerSupplyCurrent;
-        private final StatusSignal<Voltage> indexerVoltage;
-        private final StatusSignal<Temperature> indexerTempature;
+    // kicker leader status signals
+    private final StatusSignal<AngularVelocity> kickerLeaderAngularVelocityRotsPerSec;
+    private final StatusSignal<Angle> kickerLeaderPosition;
+    private final StatusSignal<Current> kickerLeaderStatorCurrent;
+    private final StatusSignal<Current> kickerLeaderSupplyCurrent;
+    private final StatusSignal<Voltage> kickerLeaderVoltage;
+    private final StatusSignal<Temperature> kickerLeaderTempature;
 
-        // kicker leader status signals
-        private final StatusSignal<AngularVelocity> kickerLeaderAngularVelocityRotsPerSec;
-        private final StatusSignal<Angle> kickerLeaderPosition;
-        private final StatusSignal<Current> kickerLeaderStatorCurrent;
-        private final StatusSignal<Current> kickerLeaderSupplyCurrent;
-        private final StatusSignal<Voltage> kickerLeaderVoltage;
-        private final StatusSignal<Temperature> kickerLeaderTempature;
+    // kicker follower status signals
+    private final StatusSignal<AngularVelocity> kickerFollowerAngularVelocityRotsPerSec;
+    private final StatusSignal<Angle> kickerFollowerPosition;
+    private final StatusSignal<Current> kickerFollowerStatorCurrent;
+    private final StatusSignal<Current> kickerFollowerSupplyCurrent;
+    private final StatusSignal<Voltage> kickerFollowerVoltage;
+    private final StatusSignal<Temperature> kickerFollowerTempature;
 
-        // kicker follower status signals
-        private final StatusSignal<AngularVelocity> kickerFollowerAngularVelocityRotsPerSec;
-        private final StatusSignal<Angle> kickerFollowerPosition;
-        private final StatusSignal<Current> kickerFollowerStatorCurrent;
-        private final StatusSignal<Current> kickerFollowerSupplyCurrent;
-        private final StatusSignal<Voltage> kickerFollowerVoltage;
-        private final StatusSignal<Temperature> kickerFollowerTempature;
+    // voltage outs
+    private VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC((true));
+    private VelocityVoltage velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
+    
+    public static TalonFXConfiguration getIndexerConfiguration() {
+        TalonFXConfiguration config = new TalonFXConfiguration();
 
-        // voltage outs
-        private VoltageOut voltageOut = new VoltageOut(0.0).withEnableFOC((true));
-        private VelocityVoltage velocityVoltage = new VelocityVoltage(0.0).withEnableFOC(true).withSlot(0);
+        config.MotorOutput.NeutralMode = NeutralModeValue.Brake; // stopping
+        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // direction
+
+        config.Feedback.SensorToMechanismRatio = INDEXER_GEAR_RATIO;
+
+        // pid values are copied from the main branch indexer file
+        config.Slot0.kS = 0;
+        config.Slot0.kG = 0;
+        config.Slot0.kV = 0.49448;
+        config.Slot0.kA = 0.032974;
+        config.Slot0.kP = 0;
+        config.Slot0.kD = 0;
+
+        config.CurrentLimits.StatorCurrentLimit = 60.0;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.CurrentLimits.SupplyCurrentLimit = 40.0;
+        config.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+        return config;
+
+    }
+
+    public static TalonFXConfiguration getKickerConfiguration() {
+        TalonFXConfiguration config = new TalonFXConfiguration();
+
+        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+        config.Feedback.SensorToMechanismRatio = KICKER_GEAR_RATIO;
+
+        // pid values from main branch indexer file
+        config.Slot0.kS = 0.018992;
+        config.Slot0.kG = 0;
+        config.Slot0.kV = 0.30798;
+        config.Slot0.kA = 0.022312;
+        config.Slot0.kP = 0;
+        config.Slot0.kD = 0;
+
+        // limits
+        config.CurrentLimits.StatorCurrentLimit = 60.0;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
+        config.CurrentLimits.SupplyCurrentLimit = 30.0;
+        config.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+        return config;
+    }
+
+    public IndexerIO(CANBus canBus) {
+        indexerMotor = new TalonFX(11, canBus);
+        indexerMotor.getConfigurator().apply(IndexerIO.getIndexerConfiguration());
+
+        kickerLeaderMotor = new TalonFX(12, canBus);
+        kickerLeaderMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
+        
+        kickerFollowerMotor = new TalonFX(12, canBus);
+        kickerFollowerMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
     }
 }
  
