@@ -126,6 +126,11 @@ public class IndexerSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    indexerIO.updateinputs(indexerInputs);
+    Logger.processInputs("Indexer", indexerInputs);
+
+    indexerDisconnectedAlert.set(!indexerInputs.indexerConnected);
+    kickerLeaderDisconnectedAlert.set(!indexerInputs.kickerLeaderConnected);
+    kickerFollowerDisconnectedAlert.set(!indexerInputs.kickerFollowerConnected);
   }
 }
