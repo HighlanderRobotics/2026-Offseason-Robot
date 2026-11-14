@@ -214,7 +214,7 @@ public class IndexerIO {
     public void setIndexerVoltage(Double voltage) {
         indexerMotor.setControl(voltageOut.withOutput(voltage));
     }
-    public void setKickerControl(Double voltage) {
+    public void setKickerVoltage(Double voltage) {
         kickerLeaderMotor.setControl(voltageOut.withOutput(voltage));
     }
     public void updateinputs(IndexerIOInputs inputs) {
