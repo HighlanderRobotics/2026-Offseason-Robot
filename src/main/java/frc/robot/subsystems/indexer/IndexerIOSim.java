@@ -8,7 +8,7 @@ import com.ctre.phoenix6.CANBus;
 
 /** Add your docs here. */
 public class IndexerIOSim extends IndexerIO {
-    public IndexerIOSim(CANBus canBus) {
-        super(canBus);
-    }
+  public IndexerIOSim(CANBus canBus) {
+    super(canBus);
+  }
 }
