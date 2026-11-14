@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.indexer;
 
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.AutoLog;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -33,10 +35,11 @@ public class IndexerIO {
     public static class IndexerIOInputs {
         // main motor
         public double indexerVelocityRotPerSecond = 0.0;
-        public double indexerPositonRots = 0.0;
+        public double indexerindexerPositionRots = 0.0;
         public double indexerStatorAmps = 0.0;
         public double indexerSupplyAmps = 0.0;
         public double indexerTempatureCelcius = 0.0;
+        public double indexerVoltage = 0.0;
         public boolean indexerConnected = false; // i think it updates in the updateinputs
 
         // kicker leader
@@ -44,6 +47,7 @@ public class IndexerIO {
         public double kickerLeaderPositionRots = 0.0;
         public double kickerLeaderStatorAmps = 0.0;
         public double kickerLeaderSupplyAmps = 0.0;
+        public double kickerLeaderVoltage = 0.0;
         public double kickerLeaderTempatureCelcius = 0.0;
         public boolean kickerLeaderConnected = false;
 
@@ -52,6 +56,7 @@ public class IndexerIO {
         public double kickerFollowerPositionRots = 0.0;
         public double kickerFollowerStatorAmps = 0.0;
         public double kickerFollowerSupplyAmps = 0.0;
+        public double kickerFollowerVoltage = 0.0;
         public double kickerFollowerTempatureCelcius = 0.0;
         public boolean kickerFollowerConnected = false;
     }
@@ -201,6 +206,84 @@ public class IndexerIO {
         indexerMotor.optimizeBusUtilization();
         kickerLeaderMotor.optimizeBusUtilization();
         kickerFollowerMotor.optimizeBusUtilization();
+    }
+    public void setIndexerVoltage(DoubleSupplier voltage) { // john dumper code says double, idk if its a mistake
+        indexerMotor.setControl(voltageOut.withOutput(voltage.getAsDouble()));
+    }
+    public void setKickerControl(DoubleSupplier voltage) {
+        kickerLeaderMotor.setControl(voltageOut.withOutput(voltage.getAsDouble()));
+    }
+    public void updateinputs(IndexerIOInputs inputs) {
+        BaseStatusSignal.refreshAll(
+            indexerAngularVelocityRotsPerSec,
+            indexerPosition,
+            indexerStatorCurrent,
+            indexerSupplyCurrent,
+            indexerVoltage,
+            indexerTempature,
+            kickerLeaderAngularVelocityRotsPerSec,
+            kickerLeaderPosition,
+            kickerLeaderStatorCurrent,
+            kickerLeaderSupplyCurrent,
+            kickerLeaderVoltage,
+            kickerLeaderTempature,
+            kickerFollowerAngularVelocityRotsPerSec,
+            kickerFollowerPosition,
+            kickerFollowerStatorCurrent,
+            kickerFollowerSupplyCurrent,
+            kickerFollowerVoltage,
+            kickerFollowerTempature
+        );
+        // check if indexer connected
+        inputs.indexerConnected = 
+            BaseStatusSignal.isAllGood(
+                indexerAngularVelocityRotsPerSec,
+                indexerPosition,
+                indexerStatorCurrent,
+                indexerSupplyCurrent,
+                indexerVoltage,
+                indexerTempature
+            );
+        inputs.indexerVelocityRotPerSecond = indexerAngularVelocityRotsPerSec.getValueAsDouble();
+        inputs.indexerindexerPositionRots = indexerPosition.getValueAsDouble();
+        inputs.indexerStatorAmps = indexerStatorCurrent.getValueAsDouble();
+        inputs.indexerSupplyAmps = indexerSupplyCurrent.getValueAsDouble();
+        inputs.indexerVoltage = indexerVoltage.getValueAsDouble();
+        inputs.indexerTempatureCelcius = indexerTempature.getValueAsDouble();
+
+        // kicker leader
+        inputs.kickerLeaderConnected = 
+            BaseStatusSignal.isAllGood(
+                kickerLeaderAngularVelocityRotsPerSec,
+                kickerLeaderPosition,
+                kickerLeaderStatorCurrent,
+                kickerLeaderSupplyCurrent,
+                kickerLeaderVoltage,
+                kickerLeaderTempature
+            );
+        inputs.kickerLeaderVelocityRotPerSecond = kickerLeaderAngularVelocityRotsPerSec.getValueAsDouble();
+        inputs.kickerLeaderPositionRots = kickerLeaderPosition.getValueAsDouble();
+        inputs.kickerLeaderStatorAmps = kickerLeaderStatorCurrent.getValueAsDouble();
+        inputs.kickerLeaderSupplyAmps = kickerLeaderSupplyCurrent.getValueAsDouble();
+        inputs.kickerLeaderVoltage = kickerLeaderVoltage.getValueAsDouble();
+        inputs.kickerLeaderTempatureCelcius = kickerLeaderTempature.getValueAsDouble();
+
+        // kicker follower
+        inputs.kickerFollowerConnected = 
+            BaseStatusSignal.isAllGood(
+                kickerFollowerAngularVelocityRotsPerSec,
+                kickerFollowerPosition,
+                kickerFollowerStatorCurrent,
+                kickerFollowerSupplyCurrent,
+                kickerFollowerVoltage,
+                kickerFollowerTempature
+            );
+        inputs.kickerFollowerVelocityRotPerSecond = kickerFollowerAngularVelocityRotsPerSec.getValueAsDouble();
+        inputs.kickerFollowerPositionRots = kickerFollowerPosition.getValueAsDouble();
+        inputs.kickerFollowerStatorAmps = kickerFollowerStatorCurrent.getValueAsDouble();
+        inputs.kickerFollowerSupplyAmps = kickerFollowerSupplyCurrent.getValueAsDouble();
+        inputs.kickerFollowerVoltage = kickerFollowerVoltage.getValueAsDouble();
+        inputs.kickerFollowerTempatureCelcius = kickerFollowerTempature.getValueAsDouble();
     }
 }
  
