@@ -12,10 +12,12 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.units.measure.*;
@@ -154,7 +156,7 @@ public class IndexerIO {
         kickerLeaderMotor = new TalonFX(12, canBus);
         kickerLeaderMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
         
-        kickerFollowerMotor = new TalonFX(12, canBus);
+        kickerFollowerMotor = new TalonFX(13, canBus);
         kickerFollowerMotor.getConfigurator().apply(IndexerIO.getKickerConfiguration());
 
         // get data from motor
@@ -206,12 +208,14 @@ public class IndexerIO {
         indexerMotor.optimizeBusUtilization();
         kickerLeaderMotor.optimizeBusUtilization();
         kickerFollowerMotor.optimizeBusUtilization();
+
+        kickerFollowerMotor.setControl(new Follower(kickerLeaderMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     }
-    public void setIndexerVoltage(DoubleSupplier voltage) { // john dumper code says double, idk if its a mistake
-        indexerMotor.setControl(voltageOut.withOutput(voltage.getAsDouble()));
+    public void setIndexerVoltage(Double voltage) {
+        indexerMotor.setControl(voltageOut.withOutput(voltage));
     }
-    public void setKickerControl(DoubleSupplier voltage) {
-        kickerLeaderMotor.setControl(voltageOut.withOutput(voltage.getAsDouble()));
+    public void setKickerControl(Double voltage) {
+        kickerLeaderMotor.setControl(voltageOut.withOutput(voltage));
     }
     public void updateinputs(IndexerIOInputs inputs) {
         BaseStatusSignal.refreshAll(
