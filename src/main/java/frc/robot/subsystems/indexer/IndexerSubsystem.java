@@ -1,62 +1,53 @@
 package frc.robot.subsystems.indexer;
 
-import static edu.wpi.first.units.Units.Volts;
+import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix6.CANBus;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.*;
-import frc.robot.Robot;
-import frc.robot.Robot.RobotMode;
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VoltageOut;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 public class IndexerSubsystem extends SubsystemBase {
-  private IndexerIO indexerIO;
-  private IndexerIOInputsAutoLogged indexerInputs = new IndexerIOInputsAutoLogged();
 
-  private final Alert indexerDisconnectedAlert =
-      new Alert("Disconnected indexer!", AlertType.kError);
-  private final Alert kickerLeaderDisconnectedAlert =
-      new Alert("Disconnected kicker leader!", AlertType.kError);
-  private final Alert kickerFollowerDisconnectedAlert =
-      new Alert("Disconnected kicker follower!", AlertType.kError);
+  public static final int INDEXER_ROLLER_ID = 11;
+  public static final int KICKER_LEADER_ID = 12;
+  public static final int KICKER_FOLLOWER_ID = 13;
 
-  private SysIdRoutine indexerSysid =
-      new SysIdRoutine(
-          new Config(
-              null,
-              null,
-              null,
-              (state) -> Logger.recordOutput("Indexer/SysID State", state.toString())),
-          new Mechanism((volts) -> indexerIO.setIndexerVoltage(volts.in(Volts)), null, this));
+  IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+  
+  public IndexerIO io;
 
-  private SysIdRoutine kickerSysid =
-      new SysIdRoutine(
-          new Config(
-              null,
-              null,
-              null,
-              (state) -> Logger.recordOutput("Kicker/SysID State", state.toString())),
-          new Mechanism((volts) -> indexerIO.setKickerVoltage(volts.in(Volts)), null, this));
+  public IndexerSubsystem(CANBus canBus) {
+    this.io = new IndexerIO(canBus);
 
-  public IndexerSubsystem(CANBus canbus) {
-    if (Robot.ROBOT_MODE == RobotMode.SIM) {
-      this.indexerIO = new IndexerIOSim(canbus);
-    } else {
-      this.indexerIO = new IndexerIO(canbus);
-    }
   }
 
-  // Kick ball out of indexer
+  @Override
+  public void periodic() {
+      // TODO Auto-generated method stub
+      io.updateInputs(inputs);
+      Logger.processInputs("Indexer", inputs);
+
+  }
+
+  public Command setIndexerVoltageCommand(DoubleSupplier volts) {
+    return this.run(() -> io.setIndexerVoltage(volts.getAsDouble()));
+  }
+  public Command setKickerVoltageCommand(DoubleSupplier volts) {
+    return this.run(() -> io.setKickerVoltage(volts.getAsDouble()));
+  }
+
   public Command kick() {
     return this.run(
         () -> {
-          indexerIO.setIndexerVoltage(5.0);
-          indexerIO.setKickerVoltage(10.0);
+          io.setIndexerVoltage(5.0);
+          io.setKickerVoltage(10.0);
         });
   }
 
@@ -64,16 +55,16 @@ public class IndexerSubsystem extends SubsystemBase {
   public Command index() {
     return this.run(
         () -> {
-          indexerIO.setIndexerVoltage(3.0);
-          indexerIO.setKickerVoltage(-4.0);
+          io.setIndexerVoltage(3.0);
+          io.setKickerVoltage(-4.0);
         });
   }
 
   public Command preshoot() {
     return this.run(
         () -> {
-          indexerIO.setIndexerVoltage(-3.0);
-          indexerIO.setKickerVoltage(-4.0);
+          io.setIndexerVoltage(-3.0);
+          io.setKickerVoltage(-4.0);
         });
   }
 
@@ -81,8 +72,8 @@ public class IndexerSubsystem extends SubsystemBase {
   public Command reverse() {
     return this.run(
         () -> {
-          indexerIO.setIndexerVoltage(-5.0);
-          indexerIO.setKickerVoltage(-5.0);
+          io.setIndexerVoltage(-5.0);
+          io.setKickerVoltage(-5.0);
         });
   }
 
@@ -90,33 +81,12 @@ public class IndexerSubsystem extends SubsystemBase {
   public Command rest() {
     return this.run(
         () -> {
-          indexerIO.setIndexerVoltage(0);
-          indexerIO.setKickerVoltage(0);
+          io.setIndexerVoltage(0);
+          io.setKickerVoltage(0);
         });
   }
 
-  public Command runIndexerSysid() {
-    return Commands.sequence(
-        indexerSysid.quasistatic(Direction.kForward),
-        indexerSysid.quasistatic(Direction.kReverse),
-        indexerSysid.dynamic(Direction.kForward),
-        indexerSysid.dynamic(Direction.kReverse));
-  }
 
-  public Command runKickerSysid() {
-    return Commands.sequence(
-        kickerSysid.quasistatic(Direction.kForward),
-        kickerSysid.quasistatic(Direction.kReverse),
-        kickerSysid.dynamic(Direction.kForward),
-        kickerSysid.dynamic(Direction.kReverse));
-  }
 
-  public void periodic() {
-    indexerIO.updateInputs(indexerInputs);
-    Logger.processInputs("Indexer", indexerInputs);
+} 
 
-    indexerDisconnectedAlert.set(!indexerInputs.indexerConnected);
-    kickerLeaderDisconnectedAlert.set(!indexerInputs.kickerLeaderConnected);
-    kickerFollowerDisconnectedAlert.set(!indexerInputs.kickerFollowerConnected);
-  }
-}
