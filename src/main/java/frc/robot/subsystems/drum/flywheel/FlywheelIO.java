@@ -52,8 +52,14 @@ public class FlywheelIO {
   }
 
   private Follower followerReq;
+  private Follower followerReq2;
+  private Follower followerReq3;
 
   protected final TalonFX leader;
+  protected final TalonFX follower1;
+  protected final TalonFX follower2;
+  protected final TalonFX follower3;
+
   protected TalonFX followerTalons[] = new TalonFX[3];
   protected FollowerStatusSignals followerStatusSignals[] = new FollowerStatusSignals[3];
 
@@ -85,13 +91,25 @@ public class FlywheelIO {
         50.0, velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPos);
     leader.optimizeBusUtilization();
     // Initialize follower Talons
-    followerReq = new Follower(DrumSubsystem.FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed);
-
+    follower1 = new TalonFX(16, canbus);
+    follower2 = new TalonFX(17, canbus);
+    follower3 = new TalonFX(18, canbus);
+    followerReq = new Follower(DrumSubsystem.FLYWHEEL_LEADER_ID, MotorAlignmentValue.Aligned);
+    followerReq2 = new Follower(DrumSubsystem.FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed);
+    followerReq3 = new Follower(DrumSubsystem.FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed);
+    followerTalons[0] = follower1;
+    followerTalons[1] = follower2;
+    followerTalons[2] = follower3;
     for (int i = 0; i < followerTalons.length; i++) {
-      followerTalons[i] = new TalonFX(DrumSubsystem.FLYWHEEL_LEADER_ID + i + 1, canbus);
       followerTalons[i].getConfigurator().apply(DrumSubsystem.getFlywheelConfig());
       followerTalons[i].optimizeBusUtilization();
-      followerTalons[i].setControl(followerReq);
+    }
+    follower1.setControl(followerReq);
+    follower2.setControl(followerReq2);
+    follower3.setControl(followerReq3);
+
+    for (int i = 0; i < followerTalons.length; i++) {
+
       FollowerStatusSignals statusSignals = new FollowerStatusSignals();
 
       statusSignals.velocity = followerTalons[i].getVelocity();
