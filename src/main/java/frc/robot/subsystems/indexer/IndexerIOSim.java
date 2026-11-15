@@ -1,3 +1,7 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot.subsystems.indexer;
 
 import static edu.wpi.first.units.Units.Rotations;
@@ -14,24 +18,26 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
+/** Add your docs here. */
 public class IndexerIOSim extends IndexerIO {
   TalonFXSimState indexerFxSimState;
-  TalonFXSimState kickerFxSimState;
-  TalonFXSimState kickerFxSimStateFollower;
+  TalonFXSimState kickerFxSimState; // change to kickerFxSimState if problems arise
+  TalonFXSimState kickerFxSimStateFollower; // change to kickerFxSimStateFollower is problems arise
   DCMotorSim physicsSimIndexer;
   DCMotorSim physicsSimKicker;
 
-  private final double simLoopPeriod = 0.002;
+  private final double simLoopPeriod = 0.002; // standard time iirc
   private Notifier simNotifier;
   private double lastSimTime = 0.0;
 
-  public IndexerIOSim(CANBus canbus) {
-    super(canbus);
+  public IndexerIOSim(CANBus canBus) {
+    super(canBus);
 
-    // Define physics simulations for each motor
+    // every motor gets its own physics sim
     physicsSimIndexer =
         new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60Foc(1), 0.0136, GEAR_RATIO),
+            LinearSystemId.createDCMotorSystem(
+                DCMotor.getKrakenX60Foc(1), 0.0136, INDEXER_GEAR_RATIO),
             DCMotor.getKrakenX60Foc(1));
     indexerFxSimState = indexerMotor.getSimState();
     indexerFxSimState.setMotorType(MotorType.KrakenX60);
@@ -50,13 +56,13 @@ public class IndexerIOSim extends IndexerIO {
     kickerFxSimStateFollower.setMotorType(MotorType.KrakenX60);
     kickerFxSimStateFollower.Orientation = ChassisReference.CounterClockwise_Positive;
 
-    // Set voltages and calculate position and velocity in sim for both motors
+    // set voltages
     simNotifier =
         new Notifier(
             () -> {
-              final double currentTime = Timer.getTimestamp();
-              final double deltaTime = currentTime - lastSimTime;
-              lastSimTime = currentTime;
+              final double currentTime = Timer.getTimestamp(); // get current time
+              final double deltaTime = currentTime - lastSimTime; // get elapsed time
+              lastSimTime = currentTime; // update
 
               indexerFxSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
               kickerFxSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
@@ -67,22 +73,25 @@ public class IndexerIOSim extends IndexerIO {
               physicsSimKicker.setInputVoltage(kickerFxSimState.getMotorVoltage());
               physicsSimKicker.update(deltaTime);
 
+              // indexer
               indexerFxSimState.setRawRotorPosition(
-                  physicsSimIndexer.getAngularPosition().in(Rotations) * GEAR_RATIO);
+                  physicsSimIndexer.getAngularPosition().in(Rotations) * INDEXER_GEAR_RATIO);
               indexerFxSimState.setRotorVelocity(
-                  physicsSimIndexer.getAngularVelocity().in(RotationsPerSecond) * GEAR_RATIO);
+                  physicsSimIndexer.getAngularVelocity().in(RotationsPerSecond)
+                      * INDEXER_GEAR_RATIO);
 
+              // kicker leader
               kickerFxSimState.setRawRotorPosition(
                   physicsSimKicker.getAngularPosition().in(Rotations) * KICKER_GEAR_RATIO);
               kickerFxSimState.setRotorVelocity(
                   physicsSimKicker.getAngularVelocity().in(RotationsPerSecond) * KICKER_GEAR_RATIO);
 
+              // kicker follower
               kickerFxSimStateFollower.setRawRotorPosition(
                   physicsSimKicker.getAngularPosition().in(Rotations) * KICKER_GEAR_RATIO);
               kickerFxSimStateFollower.setRotorVelocity(
                   physicsSimKicker.getAngularVelocity().in(RotationsPerSecond) * KICKER_GEAR_RATIO);
             });
-
     simNotifier.setName("Indexer");
     simNotifier.startPeriodic(simLoopPeriod);
   }
