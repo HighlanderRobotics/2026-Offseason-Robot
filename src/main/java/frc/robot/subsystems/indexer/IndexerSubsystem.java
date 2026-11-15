@@ -1,17 +1,11 @@
 package frc.robot.subsystems.indexer;
 
-import java.util.function.DoubleSupplier;
-
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VoltageOut;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
+import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class IndexerSubsystem extends SubsystemBase {
 
@@ -20,25 +14,28 @@ public class IndexerSubsystem extends SubsystemBase {
   public static final int KICKER_FOLLOWER_ID = 13;
 
   IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
-  
+
   public IndexerIO io;
 
   public IndexerSubsystem(CANBus canBus) {
-    this.io = new IndexerIO(canBus);
-
+    if (Robot.isReal()) {
+      this.io = new IndexerIO(canBus);
+    } else {
+      this.io = new IndexerIOSim(canBus);
+    }
   }
 
   @Override
   public void periodic() {
-      // TODO Auto-generated method stub
-      io.updateInputs(inputs);
-      Logger.processInputs("Indexer", inputs);
-
+    // TODO Auto-generated method stub
+    io.updateInputs(inputs);
+    Logger.processInputs("Indexer", inputs);
   }
 
   public Command setIndexerVoltageCommand(DoubleSupplier volts) {
     return this.run(() -> io.setIndexerVoltage(volts.getAsDouble()));
   }
+
   public Command setKickerVoltageCommand(DoubleSupplier volts) {
     return this.run(() -> io.setKickerVoltage(volts.getAsDouble()));
   }
@@ -85,8 +82,4 @@ public class IndexerSubsystem extends SubsystemBase {
           io.setKickerVoltage(0);
         });
   }
-
-
-
-} 
-
+}
