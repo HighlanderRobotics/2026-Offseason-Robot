@@ -64,7 +64,9 @@ public class DrumSubsystem extends SubsystemBase {
       new Alert("Flywheel Leader Disconnected", AlertType.kError);
   // True if any are disconnected (maybe I should add one for each but seems excessive)
   // private Alert flywheelFollowerDisconnectAlert =
-  //     new Alert("Flywheel Follower Disconnected", AlertType.kError); // This is no longer needed because connected is shared across the leaders and followers. Maybe we should check them seperately but for now this is fine.
+  //     new Alert("Flywheel Follower Disconnected", AlertType.kError); // This is no longer needed
+  // because connected is shared across the leaders and followers. Maybe we should check them
+  // seperately but for now this is fine.
   // Check line 90 in FlywheelIO and 149 in this file for more info
 
   private SysIdRoutine flywheelSysid =
@@ -144,9 +146,9 @@ public class DrumSubsystem extends SubsystemBase {
     flywheelIO.updateInputs(flywheelIOInputs);
     Logger.processInputs("Drum/Flywheel/Leader", flywheelIOInputs);
     flywheelLeaderDisconnectAlert.set(!flywheelIOInputs.connected);
-    // flywheelFollowerDisconnectAlert.set(!flywheelIOInputs.connected); this is no longer needed because connected is shared across
+    // flywheelFollowerDisconnectAlert.set(!flywheelIOInputs.connected); this is no longer needed
+    // because connected is shared across
     // the leaders and followers. Maybe we should check them seperately but for now this is fine.
-
 
     hoodIO.updateInputs(hoodIOInputs);
     Logger.processInputs("Drum/Hood", hoodIOInputs);
@@ -253,16 +255,20 @@ public class DrumSubsystem extends SubsystemBase {
     return Commands.sequence(
         hoodSysid
             .quasistatic(Direction.kForward)
-            .until(() -> hoodIOInputs.hoodPosition.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
+            .until(
+                () -> hoodIOInputs.hoodPosition.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
         hoodSysid
             .quasistatic(Direction.kReverse)
-            .until(() -> hoodIOInputs.hoodPosition.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)),
+            .until(
+                () -> hoodIOInputs.hoodPosition.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)),
         hoodSysid
             .dynamic(Direction.kForward)
-            .until(() -> hoodIOInputs.hoodPosition.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
+            .until(
+                () -> hoodIOInputs.hoodPosition.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
         hoodSysid
             .dynamic(Direction.kReverse)
-            .until(() -> hoodIOInputs.hoodPosition.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)));
+            .until(
+                () -> hoodIOInputs.hoodPosition.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)));
   }
 
   public boolean readyToShoot() {
