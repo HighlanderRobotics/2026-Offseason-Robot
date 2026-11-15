@@ -6,7 +6,6 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -22,9 +21,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Robot;
 import frc.robot.Robot.RobotMode;
-import frc.robot.components.follower.FollowerIO;
 import frc.robot.components.follower.FollowerIOInputsAutoLogged;
-import frc.robot.components.follower.FollowerIOSim;
 import frc.robot.subsystems.drum.flywheel.FlywheelIO;
 import frc.robot.subsystems.drum.flywheel.FlywheelIOInputsAutoLogged;
 import frc.robot.subsystems.drum.flywheel.FlywheelIOSim;
@@ -38,13 +35,13 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.hardware.TalonFX;
 
 public class DrumSubsystem extends SubsystemBase {
   public static final double HOOD_ANGLE_TOLERANCE_DEG = 2.0;
   public static final double FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC = 3.0;
   public static final int FLYWHEEL_LEADER_ID = 15;
+  public static final int HOOD_MOTOR_ID = 14;
+
   // Ratio to main drum
   public static final double FLYWHEEL_GEAR_RATIO = 26.0 / 18.0;
   // May have to adjust 10/20 to account for the hood not moving a whole rotation
@@ -57,7 +54,6 @@ public class DrumSubsystem extends SubsystemBase {
   private FlywheelIO flywheelIO;
   private FlywheelIOInputsAutoLogged flywheelIOInputs = new FlywheelIOInputsAutoLogged();
 
-  private Follower[] followerTalons = new Follower[3];
   private FollowerIOInputsAutoLogged[] followerIOInputs = new FollowerIOInputsAutoLogged[3];
 
   private HoodIO hoodIO;
@@ -67,8 +63,9 @@ public class DrumSubsystem extends SubsystemBase {
   private Alert flywheelLeaderDisconnectAlert =
       new Alert("Flywheel Leader Disconnected", AlertType.kError);
   // True if any are disconnected (maybe I should add one for each but seems excessive)
-  private Alert flywheelFollowerDisconnectAlert =
-      new Alert("Flywheel Follower Disconnected", AlertType.kError);
+  // private Alert flywheelFollowerDisconnectAlert =
+  //     new Alert("Flywheel Follower Disconnected", AlertType.kError); // This is no longer needed because connected is shared across the leaders and followers. Maybe we should check them seperately but for now this is fine.
+  // Check line 90 in FlywheelIO and 149 in this file for more info
 
   private SysIdRoutine flywheelSysid =
       new SysIdRoutine(
@@ -99,7 +96,6 @@ public class DrumSubsystem extends SubsystemBase {
 
   @AutoLogOutput(key = "Drum/Flywheel Fudge Factor")
   private double flywheelFudgeFactor = 0.0;
-  private Follower followerReq;
 
   public DrumSubsystem(CANBus canBus) {
     if (Robot.ROBOT_MODE != RobotMode.SIM) {
@@ -107,44 +103,38 @@ public class DrumSubsystem extends SubsystemBase {
       //TODO: refactor to use follower motors in FlywheelIO instead of creating them here
       // and fix the sim, also check if FlywheelIO will work autologged.
       hoodIO = new HoodIO(canBus);
-      followerTalons[1] =
-          new Follower(
-              FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed);
-      followerTalons[2] =
-          new Follower(
-              FLYWHEEL_LEADER_ID, MotorAlignmentValue.Opposed);
-              followerTalons[0]
+
     } else {
       flywheelIO = new FlywheelIOSim(canBus);
       hoodIO = new HoodIOSim(canBus);
 
-      followerIOs[0] =
-          new FollowerIOSim(
-              16,
-              FLYWHEEL_LEADER_ID,
-              MotorAlignmentValue.Aligned,
-              canBus,
-              getFlywheelConfig(),
-              () -> flywheelIOInputs.flywheelPositionRotations,
-              () -> flywheelIOInputs.velocityRotPerSec);
-      followerIOs[1] =
-          new FollowerIOSim(
-              17,
-              FLYWHEEL_LEADER_ID,
-              MotorAlignmentValue.Opposed,
-              canBus,
-              getFlywheelConfig(),
-              () -> flywheelIOInputs.flywheelPositionRotations,
-              () -> flywheelIOInputs.velocityRotPerSec);
-      followerIOs[2] =
-          new FollowerIOSim(
-              18,
-              FLYWHEEL_LEADER_ID,
-              MotorAlignmentValue.Opposed,
-              canBus,
-              getFlywheelConfig(),
-              () -> flywheelIOInputs.flywheelPositionRotations,
-              () -> flywheelIOInputs.velocityRotPerSec);
+      // followerIOs[0] =
+      //     new FollowerIOSim(
+      //         16,
+      //         FLYWHEEL_LEADER_ID,
+      //         MotorAlignmentValue.Aligned,
+      //         canBus,
+      //         getFlywheelConfig(),
+      //         () -> flywheelIOInputs.flywheelPositionRotations,
+      //         () -> flywheelIOInputs.velocityRotPerSec);
+      // followerIOs[1] =
+      //     new FollowerIOSim(
+      //         17,
+      //         FLYWHEEL_LEADER_ID,
+      //         MotorAlignmentValue.Opposed,
+      //         canBus,
+      //         getFlywheelConfig(),
+      //         () -> flywheelIOInputs.flywheelPositionRotations,
+      //         () -> flywheelIOInputs.velocityRotPerSec);
+      // followerIOs[2] =
+      //     new FollowerIOSim(
+      //         18,
+      //         FLYWHEEL_LEADER_ID,
+      //         MotorAlignmentValue.Opposed,
+      //         canBus,
+      //         getFlywheelConfig(),
+      //         () -> flywheelIOInputs.flywheelPositionRotations,
+      //         () -> flywheelIOInputs.velocityRotPerSec);
     }
 
     // Fill with blank inputs
@@ -156,21 +146,14 @@ public class DrumSubsystem extends SubsystemBase {
     flywheelIO.updateInputs(flywheelIOInputs);
     Logger.processInputs("Drum/Flywheel/Leader", flywheelIOInputs);
     flywheelLeaderDisconnectAlert.set(!flywheelIOInputs.connected);
+    // flywheelFollowerDisconnectAlert.set(!flywheelIOInputs.connected); this is no longer needed because connected is shared across
+    // the leaders and followers. Maybe we should check them seperately but for now this is fine.
 
-    // Update follower inputs
-    boolean anyFollowerDisconnected = false;
-    for (int i = 0; i < followerIOs.length; i++) {
-      followerIOs[i].updateInputs(followerIOInputs[i]);
-      Logger.processInputs("Drum/Flywheel/Follower " + i, followerIOInputs[i]);
-
-      anyFollowerDisconnected |= !followerIOInputs[i].connected;
-    }
-    flywheelFollowerDisconnectAlert.set(anyFollowerDisconnected);
 
     hoodIO.updateInputs(hoodIOInputs);
     Logger.processInputs("Drum/Hood", hoodIOInputs);
     hoodDisconnectAlert.set(!hoodIOInputs.connected);
-    currentFilterValue = currentFilter.calculate(hoodIOInputs.statorCurrentAmps);
+    currentFilterValue = currentFilter.calculate(hoodIOInputs.hoodStatorCurrentAmps);
 
     Logger.recordOutput("Drum/Hood/Setpoint", hoodIO.getAngleSetpoint());
     Logger.recordOutput("Drum/Flywheel/Setpoint", flywheelIO.getSetpointRotPerSec());
@@ -272,16 +255,16 @@ public class DrumSubsystem extends SubsystemBase {
     return Commands.sequence(
         hoodSysid
             .quasistatic(Direction.kForward)
-            .until(() -> hoodIOInputs.position.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
+            .until(() -> hoodIOInputs.hoodPosition.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
         hoodSysid
             .quasistatic(Direction.kReverse)
-            .until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)),
+            .until(() -> hoodIOInputs.hoodPosition.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)),
         hoodSysid
             .dynamic(Direction.kForward)
-            .until(() -> hoodIOInputs.position.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
+            .until(() -> hoodIOInputs.hoodPosition.getDegrees() > (HOOD_MAX_ANGLE.getDegrees() - 5)),
         hoodSysid
             .dynamic(Direction.kReverse)
-            .until(() -> hoodIOInputs.position.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)));
+            .until(() -> hoodIOInputs.hoodPosition.getDegrees() < (HOOD_MIN_ANGLE.getDegrees() + 5)));
   }
 
   public boolean readyToShoot() {
@@ -292,7 +275,7 @@ public class DrumSubsystem extends SubsystemBase {
             FLYWHEEL_VEL_TOLERANCE_ROT_PER_SEC)
         && MathUtil.isNear(
             hoodIO.getAngleSetpoint().getDegrees(),
-            hoodIOInputs.position.getDegrees(),
+            hoodIOInputs.hoodPosition.getDegrees(),
             HOOD_ANGLE_TOLERANCE_DEG);
   }
 

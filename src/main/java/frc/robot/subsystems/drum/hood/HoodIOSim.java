@@ -31,7 +31,7 @@ public class HoodIOSim extends HoodIO {
 
     // motor.setPosition(DrumSubsystem.HOOD_MIN_ANGLE.getMeasure());
 
-    simState = motor.getSimState();
+    simState = hoodMotor.getSimState();
     simState.Orientation = ChassisReference.Clockwise_Positive;
 
     // TODO: VALUES FROM CAD
@@ -53,7 +53,7 @@ public class HoodIOSim extends HoodIO {
               double deltaTime = currentTime - lastLoopTime;
               lastLoopTime = currentTime;
 
-              // This is actually stupid af
+              // Apparently this is dumb
               if (firstRunThrough.get()) {
                 deltaTime = 1.0;
                 firstRunThrough.set(false);

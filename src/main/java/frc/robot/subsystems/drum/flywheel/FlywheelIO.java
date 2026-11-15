@@ -27,7 +27,7 @@ public static class FlywheelIOInputs {
     public boolean connected = false;
 
     // Leader
-    public double angularVelocityRotsPerSec = 0.0;
+    public double velocityRotPerSec = 0.0;
     public double voltage = 0.0;
     public double statorCurrentAmps = 0.0;
     public double supplyCurrentAmps = 0.0;
@@ -115,7 +115,7 @@ public static class FlywheelIOInputs {
     inputs.connected = BaseStatusSignal.isAllGood(
       velocity, voltage, statorCurrent, supplyCurrent, temp, flywheelPos);
     inputs.flywheelPositionRotations = flywheelPos.getValue().in(Rotation);
-    inputs.angularVelocityRotsPerSec = velocity.getValue().in(Rotation.per(Second));
+    inputs.velocityRotPerSec = velocity.getValue().in(Rotation.per(Second));
     inputs.voltage = voltage.getValueAsDouble();
     inputs.statorCurrentAmps = statorCurrent.getValueAsDouble();
     inputs.supplyCurrentAmps = supplyCurrent.getValueAsDouble();
