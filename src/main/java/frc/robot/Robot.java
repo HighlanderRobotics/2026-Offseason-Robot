@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Superstructure.SuperState;
+import frc.robot.components.battery.BatterySubsystem;
 import frc.robot.subsystems.drum.DrumSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intake.CANcoderIO;
@@ -90,6 +91,8 @@ public class Robot extends LoggedRobot {
   private Superstructure superstructure =
       new Superstructure(driver, operator, indexer, drum, intake, swerve::getPose);
 
+  private BatterySubsystem bfg = new BatterySubsystem(0); // TODO: MAYBE TRY TO SNIFF FOR THESE
+
   private boolean hoodZeroed = false;
 
   @AutoLogOutput(key = "Swerve/Should X Lock")
@@ -107,6 +110,11 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
     Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
     Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+
+    // BFG Info
+    Logger.recordMetadata("BFG Name", bfg.getBatteryName());
+    Logger.recordMetadata("Battery Manufacturer", bfg.getManufacturer().toString());
+    Logger.recordMetadata("BFG Serial Number", String.valueOf(bfg.getSerialNumber()));
 
     // log if we have uncommitted changes
     switch (BuildConstants.DIRTY) {
@@ -324,6 +332,9 @@ public class Robot extends LoggedRobot {
                         hoodZeroed = true;
                       }
                     }));
+
+    // Save log on code startup
+    bfg.saveLog();
   }
 
   @Override
@@ -421,7 +432,10 @@ public class Robot extends LoggedRobot {
   public void teleopPeriodic() {}
 
   @Override
-  public void teleopExit() {}
+  public void teleopExit() {
+    // Save log after the match
+    bfg.saveLog();
+  }
 
   @Override
   public void testInit() {
