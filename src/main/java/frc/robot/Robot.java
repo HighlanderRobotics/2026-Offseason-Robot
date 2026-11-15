@@ -369,6 +369,8 @@ public class Robot extends LoggedRobot {
 
     autoChooser.addOption("Flywheel sysid", drum.runFlywheelSysid());
 
+    autoChooser.addOption("Test auto", autos.testPath());
+
     haveAutosGenerated = true;
     System.out.println("Done generating autos");
   }
