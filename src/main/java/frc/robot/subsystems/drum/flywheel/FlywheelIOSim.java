@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -19,7 +20,6 @@ public class FlywheelIOSim extends FlywheelIO {
   private TalonFXSimState followerSimState2;
   private TalonFXSimState followerSimState3;
 
-
   private DCMotorSim physicsSim;
 
   private Notifier simNotifier;
@@ -27,6 +27,7 @@ public class FlywheelIOSim extends FlywheelIO {
   private final double simLoopPeriod = 0.02;
   private double lastSimTime = 0.0;
   private TalonFXSimState[] followerSimStates = new TalonFXSimState[3];
+
   public FlywheelIOSim(CANBus canBus) {
     super(canBus);
 
@@ -37,6 +38,12 @@ public class FlywheelIOSim extends FlywheelIO {
     followerSimStates[0] = followerSimState1;
     followerSimStates[1] = followerSimState2;
     followerSimStates[2] = followerSimState3;
+
+    simState.Orientation = ChassisReference.CounterClockwise_Positive;
+    followerSimState1.Orientation = ChassisReference.CounterClockwise_Positive;
+    followerSimState2.Orientation = ChassisReference.Clockwise_Positive;
+    followerSimState3.Orientation = ChassisReference.Clockwise_Positive;
+
     physicsSim =
         new DCMotorSim(
             LinearSystemId.createDCMotorSystem(
@@ -51,7 +58,7 @@ public class FlywheelIOSim extends FlywheelIO {
               lastSimTime = currentTime;
 
               simState.setSupplyVoltage(RobotController.getBatteryVoltage());
-              
+
               physicsSim.setInputVoltage(simState.getMotorVoltage());
               physicsSim.update(deltaTime);
 
@@ -59,12 +66,13 @@ public class FlywheelIOSim extends FlywheelIO {
                   physicsSim.getAngularPositionRotations() * physicsSim.getGearing());
               simState.setRotorVelocity(
                   physicsSim.getAngularVelocity().in(RotationsPerSecond) * physicsSim.getGearing());
-              for (int i=0; i<followerSimStates.length; i++) {
+              for (int i = 0; i < followerSimStates.length; i++) {
                 followerSimStates[i].setSupplyVoltage(RobotController.getBatteryVoltage());
-                 followerSimStates[i].setRawRotorPosition(
-                  physicsSim.getAngularPositionRotations() * physicsSim.getGearing());
-              followerSimStates[i].setRotorVelocity(
-                  physicsSim.getAngularVelocity().in(RotationsPerSecond) * physicsSim.getGearing());
+                followerSimStates[i].setRawRotorPosition(
+                    physicsSim.getAngularPositionRotations() * physicsSim.getGearing());
+                followerSimStates[i].setRotorVelocity(
+                    physicsSim.getAngularVelocity().in(RotationsPerSecond)
+                        * physicsSim.getGearing());
               }
             });
 
