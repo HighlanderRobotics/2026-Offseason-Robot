@@ -7,6 +7,7 @@ package frc.robot.subsystems.intake;
 import java.util.stream.BaseStream;
 
 import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.units.measure.*;
 
@@ -74,5 +75,48 @@ public class RollerIO {
       positionRotations);
     motor.getConfigurator().apply(config);
     motor.optimizeBusUtilization();
+  }
+
+  public void updateInputs(RollerIOInputs inputs) {
+    BaseStatusSignal.refreshAll(
+      angularVelocityRotsPerSecond,
+      appliedVoltage,
+      statorCurrentAmps,
+      supplyCurrentAmps,
+      temperatureCelsius,
+      positionRotations
+    );
+    inputs.connected = BaseStatusSignal.isAllGood(
+      angularVelocityRotsPerSecond,
+      appliedVoltage,
+      statorCurrentAmps,
+      supplyCurrentAmps,
+      temperatureCelsius,
+      positionRotations
+    );
+    inputs.velocityRotsPerSecond = angularVelocityRotsPerSecond.getValueAsDouble();
+    inputs.appliedVoltage = appliedVoltage.getValueAsDouble();
+    inputs.statorCurrentAmps = statorCurrentAmps.getValueAsDouble();
+    inputs.supplyCurrentAmps = supplyCurrentAmps.getValueAsDouble();
+    inputs.temperatureCelsius = temperatureCelsius.getValueAsDouble();
+    inputs.positionRotations = positionRotations.getValueAsDouble();
+  }
+
+  public void setRollerVoltage(double volts) {
+    Logger.recordOutput("Intake/Requested Voltage", volts);
+    motor.setControl(voltageOut.withOutput(volts));
+  }
+
+  public void setRollerVelocity(double velocityRotsPerSecond) {
+    setpointVelocity = velocityRotsPerSecond;
+    motor.setControl(velocityVoltage.withVelocity(velocityRotsPerSecond));
+  }
+
+  public double getVelocitySetpoint() {
+    return setpointVelocity;
+  }
+
+  public int getMotorId() {
+    return motor.getDeviceID();
   }
 }
